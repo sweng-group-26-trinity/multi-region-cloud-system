@@ -472,13 +472,11 @@ export default function OrdersPage() {
 
   if (!meta || !id) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
-        <h2 className="text-xl font-semibold text-slate-800">
-          Restaurant not found.
-        </h2>
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+        <h2 className="text-xl font-semibold">Restaurant not found.</h2>
         <button
           onClick={() => navigate("/dashboard")}
-          className="bg-slate-900 text-white px-5 py-2 rounded-xl hover:bg-slate-700 transition"
+          className="rounded-xl bg-slate-900 px-5 py-2 text-white transition hover:bg-slate-700 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200"
         >
           Back to Restaurants
         </button>
@@ -490,7 +488,6 @@ export default function OrdersPage() {
   const total = cart.reduce((s, i) => s + i.price * i.quantity, 0);
   const totalQty = cart.reduce((s, i) => s + i.quantity, 0);
 
-  /** Adds a product to the cart, or increments quantity if already present */
   function addToCart(product: Product) {
     setOrderPlaced(false);
     setCart((prev) => {
@@ -504,7 +501,6 @@ export default function OrdersPage() {
     });
   }
 
-  /** Decrements quantity of a cart item, removing it if quantity reaches zero */
   function removeOne(productId: number) {
     setCart((prev) =>
       prev
@@ -515,7 +511,6 @@ export default function OrdersPage() {
     );
   }
 
-  /** Confirms the order, clears the cart, and shows success message */
   function confirmOrder() {
     setOrderPlaced(true);
     setCart([]);
@@ -523,25 +518,27 @@ export default function OrdersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
       {/* Top bar */}
-      <div className="bg-white border-b border-slate-200 sticky top-0 z-20">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
+      <div className="sticky top-0 z-20 border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate("/dashboard")}
-              className="text-slate-500 hover:text-slate-900 transition text-sm font-medium flex items-center gap-1"
+              className="flex items-center gap-1 text-sm font-medium text-slate-500 transition hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
             >
               <ArrowLeft size={16} />
               Back
             </button>
-            <h1 className="text-xl font-bold text-slate-900">{meta.name}</h1>
+            <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">
+              {meta.name}
+            </h1>
           </div>
 
           <button
             onClick={() => setShowCheckout(true)}
             disabled={cart.length === 0}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full text-white text-sm font-semibold transition ${meta.btnClass} disabled:opacity-40 disabled:cursor-not-allowed`}
+            className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-white transition ${meta.btnClass} disabled:cursor-not-allowed disabled:opacity-40`}
           >
             <ShoppingCart size={16} />
             {totalQty > 0 ? (
@@ -558,15 +555,15 @@ export default function OrdersPage() {
         </div>
 
         {/* Tabs */}
-        <div className="max-w-6xl mx-auto px-6 flex gap-1">
+        <div className="mx-auto flex max-w-6xl gap-1 px-6">
           {(["food", "drinks"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`capitalize px-5 py-2 text-sm font-semibold border-b-2 transition flex items-center gap-2 ${
+              className={`flex items-center gap-2 border-b-2 px-5 py-2 text-sm font-semibold capitalize transition ${
                 activeTab === tab
-                  ? "border-slate-900 text-slate-900"
-                  : "border-transparent text-slate-500 hover:text-slate-700"
+                  ? "border-slate-900 text-slate-900 dark:border-slate-100 dark:text-slate-100"
+                  : "border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
               }`}
             >
               {tab === "food" ? (
@@ -581,23 +578,23 @@ export default function OrdersPage() {
       </div>
 
       {/* Menu grid */}
-      <div className="max-w-6xl mx-auto px-6 py-8">
+      <div className="mx-auto max-w-6xl px-6 py-8">
         {orderPlaced && (
-          <div className="mb-6 flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-2xl text-green-800 font-medium">
+          <div className="mb-6 flex items-center gap-3 rounded-2xl border border-green-200 bg-green-50 p-4 font-medium text-green-800 dark:border-green-900 dark:bg-green-950/40 dark:text-green-300">
             <PartyPopper size={22} />
             Order placed! Your food is on its way.
           </div>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {products.map((product) => {
             const inCart = cart.find((i) => i.id === product.id);
             return (
               <div
                 key={product.id}
-                className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition overflow-hidden flex flex-col"
+                className="flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
               >
-                <div className="h-44 overflow-hidden bg-slate-100">
+                <div className="h-44 overflow-hidden bg-slate-100 dark:bg-slate-800">
                   <img
                     src={product.image}
                     alt={product.name}
@@ -606,15 +603,15 @@ export default function OrdersPage() {
                   />
                 </div>
 
-                <div className="p-4 flex flex-col flex-1">
-                  <h2 className="font-semibold text-slate-900">
+                <div className="flex flex-1 flex-col p-4">
+                  <h2 className="font-semibold text-slate-900 dark:text-slate-100">
                     {product.name}
                   </h2>
-                  <p className="text-slate-500 text-sm mt-1 leading-snug flex-1">
+                  <p className="mt-1 flex-1 text-sm leading-snug text-slate-500 dark:text-slate-400">
                     {product.description}
                   </p>
                   <div className="mt-4 flex items-center justify-between">
-                    <span className="font-bold text-slate-900">
+                    <span className="font-bold text-slate-900 dark:text-slate-100">
                       €{product.price.toFixed(2)}
                     </span>
 
@@ -622,16 +619,16 @@ export default function OrdersPage() {
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => removeOne(product.id)}
-                          className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 transition font-bold text-lg flex items-center justify-center"
+                          className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-lg font-bold transition hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
                         >
                           −
                         </button>
-                        <span className="w-5 text-center font-semibold">
+                        <span className="w-5 text-center font-semibold text-slate-900 dark:text-slate-100">
                           {inCart.quantity}
                         </span>
                         <button
                           onClick={() => addToCart(product)}
-                          className={`w-8 h-8 rounded-full text-white transition font-bold text-lg flex items-center justify-center ${meta.btnClass}`}
+                          className={`flex h-8 w-8 items-center justify-center rounded-full text-lg font-bold text-white transition ${meta.btnClass}`}
                         >
                           +
                         </button>
@@ -639,7 +636,7 @@ export default function OrdersPage() {
                     ) : (
                       <button
                         onClick={() => addToCart(product)}
-                        className={`px-4 py-1.5 rounded-full text-white text-sm font-semibold transition ${meta.btnClass}`}
+                        className={`rounded-full px-4 py-1.5 text-sm font-semibold text-white transition ${meta.btnClass}`}
                       >
                         Add
                       </button>
@@ -654,17 +651,17 @@ export default function OrdersPage() {
 
       {/* Checkout modal */}
       {showCheckout && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl dark:bg-slate-900">
             <div className={`${meta.headerClass} px-6 py-4`}>
               <h2 className="text-lg font-bold text-white">
                 Your Order — {meta.name}
               </h2>
             </div>
 
-            <div className="px-6 py-4 max-h-64 overflow-y-auto divide-y divide-slate-100">
+            <div className="max-h-64 divide-y divide-slate-100 overflow-y-auto px-6 py-4 dark:divide-slate-800">
               {cart.length === 0 ? (
-                <p className="text-slate-500 py-4 text-center">
+                <p className="py-4 text-center text-slate-500 dark:text-slate-400">
                   Your cart is empty.
                 </p>
               ) : (
@@ -673,15 +670,17 @@ export default function OrdersPage() {
                     <img
                       src={item.image}
                       alt={item.name}
-                      className="w-12 h-12 rounded-xl object-cover shrink-0"
+                      className="h-12 w-12 shrink-0 rounded-xl object-cover"
                     />
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-slate-900 truncate">
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-medium text-slate-900 dark:text-slate-100">
                         {item.name}
                       </p>
-                      <p className="text-slate-500 text-sm">x{item.quantity}</p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">
+                        x{item.quantity}
+                      </p>
                     </div>
-                    <span className="font-semibold text-slate-900 shrink-0">
+                    <span className="shrink-0 font-semibold text-slate-900 dark:text-slate-100">
                       €{(item.price * item.quantity).toFixed(2)}
                     </span>
                   </div>
@@ -690,23 +689,23 @@ export default function OrdersPage() {
             </div>
 
             {cart.length > 0 && (
-              <div className="px-6 py-3 bg-slate-50 border-t border-slate-100 flex justify-between font-bold text-slate-900">
+              <div className="flex justify-between border-t border-slate-100 bg-slate-50 px-6 py-3 font-bold text-slate-900 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100">
                 <span>Total</span>
                 <span>€{total.toFixed(2)}</span>
               </div>
             )}
 
-            <div className="px-6 py-4 flex gap-3">
+            <div className="flex gap-3 px-6 py-4">
               <button
                 onClick={() => setShowCheckout(false)}
-                className="flex-1 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 transition font-semibold text-slate-700"
+                className="flex-1 rounded-xl bg-slate-100 py-3 font-semibold text-slate-700 transition hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
               >
                 Keep browsing
               </button>
               <button
                 onClick={confirmOrder}
                 disabled={cart.length === 0}
-                className={`flex-1 py-3 rounded-xl text-white font-bold transition ${meta.btnClass} disabled:opacity-40 disabled:cursor-not-allowed`}
+                className={`flex-1 rounded-xl py-3 font-bold text-white transition ${meta.btnClass} disabled:cursor-not-allowed disabled:opacity-40`}
               >
                 Place Order
               </button>

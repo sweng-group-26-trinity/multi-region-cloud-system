@@ -1,5 +1,6 @@
-@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
+@import "tailwindcss";
 @import "../styles/globals.css";
 
 @layer base {
@@ -8,7 +9,46 @@
   }
 
   body {
-    @apply m-0 min-h-screen;
+    @apply m-0 min-h-screen bg-white text-slate-900 transition-colors duration-300;
+  }
+
+  html.dark body {
+    @apply bg-slate-950 text-slate-100;
+  }
+}
+
+/* reusable dark mode helper classes */
+@layer components {
+  .dark-app {
+    @apply bg-white text-slate-900 transition-colors duration-300;
+  }
+
+  html.dark .dark-app {
+    @apply bg-slate-950 text-slate-100;
+  }
+
+  .app-card {
+    @apply bg-white text-slate-900 transition-colors duration-300;
+  }
+
+  html.dark .app-card {
+    @apply bg-slate-900 text-slate-100 shadow-lg;
+  }
+
+  .app-text {
+    @apply text-slate-900 transition-colors duration-300;
+  }
+
+  html.dark .app-text {
+    @apply text-slate-100;
+  }
+
+  .app-input {
+    @apply border border-slate-300 bg-white text-slate-900 transition-colors duration-300;
+  }
+
+  html.dark .app-input {
+    @apply border-slate-700 bg-slate-900 text-slate-100;
   }
 }
 
@@ -24,6 +64,10 @@ body::before {
   transform: rotate(-12deg) scale(1.35);
   animation: slide 30s linear infinite;
   pointer-events: none;
+}
+
+html.dark body::before {
+  opacity: 0.025;
 }
 
 @keyframes slide {
