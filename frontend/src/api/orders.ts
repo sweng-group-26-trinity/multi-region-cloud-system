@@ -1,95 +1,66 @@
 import { apiFetch } from "./clients";
-import type { Order, PaginatedResponse } from "./types";
 
-/**
- * Parameters for fetching orders via ordersApi.getAll.
- */
-export interface GetAllOrdersParams {
-  /** Page number to fetch (default: 1) */
-  page?: number;
-
-  /** Number of items per page (default: 10) */
-  pageSize?: number;
-
-  /** Restaurant ID filter */
-  restaurantId?: string;
-
-  /** Order status filter (e.g., "pending") */
-  status?: string;
+export interface OrderItem {
+  itemId: string;
+  name: string;
+  quantity: number;
+  unitPrice: number;
+  subtotal: number;
 }
 
-/**
- * Orders API client.
- *
- * Provides methods for fetching and mutating order data.
- */
-export const ordersApi = {
-  /**
-   * Fetches a paginated and filterable list of orders.
-   * @param params - Pagination and filter options
-   * @returns Paginated order response
-   */
-  getAll: async (
-    params?: GetAllOrdersParams,
-  ): Promise<PaginatedResponse<Order>> => {
-    const queryParams = new URLSearchParams();
-    if (params?.page) queryParams.append("page", params.page.toString());
-    if (params?.pageSize)
-      queryParams.append("pageSize", params.pageSize.toString());
-    if (params?.restaurantId)
-      queryParams.append("restaurantId", params.restaurantId);
-    if (params?.status) queryParams.append("status", params.status);
+export interface Order {
+  id: string;
+  restaurantId: string;
+  customerId: string;
+  customerName: string;
+  customerEmail: string;
+  status: "pending" | "confirmed" | "preparing" | "ready" | "delivered" | "cancelled";
+  totalAmount: number;
+  specialInstructions?: string;
+  items: OrderItem[];
+  createdAt: string;
+  updatedAt: string;
+}
 
-    const query = queryParams.toString();
-    return apiFetch<PaginatedResponse<Order>>(
-      `/orders${query ? `?${query}` : ""}`,
-    );
-  },
+export interface CreateOrderRequest {
+  restaurantId: string;
+  customerName: string;
+  customerEmail: string;
+  specialInstructions?: string;
+  items: { itemId: string; quantity: number }[];
+}
 
-  /**
-   * Fetches a single order by ID.
-   * @param id - Order ID
-   * @returns The matching order
-   */
-  getById: async (id: string): Promise<Order> => {
-    return apiFetch<Order>(`/orders/${id}`);
-  },
+export interface UpdateOrderRequest {
+  customerName?: string;
+  customerEmail?: string;
+  specialInstructions?: string;
+  status?: string;
+  items?: { itemId: string; quantity: number }[];
+}
 
-  /**
-   * Creates a new order.
-   * @param data - Order data without generated fields
-   * @returns The created order
-   */
-  create: async (
-    data: Omit<Order, "id" | "createdAt" | "updatedAt">,
-  ): Promise<Order> => {
-    return apiFetch<Order>("/orders", {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
-  },
-
-  /**
-   * Updates the status of an existing order.
-   * @param id - Order ID
-   * @param status - New order status
-   * @returns The updated order
-   */
-  updateStatus: async (id: string, status: Order["status"]): Promise<Order> => {
-    return apiFetch<Order>(`/orders/${id}/status`, {
-      method: "PATCH",
-      body: JSON.stringify({ status }),
-    });
-  },
-
-  /**
-   * Deletes an order by ID.
-   * @param id - Order ID
-   * @returns Void on success
-   */
-  delete: async (id: string): Promise<void> => {
-    return apiFetch<void>(`/orders/${id}`, {
-      method: "DELETE",
-    });
-  },
+export const getOrders = (params?: { restaurantId?: string; userId?: string; status?: string }) => {
+  const query = new URLSearchParams();
+  if (params?.restaurantId) query.set("restaurantId", params.restaurantId);
+  if (params?.userId) query.set("userId", params.userId);
+  if (params?.status) query.set("status", params.status);
+  const qs = query.toString();
+  return apiFetch<{ data: Order[] }>(`/api/orders${qs ? `?${qs}` : ""}`);
 };
+
+export const getOrder = (orderId: string) =>
+  apiFetch<Order>(`/api/orders/${orderId}`);
+
+export const createOrder = (data: CreateOrderRequest) =>
+  apiFetch<Order>("/api/orders", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+
+export const updateOrder = (orderId: string, data: UpdateOrderRequest) =>
+  apiFetch<Order>(`/api/orders/${orderId}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+
+export const deleteOrder = (orderId: string) =>
+  apiFetch<void>(`/api/orders/${orderId}`, { method: "DELETE" });
