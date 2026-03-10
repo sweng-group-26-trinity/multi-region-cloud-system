@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useLogin } from "../api/authhooks";
+import { useAuth } from "../context/AuthContext";
 
 /**
  * LoginPage component.
@@ -21,6 +22,7 @@ import { useLogin } from "../api/authhooks";
  */
 export function LoginPage() {
   const { mutate, isPending, error } = useLogin();
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const [identifier, setIdentifier] = useState("");
@@ -38,7 +40,12 @@ export function LoginPage() {
     e.preventDefault();
     mutate(
       { identifier, password },
-      { onSuccess: () => navigate("/dashboard") },
+      {
+        onSuccess: () => {
+          login("loggedIn");
+          navigate("/dashboard");
+        },
+      },
     );
   };
 
