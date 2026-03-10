@@ -8,7 +8,6 @@ import HomePage from "./pages/HomePage";
 import { RestaurantsPage } from "./pages/RestaurantPage";
 import OrdersPage from "./pages/OrdersPage";
 import DatabaseHealth from "./pages/DatabaseHealth";
-<<<<<<< HEAD
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
 import {
@@ -20,8 +19,6 @@ import {
   LogOut,
 } from "lucide-react";
 import { useAuth } from "./context/AuthContext";
-=======
->>>>>>> 9ad159f (resolve merge conflict in App.tsx)
 import "./index.css";
 
 /**
