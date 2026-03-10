@@ -7,7 +7,10 @@ import {
   useLocation,
 } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
+<<<<<<< Updated upstream
 import { UtensilsCrossed } from "lucide-react";
+=======
+>>>>>>> Stashed changes
 import { LoginPage } from "./pages/LoginPage";
 import { SignupPage } from "./pages/SignupPage";
 import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
@@ -15,7 +18,6 @@ import HomePage from "./pages/HomePage";
 import { RestaurantsPage } from "./pages/RestaurantPage";
 import OrdersPage from "./pages/OrdersPage";
 import DatabaseHealth from "./pages/DatabaseHealth";
-
 import "./index.css";
 
 /**
@@ -23,7 +25,6 @@ import "./index.css";
  */
 function AnimatedRoutes() {
   const location = useLocation();
-
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
@@ -110,10 +111,9 @@ function Page({ children }: { children: ReactNode }) {
  */
 function AppShell() {
   const navigate = useNavigate();
-
   return (
     <div className="min-h-screen w-screen bg-white relative">
-      {/* Generic Brand Logo */}
+      {/* Brand Logo */}
       <button
         type="button"
         onClick={() => navigate("/")}
