@@ -15,7 +15,6 @@ import HomePage from "./pages/HomePage";
 import { RestaurantsPage } from "./pages/RestaurantPage";
 import OrdersPage from "./pages/OrdersPage";
 import DatabaseHealth from "./pages/DatabaseHealth";
-
 import "./index.css";
 
 /**
@@ -23,7 +22,6 @@ import "./index.css";
  */
 function AnimatedRoutes() {
   const location = useLocation();
-
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
