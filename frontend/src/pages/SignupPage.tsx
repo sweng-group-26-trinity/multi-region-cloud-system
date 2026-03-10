@@ -40,7 +40,7 @@ export function SignupPage() {
     e.preventDefault();
     mutate(
       { username, firstName, lastName, email, password },
-      { onSuccess: () => navigate("/restaurants") },
+      { onSuccess: () => navigate("/dashboard") },
     );
   };
 
