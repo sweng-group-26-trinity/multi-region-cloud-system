@@ -7,10 +7,7 @@ import {
   useLocation,
 } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-<<<<<<< Updated upstream
 import { UtensilsCrossed } from "lucide-react";
-=======
->>>>>>> Stashed changes
 import { LoginPage } from "./pages/LoginPage";
 import { SignupPage } from "./pages/SignupPage";
 import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
