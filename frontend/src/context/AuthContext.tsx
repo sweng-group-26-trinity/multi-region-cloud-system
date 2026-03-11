@@ -13,9 +13,17 @@ import {
 /**
  * Shape of the authentication context.
  */
-type AuthContextType = {
+export type AuthContextType = {
+  /** Indicates whether the user is currently authenticated. */
   isAuthenticated: boolean;
+
+  /**
+   * Logs the user in.
+   * @param token Authentication token returned by the backend.
+   */
   login: (token: string) => void;
+
+  /** Logs the user out and clears authentication state. */
   logout: () => void;
 };
 
@@ -48,7 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("authToken", token);
     setIsAuthenticated(true);
   };
-  
+
   /**
    * Logs the user out by removing their token and clearing auth state.
    */
