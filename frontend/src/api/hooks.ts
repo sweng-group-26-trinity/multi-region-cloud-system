@@ -1,7 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { restaurantsApi } from "./restaurants";
+<<<<<<< HEAD
 import type { Restaurant } from "./types";
 
+=======
+import type { Restaurant, Order } from "./types";
+>>>>>>> abfa68c (Fixed issues)
 /**
  * Parameters for fetching restaurants via useRestaurants hook.
  */
