@@ -50,15 +50,30 @@ export function LoginPage() {
   };
 
   return (
-    <div className="w-full min-h-screen flex justify-center items-start pt-16 px-4">
-      <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8 space-y-6">
+    <div className="flex min-h-screen w-full justify-center px-4 pt-16 bg-transparent">
+      {/* 
+        Main login card.
+        Dark mode support is added here so the card remains readable
+        against the darker global page background.
+      */}
+      <div className="w-full max-w-md space-y-6 rounded-xl bg-white p-8 shadow-lg dark:bg-slate-900 dark:shadow-black/30">
         <div className="space-y-2 text-center">
-          <h1 className="text-2xl font-semibold">Sign in to your account</h1>
-          <p className="text-sm text-muted-foreground">Welcome back </p>
+          <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">
+            Sign in to your account
+          </h1>
+          <p className="text-sm text-muted-foreground dark:text-slate-400">
+            Welcome back
+          </p>
         </div>
+
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="space-y-2">
-            <Label htmlFor="identifier">Email or username</Label>
+            <Label
+              htmlFor="identifier"
+              className="text-slate-900 dark:text-slate-200"
+            >
+              Email or username
+            </Label>
             <input
               id="identifier"
               type="text"
@@ -66,15 +81,21 @@ export function LoginPage() {
               value={identifier}
               onChange={(e) => setIdentifier(e.target.value)}
               required
-              className="w-full h-11 px-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="h-11 w-full rounded-md border border-slate-300 bg-white px-3 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
             />
           </div>
+
           <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <Label htmlFor="password">Password</Label>
+            <div className="flex items-center justify-between">
+              <Label
+                htmlFor="password"
+                className="text-slate-900 dark:text-slate-200"
+              >
+                Password
+              </Label>
               <Link
                 to="/forgot-password"
-                className="text-sm text-indigo-600 hover:underline"
+                className="text-sm text-indigo-600 hover:underline dark:text-indigo-400"
               >
                 Forgot password?
               </Link>
@@ -86,34 +107,42 @@ export function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full h-11 px-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="h-11 w-full rounded-md border border-slate-300 bg-white px-3 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
             />
           </div>
-          {error && <p className="text-red-500 text-sm">{error.message}</p>}
+
+          {error && <p className="text-sm text-red-500">{error.message}</p>}
+
           <Button
             type="submit"
             disabled={isPending}
-            className="w-full h-11 bg-indigo-600 hover:bg-indigo-700"
+            className="h-11 w-full bg-indigo-600 hover:bg-indigo-700"
           >
             {isPending ? "Signing in…" : "Sign in"}
           </Button>
         </form>
+
+        {/* 
+          Divider between standard login and Google sign-in.
+          Background text chip is dark-mode aware so it blends with the card correctly.
+        */}
         <div className="relative text-center text-sm">
           <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t" />
+            <span className="w-full border-t border-slate-300 dark:border-slate-700" />
           </div>
-          <span className="relative bg-white px-2 text-muted-foreground">
+          <span className="relative bg-white px-2 text-muted-foreground dark:bg-slate-900 dark:text-slate-400">
             OR
           </span>
         </div>
+
         <Button
           variant="outline"
-          className="w-full flex items-center justify-center gap-3 h-11"
+          className="flex h-11 w-full items-center justify-center gap-3 border-slate-300 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 48 48"
-            className="w-5 h-5"
+            className="h-5 w-5"
           >
             <path
               fill="#EA4335"
@@ -134,9 +163,13 @@ export function LoginPage() {
           </svg>
           Sign in with Google
         </Button>
-        <p className="text-sm text-center text-muted-foreground">
+
+        <p className="text-center text-sm text-muted-foreground dark:text-slate-400">
           Don't have an account?{" "}
-          <Link to="/signup" className="text-indigo-600 hover:underline">
+          <Link
+            to="/signup"
+            className="text-indigo-600 hover:underline dark:text-indigo-400"
+          >
             Create account
           </Link>
         </p>
