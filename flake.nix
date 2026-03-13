@@ -69,6 +69,8 @@
     schemathesis = {
       url = "github:schemathesis/schemathesis";
       flake = false;
+    };
+
     disko = {
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
