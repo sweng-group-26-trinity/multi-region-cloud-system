@@ -4,9 +4,12 @@
 #
 # Usage:
 #   GCP_PROJECT=my-project ./scripts/create-vms.sh
+#   — or via Nix —
+#   GCP_PROJECT=my-project nix run .#create-vms
 #
 # Prerequisites:
 #   - gcloud CLI authenticated: gcloud auth login
+#   - gum installed (for formatted output)
 #   - Project set or passed via GCP_PROJECT env var
 
 set -euo pipefail
@@ -15,21 +18,21 @@ set -euo pipefail
 GCP_PROJECT="${GCP_PROJECT:-}"
 SSH_PUB_KEY="${SSH_PUB_KEY:-$HOME/.ssh/id_ed25519.pub}"
 DISK_SIZE="20GB"
-MACHINE_TYPE="e2-medium"   # 2 vCPU, 4 GB — enough for a demo
+MACHINE_TYPE="e2-medium" # 2 vCPU, 4 GB — enough for a demo
 IMAGE_FAMILY="debian-12"
 IMAGE_PROJECT="debian-cloud"
 NETWORK_TAG="toast-node"
 # ──────────────────────────────────────────────────────────────────────────────
 
-if [[ -z "$GCP_PROJECT" ]]; then
-  echo "Error: set GCP_PROJECT env var to your GCP project ID"
-  echo "  e.g. GCP_PROJECT=my-project-123 ./scripts/create-vms.sh"
+if [[ -z $GCP_PROJECT ]]; then
+  gum log --level error "Set GCP_PROJECT env var to your GCP project ID"
+  gum log --level info "e.g. GCP_PROJECT=my-project-123 nix run .#create-vms"
   exit 1
 fi
 
-if [[ ! -f "$SSH_PUB_KEY" ]]; then
-  echo "Error: SSH public key not found at $SSH_PUB_KEY"
-  echo "  Set SSH_PUB_KEY env var to your public key path"
+if [[ ! -f $SSH_PUB_KEY ]]; then
+  gum log --level error "SSH public key not found at $SSH_PUB_KEY"
+  gum log --level info "Set SSH_PUB_KEY env var to your public key path"
   exit 1
 fi
 
@@ -38,11 +41,11 @@ fi
 #   us-central1    → backend-a, db-coordinator, db-worker-1, monitoring
 #   europe-west1   → backend-b, db-worker-2
 declare -A NODE_ZONES=(
-  [backend-a]="us-central1-a"
-  [backend-b]="europe-west1-b"
-  [db-coordinator]="us-central1-a"
-  [db-worker-1]="us-central1-a"
-  [db-worker-2]="europe-west1-b"
+  [backend - a]="us-central1-a"
+  [backend - b]="europe-west1-b"
+  [db - coordinator]="us-central1-a"
+  [db - worker - 1]="us-central1-a"
+  [db - worker - 2]="europe-west1-b"
   [monitoring]="us-central1-a"
 )
 
@@ -51,51 +54,54 @@ NODES=(backend-a backend-b db-coordinator db-worker-1 db-worker-2 monitoring)
 # Wrap gcloud to always pass --project
 gcloud() { command gcloud --project "$GCP_PROJECT" "$@"; }
 
-echo "=== Toast VM Setup ==="
-echo "Project : $GCP_PROJECT"
-echo "SSH key : $SSH_PUB_KEY"
-echo ""
+gum style --bold --foreground 212 "Toast VM Setup"
+gum log --level info "Project: $GCP_PROJECT"
+gum log --level info "SSH key: $SSH_PUB_KEY"
 
 # ── Firewall rules ─────────────────────────────────────────────────────────────
-echo "Setting up firewall rules..."
+gum style --bold --foreground 212 "Firewall Rules"
 
-gcloud compute firewall-rules create toast-allow-ssh \
+if gcloud compute firewall-rules create toast-allow-ssh \
   --network default \
   --allow tcp:22 \
   --target-tags "$NETWORK_TAG" \
-  --description "Toast: SSH access" 2>/dev/null \
-  && echo "  Created: toast-allow-ssh" \
-  || echo "  Already exists: toast-allow-ssh"
+  --description "Toast: SSH access" 2>/dev/null; then
+  gum log --level info "Created: toast-allow-ssh"
+else
+  gum log --level warn "toast-allow-ssh already exists"
+fi
 
-gcloud compute firewall-rules create toast-allow-tailscale \
+if gcloud compute firewall-rules create toast-allow-tailscale \
   --network default \
   --allow udp:41641 \
   --target-tags "$NETWORK_TAG" \
-  --description "Toast: Tailscale WireGuard" 2>/dev/null \
-  && echo "  Created: toast-allow-tailscale" \
-  || echo "  Already exists: toast-allow-tailscale"
+  --description "Toast: Tailscale WireGuard" 2>/dev/null; then
+  gum log --level info "Created: toast-allow-tailscale"
+else
+  gum log --level warn "toast-allow-tailscale already exists"
+fi
 
-gcloud compute firewall-rules create toast-allow-internal \
+if gcloud compute firewall-rules create toast-allow-internal \
   --network default \
   --allow tcp,udp,icmp \
   --source-tags "$NETWORK_TAG" \
   --target-tags "$NETWORK_TAG" \
-  --description "Toast: unrestricted inter-node traffic" 2>/dev/null \
-  && echo "  Created: toast-allow-internal" \
-  || echo "  Already exists: toast-allow-internal"
-
-echo ""
+  --description "Toast: unrestricted inter-node traffic" 2>/dev/null; then
+  gum log --level info "Created: toast-allow-internal"
+else
+  gum log --level warn "toast-allow-internal already exists"
+fi
 
 # ── Create VMs ─────────────────────────────────────────────────────────────────
-echo "Creating VMs..."
+gum style --bold --foreground 212 "Creating VMs"
 SSH_METADATA="admin:$(cat "$SSH_PUB_KEY")"
 
 for name in "${NODES[@]}"; do
   zone="${NODE_ZONES[$name]}"
-  echo "  $name  ($zone, $MACHINE_TYPE)..."
+  gum log --level info "$name ($zone, $MACHINE_TYPE)..."
 
   if gcloud compute instances describe "$name" --zone "$zone" &>/dev/null; then
-    echo "    Already exists — skipping"
+    gum log --level warn "$name already exists - skipping"
     continue
   fi
 
@@ -110,15 +116,12 @@ for name in "${NODES[@]}"; do
     --metadata "ssh-keys=$SSH_METADATA" \
     --quiet
 
-  echo "    Done"
+  gum log --level info "$name created"
 done
 
-echo ""
-
 # ── Print IPs ──────────────────────────────────────────────────────────────────
-echo "=== VM External IPs ==="
-echo "(Copy these into deploy-nixos.sh)"
-echo ""
+gum style --bold --foreground 212 "VM External IPs"
+gum log --level info "Copy these into deploy-nixos.sh"
 
 for name in "${NODES[@]}"; do
   zone="${NODE_ZONES[$name]}"
@@ -128,5 +131,4 @@ for name in "${NODES[@]}"; do
   printf "  %-20s %s\n" "$name" "$ip"
 done
 
-echo ""
-echo "Next step: run  scripts/deploy-nixos.sh  to install NixOS on each VM"
+gum log --level info "Next step: run scripts/deploy-nixos.sh to install NixOS on each VM"

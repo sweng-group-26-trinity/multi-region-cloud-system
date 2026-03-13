@@ -16,11 +16,11 @@ set -euo pipefail
 
 # ── Fill in the IPs printed by create-vms.sh ──────────────────────────────────
 declare -A NODE_IPS=(
-  [backend-a]=""
-  [backend-b]=""
-  [db-coordinator]=""
-  [db-worker-1]=""
-  [db-worker-2]=""
+  [backend - a]=""
+  [backend - b]=""
+  [db - coordinator]=""
+  [db - worker - 1]=""
+  [db - worker - 2]=""
   [monitoring]=""
 )
 # ──────────────────────────────────────────────────────────────────────────────
@@ -35,7 +35,7 @@ echo "=== Checking IPs ==="
 missing=0
 for name in "${NODES[@]}"; do
   ip="${NODE_IPS[$name]}"
-  if [[ -z "$ip" ]]; then
+  if [[ -z $ip ]]; then
     echo "  ERROR: No IP set for $name — edit the NODE_IPS section in this script"
     missing=1
   else
@@ -76,10 +76,10 @@ for name in "${NODES[@]}"; do
 
   for _ in $(seq 1 30); do
     if ssh -o StrictHostKeyChecking=no \
-           -o ConnectTimeout=5 \
-           -o IdentityFile="$SSH_KEY" \
-           -o BatchMode=yes \
-           "admin@${ip}" true 2>/dev/null; then
+      -o ConnectTimeout=5 \
+      -o IdentityFile="$SSH_KEY" \
+      -o BatchMode=yes \
+      "admin@${ip}" true 2>/dev/null; then
       echo " ready"
       break
     fi
