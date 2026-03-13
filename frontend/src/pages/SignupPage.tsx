@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useSignup } from "../api/authhooks";
+import { useAuth } from "../context/AuthContext";
 
 /**
  * SignupPage component.
@@ -21,6 +22,7 @@ import { useSignup } from "../api/authhooks";
 export function SignupPage() {
   const { mutate, isPending, error } = useSignup();
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const [username, setUsername] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -40,27 +42,50 @@ export function SignupPage() {
     e.preventDefault();
     mutate(
       { username, firstName, lastName, email, password },
-      { onSuccess: () => navigate("/restaurants") },
+      {
+        onSuccess: () => {
+          /**
+           * Automatically authenticates the user after account creation
+           * so protected routes can be accessed immediately.
+           */
+          login("loggedIn");
+
+          /**
+           * Redirects the newly created user straight to the dashboard.
+           */
+          navigate("/dashboard");
+        },
+      },
     );
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-indigo-600 via-purple-600 to-blue-600 flex items-center justify-center px-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8">
-        <h1 className="text-2xl font-bold text-center mb-2">
+    <div className="min-h-screen w-full flex items-center justify-center px-4 bg-transparent">
+      {/* 
+        Signup form card.
+
+        Dark mode support is added so the form remains readable when the global
+        application theme switches to dark mode. The background and text colours
+        adapt automatically using Tailwind's `dark:` variants.
+      */}
+      <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-2xl p-8">
+        <h1 className="text-2xl font-bold text-center mb-2 text-slate-900 dark:text-white">
           Create your account
         </h1>
-        <p className="text-gray-500 text-center mb-6">
+
+        <p className="text-gray-500 dark:text-slate-400 text-center mb-6">
           Join us and get started
         </p>
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label
               htmlFor="username"
-              className="block text-sm font-medium mb-1"
+              className="block text-sm font-medium mb-1 text-slate-900 dark:text-slate-200"
             >
               Username
             </label>
+
             <input
               id="username"
               type="text"
@@ -68,17 +93,19 @@ export function SignupPage() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
-              className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
+
           <div className="flex gap-3">
             <div className="flex-1">
               <label
                 htmlFor="firstName"
-                className="block text-sm font-medium mb-1"
+                className="block text-sm font-medium mb-1 text-slate-900 dark:text-slate-200"
               >
                 First name
               </label>
+
               <input
                 id="firstName"
                 type="text"
@@ -86,16 +113,18 @@ export function SignupPage() {
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 required
-                className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
+
             <div className="flex-1">
               <label
                 htmlFor="lastName"
-                className="block text-sm font-medium mb-1"
+                className="block text-sm font-medium mb-1 text-slate-900 dark:text-slate-200"
               >
                 Last name
               </label>
+
               <input
                 id="lastName"
                 type="text"
@@ -103,14 +132,19 @@ export function SignupPage() {
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 required
-                className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
           </div>
+
           <div>
-            <label htmlFor="email" className="block text-sm font-medium mb-1">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium mb-1 text-slate-900 dark:text-slate-200"
+            >
               Email
             </label>
+
             <input
               id="email"
               type="email"
@@ -118,16 +152,18 @@ export function SignupPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
+
           <div>
             <label
               htmlFor="password"
-              className="block text-sm font-medium mb-1"
+              className="block text-sm font-medium mb-1 text-slate-900 dark:text-slate-200"
             >
               Password
             </label>
+
             <input
               id="password"
               type="password"
@@ -135,10 +171,12 @@ export function SignupPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
+
           {error && <p className="text-red-500 text-sm">{error.message}</p>}
+
           <Button
             type="submit"
             disabled={isPending}
@@ -146,18 +184,27 @@ export function SignupPage() {
           >
             {isPending ? "Creating account…" : "Create account"}
           </Button>
+
+          {/* 
+            Divider between standard signup and Google signup.
+
+            The background colour switches between white and dark mode card
+            colour to ensure the divider text remains visible.
+          */}
           <div className="relative text-center text-sm">
             <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
+              <span className="w-full border-t border-gray-300 dark:border-slate-700" />
             </div>
-            <span className="relative bg-white px-2 text-muted-foreground">
+
+            <span className="relative bg-white dark:bg-slate-900 px-2 text-muted-foreground dark:text-slate-400">
               OR
             </span>
           </div>
+
           <Button
             type="button"
             variant="outline"
-            className="w-full flex items-center justify-center gap-3 h-11"
+            className="w-full flex items-center justify-center gap-3 h-11 border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -184,9 +231,13 @@ export function SignupPage() {
             Sign up with Google
           </Button>
         </form>
-        <p className="text-center text-sm text-gray-500 mt-6">
+
+        <p className="text-center text-sm text-gray-500 dark:text-slate-400 mt-6">
           Already have an account?{" "}
-          <Link to="/login" className="text-indigo-600 hover:underline">
+          <Link
+            to="/login"
+            className="text-indigo-600 dark:text-indigo-400 hover:underline"
+          >
             Sign in
           </Link>
         </p>

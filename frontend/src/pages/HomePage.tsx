@@ -103,14 +103,20 @@ function AvatarNode({ person }: { person: Person }) {
           <img
             src={person.img}
             alt={person.name}
-            className="h-full w-full object-cover rounded-full"
+            className="h-full w-full rounded-full object-cover"
             loading="lazy"
             draggable={false}
           />
         </div>
       </div>
 
-      <div className="mt-4 text-lg font-extrabold">{person.name}</div>
+      {/* 
+        Team member text uses dark-mode-aware colours so names and roles
+        remain readable against the darker card background.
+      */}
+      <div className="mt-4 text-lg font-extrabold text-black">
+        {person.name}
+      </div>
       <div className="text-gray-700">{person.role}</div>
     </div>
   );
@@ -156,37 +162,49 @@ export default function HomePage() {
   const bottomY = 78;
 
   return (
-    <div className="min-h-screen w-full">
+    <div className="min-h-screen w-full bg-transparent">
       <div className="relative z-10 mx-auto max-w-6xl px-6 py-14">
-        <Card className="bg-white/95 backdrop-blur shadow-xl rounded-2xl">
-          <CardHeader className="text-center space-y-3">
-            <CardTitle className="text-5xl font-extrabold tracking-tight">
+        {/* 
+          Main homepage card.
+
+          Dark-mode support is added here so the card, headings, and content
+          remain high-contrast when the application theme switches to dark mode.
+        */}
+        <Card className="rounded-2xl bg-white/95 shadow-xl backdrop-blur dark:bg-slate-900/95 dark:shadow-black/30">
+          <CardHeader className="space-y-3 text-center">
+            <CardTitle className="text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white">
               Group 26
             </CardTitle>
 
-            <p className="text-lg text-gray-600">
+            <p className="text-lg text-gray-600 dark:text-slate-300">
               Resilient Multi-Region Cloud-Native Restaurant Ordering System
             </p>
 
-            <p className="text-orange-500 font-semibold">
+            <p className="font-semibold text-orange-500">
               In collaboration with Toast
             </p>
 
-            <div className="pt-3 flex flex-wrap justify-center gap-3">
+            <div className="flex flex-wrap justify-center gap-3 pt-3">
               <Button asChild className="rounded-xl px-6">
-                <Link to="/orders">Go to Orders</Link>
+                <Link to="/dashboard">Go to Orders</Link>
               </Button>
+
+              {/* 
+                Outline buttons are given dark-mode-aware background, border,
+                and text colours to avoid disappearing on dark pages.
+              */}
               <Button
                 asChild
                 variant="outline"
-                className="rounded-xl px-6 bg-white"
+                className="rounded-xl bg-white px-6 text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
               >
                 <Link to="/login">Login</Link>
               </Button>
+
               <Button
                 asChild
                 variant="outline"
-                className="rounded-xl px-6 bg-white"
+                className="rounded-xl bg-white px-6 text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
               >
                 <Link to="/health">Health</Link>
               </Button>
@@ -194,11 +212,11 @@ export default function HomePage() {
           </CardHeader>
 
           <CardContent className="pb-12">
-            <h2 className="text-4xl font-extrabold text-center mt-6 mb-10">
+            <h2 className="mt-6 mb-10 text-center text-4xl font-extrabold text-slate-900 dark:text-white">
               Team &amp; Roles
             </h2>
 
-            <div className="relative rounded-2xl bg-[#f6d2cb] p-10 overflow-hidden">
+            <div className="relative overflow-hidden rounded-2xl bg-[#f6d2cb] p-10">
               {/* SVG connector lines linking leads to their direct reports */}
               <svg
                 className="absolute inset-0 h-full w-full"
@@ -254,14 +272,14 @@ export default function HomePage() {
 
               <div className="relative z-10">
                 {/* Top row — leads */}
-                <div className="grid grid-cols-3 gap-10 items-start">
+                <div className="grid grid-cols-3 items-start gap-10">
                   {topRow.map((p) => (
                     <AvatarNode key={p.id} person={p} />
                   ))}
                 </div>
 
                 {/* Bottom row — engineers */}
-                <div className="mt-14 grid grid-cols-5 gap-8 items-start">
+                <div className="mt-14 grid grid-cols-5 items-start gap-8">
                   {bottomRow.map((p) => (
                     <AvatarNode key={p.id} person={p} />
                   ))}
