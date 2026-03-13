@@ -9,6 +9,7 @@
           gradle_9
           spring-boot-cli
           openjdk25
+          graalvmPackages.graalvm-ce
           inputs'.gradle2nix.packages.gradle2nix
 
           bun
@@ -20,6 +21,8 @@
           rage
           inputs'.ragenix.packages.ragenix
         ];
+
+        GRAALVM_HOME = pkgs.graalvmPackages.graalvm-ce;
 
         shellHook = ''
           export FLAKE_ROOT="$(git rev-parse --show-toplevel)"
