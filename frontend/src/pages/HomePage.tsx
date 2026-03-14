@@ -21,8 +21,7 @@ import { CookingPot, Activity } from "lucide-react";
  * - Dark/light mode reactive rendering
  * - Interactive UI overlays for navigation
  *
- * @remarks
- * Built using {@link THREE.WebGLRenderer} and {@link OrbitControls}.
+ * * Built using WebGLRenderer and OrbitControls.
  * The scene is mounted into a DOM element using a React ref.
  *
  * @example
