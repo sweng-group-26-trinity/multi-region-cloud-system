@@ -16,9 +16,6 @@ mirror_to_github:
   rules:
     - if: $CI_COMMIT_BRANCH
 garnix_checks:
-  before_script:
-    - bash scripts/ubuntu-setup.sh
-    - export PATH="$HOME/.local/bin:$PATH"
   stage: verify
   needs:
     - mirror_to_github
