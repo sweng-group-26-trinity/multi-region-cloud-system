@@ -141,12 +141,12 @@ function AppShell() {
       <button
         type="button"
         onClick={() => navigate("/")}
-        className="fixed top-6 left-6 z-50 flex items-center gap-2 rounded-xl px-4 py-2
+        className="fixed top-6 left-6 z-50 flex items-center gap-2 rounded-sm px-4 py-2
                    bg-white text-slate-900 shadow-md transition-all duration-200
                    hover:scale-[1.03] hover:shadow-lg active:scale-[0.98]
                    dark:bg-slate-900 dark:text-slate-100 dark:shadow-black/30"
       >
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500 text-white">
+        <div className="flex h-8 w-8 items-center justify-center rounded-xs bg-orange-500 text-white">
           <UtensilsCrossed size={18} strokeWidth={2.5} />
         </div>
         <span className="text-lg font-semibold text-slate-900 dark:text-slate-100">
@@ -158,15 +158,12 @@ function AppShell() {
       <button
         type="button"
         onClick={toggleDarkMode}
-        className="fixed top-6 right-6 z-50 flex items-center gap-2 rounded-xl px-4 py-2
+        className="fixed top-6 right-6 z-50 flex items-center gap-2 rounded-3xl px-4 py-4
                    bg-white text-slate-900 shadow-md transition-all duration-200
                    hover:scale-[1.03] hover:shadow-lg active:scale-[0.98]
                    dark:bg-slate-900 dark:text-slate-100 dark:shadow-black/30"
       >
         {darkMode ? <Sun size={18} /> : <Moon size={18} />}
-        <span className="font-medium text-slate-900 dark:text-slate-100">
-          {darkMode ? "Light Mode" : "Dark Mode"}
-        </span>
       </button>
 
       <AnimatedRoutes />
