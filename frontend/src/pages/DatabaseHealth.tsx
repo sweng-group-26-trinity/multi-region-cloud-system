@@ -14,17 +14,16 @@ import { Terminal } from "../components/js/Terminal";
  * Main 3D visualization component for the application.
  *
  * Responsibilities:
- * - Initializes a {@link THREE.Scene} with lighting and starfield
- * - Loads Earth and plane models
+ * - Initializes a Three.js Scene with lighting and starfield * - Loads Earth and plane models
  * - Renders a curved orbital path
  * - Creates floating UI nodes attached to geographic coordinates
  * - Handles dark/light theme switching
  * - Runs the animation loop
  * - Displays an interactive terminal overlay
  *
- * @remarks
- * This component uses {@link THREE.WebGLRenderer} for 3D rendering
- * and {@link CSS2DRenderer} for DOM-based labels attached to 3D objects.
+ *
+ * This component uses WebGLRenderer for 3D rendering
+ * and CSS2DRenderer for DOM-based labels attached to 3D objects..
  *
  * @example
  * ```tsx
@@ -372,14 +371,30 @@ export default function ThreeScene() {
    * - Dashboard navigation button
    * - Interactive terminal overlay
    */
-  return ( <div className="relative w-screen h-screen"> 
-  <div className="absolute top-6 left-1/2 -translate-x-1/2 z-50">
-   <button onClick={() => navigate("/dashboard")} className="px-6 py-2 rounded-full bg-indigo-600 text-white font-semibold shadow-md hover:shadow-lg hover:bg-indigo-700 transition-all duration-200 hover:scale-[1.03] active:scale-[0.98]" >
-     Dashboard </button>
-      </div> 
+  return (
+    <div className="relative w-screen h-screen">
+      <div className="absolute top-6 left-1/2 -translate-x-1/2 z-50">
+        <button
+          onClick={() => navigate("/dashboard")}
+          className="px-6 py-2 rounded-full bg-indigo-600 text-white font-semibold shadow-md hover:shadow-lg hover:bg-indigo-700 transition-all duration-200 hover:scale-[1.03] active:scale-[0.98]"
+        >
+          Dashboard{" "}
+        </button>
+      </div>
       <div ref={mountRef} className="w-full h-full" />
-       <Terminal title="dinehub-terminal" initialLines={['Type a command. Try "/kill"']} 
-       commands={[ { command: "/kill", description: "terminate all active nodes", 
-        onExecute: () => { console.log("hello"); }, }, ]} /> 
-        </div> );
+      <Terminal
+        title="dinehub-terminal"
+        initialLines={['Type a command. Try "/kill"']}
+        commands={[
+          {
+            command: "/kill",
+            description: "terminate all active nodes",
+            onExecute: () => {
+              console.log("hello");
+            },
+          },
+        ]}
+      />
+    </div>
+  );
 }
