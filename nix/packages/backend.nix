@@ -12,13 +12,6 @@ in
     }:
     let
       frontend = "${self'.packages.frontend}/dist";
-
-      metadataVersion = "0.3.30";
-
-      metadata = pkgs.fetchurl {
-        url = "https://github.com/oracle/graalvm-reachability-metadata/releases/download/${metadataVersion}/graalvm-reachability-metadata-${metadataVersion}.zip";
-        hash = "sha256-DKG5ny/W++SO6hXsR5ySY8h0t8TDZqnnKa7HqSKnMEg=";
-      };
     in
     rec {
       packages.backend = gradle2nix.builders.${system}.buildGradlePackage rec {
@@ -32,34 +25,23 @@ in
 
         gradleBuildFlags = [
           "test"
-          "nativeCompile"
+          "bootJar"
         ];
 
         nativeBuildInputs = with pkgs; [
           makeWrapper
-          graalvmPackages.graalvm-ce
+          openjdk25
         ];
 
-        GRAALVM_HOME = pkgs.graalvmPackages.graalvm-ce;
-
-        preBuild = ''
-          sed -i '
-          /^[[:space:]]*metadataRepository[[:space:]]*{.*}$/{
-            c\
-            metadataRepository {\
-                uri(file("${metadata}"))\
-                enabled.set(true)\
-            }
-          }
-          ' build.gradle.kts
-        '';
-
         installPhase = ''
-          mkdir -p "$out/bin"
+          mkdir -p \
+            "$out/share/backend" \
+            "$out/bin"
 
-          cp build/native/nativeCompile/${pname} "$out/bin/${pname}"
+          cp build/libs/backend.jar "$out/share/backend"
 
-          wrapProgram "$out/bin/${pname}" \
+          makeWrapper "${pkgs.openjdk25}/bin/java" "$out/bin/${pname}" \
+            --add-flags "-jar $out/share/backend/${pname}.jar"\
             --set FRONTEND_PATH "${frontend}"
         '';
 

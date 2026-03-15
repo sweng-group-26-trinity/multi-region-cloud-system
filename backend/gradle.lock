@@ -135,16 +135,6 @@
       "hash": "sha256-vP3yeCUyMraDq1HeLcvI+Y8g9Hc4wRHs/SyFxBsTHOw="
     }
   },
-  "com.github.openjson:openjson:1.0.13": {
-    "openjson-1.0.13.jar": {
-      "url": "https://plugins.gradle.org/m2/com/github/openjson/openjson/1.0.13/openjson-1.0.13.jar",
-      "hash": "sha256-fUGEz4kfNZ7nIJWkzhy5zY88Z2Z23+cW6on6tNDm6VM="
-    },
-    "openjson-1.0.13.pom": {
-      "url": "https://plugins.gradle.org/m2/com/github/openjson/openjson/1.0.13/openjson-1.0.13.pom",
-      "hash": "sha256-bH6VO09at9+Uppnum6jk7NneKghLcombV2R6I3WJhqg="
-    }
-  },
   "com.google.code.findbugs:jsr305:3.0.2": {
     "jsr305-3.0.2.jar": {
       "url": "https://plugins.gradle.org/m2/com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2.jar",
@@ -1083,68 +1073,6 @@
       "hash": "sha256-xUcMOr8/QtNyHQo137qtS6NkMJy36M8vyBBX+R1LFhs="
     }
   },
-  "org.graalvm.buildtools:graalvm-reachability-metadata:0.11.2": {
-    "graalvm-reachability-metadata-0.11.2.jar": {
-      "url": "https://plugins.gradle.org/m2/org/graalvm/buildtools/graalvm-reachability-metadata/0.11.2/graalvm-reachability-metadata-0.11.2.jar",
-      "hash": "sha256-LtmKlQHa1ai3sJQxUh0A4ROAg4O0UMdtWGjgHPNrHLU="
-    },
-    "graalvm-reachability-metadata-0.11.2.module": {
-      "url": "https://plugins.gradle.org/m2/org/graalvm/buildtools/graalvm-reachability-metadata/0.11.2/graalvm-reachability-metadata-0.11.2.module",
-      "hash": "sha256-FPScrhYAJ7wy78ol8erBT7Htd3Xw8RIUuGmbraiSxpU="
-    },
-    "graalvm-reachability-metadata-0.11.2.pom": {
-      "url": "https://plugins.gradle.org/m2/org/graalvm/buildtools/graalvm-reachability-metadata/0.11.2/graalvm-reachability-metadata-0.11.2.pom",
-      "hash": "sha256-vHTZZNw9mLDNNLBK+cEFHaIObVJzeEtZSotiAsN0mKM="
-    }
-  },
-  "org.graalvm.buildtools:junit-platform-native:0.11.2": {
-    "junit-platform-native-0.11.2.jar": {
-      "url": "https://repo.maven.apache.org/maven2/org/graalvm/buildtools/junit-platform-native/0.11.2/junit-platform-native-0.11.2.jar",
-      "hash": "sha256-2o6YnWqbb42XopbVemh5uSCSh8ZGRhZECsiTuqt/A8w="
-    },
-    "junit-platform-native-0.11.2.module": {
-      "url": "https://repo.maven.apache.org/maven2/org/graalvm/buildtools/junit-platform-native/0.11.2/junit-platform-native-0.11.2.module",
-      "hash": "sha256-MA/JIzo5Go7v/3+vlSneBl4WZTBq2sajgxjbnhqzqiM="
-    },
-    "junit-platform-native-0.11.2.pom": {
-      "url": "https://repo.maven.apache.org/maven2/org/graalvm/buildtools/junit-platform-native/0.11.2/junit-platform-native-0.11.2.pom",
-      "hash": "sha256-yHVXr1TYyos57YKm172xvo9vAXv/o/0Mq2OY54Ow89M="
-    }
-  },
-  "org.graalvm.buildtools:native-gradle-plugin:0.11.2": {
-    "native-gradle-plugin-0.11.2.jar": {
-      "url": "https://plugins.gradle.org/m2/org/graalvm/buildtools/native-gradle-plugin/0.11.2/native-gradle-plugin-0.11.2.jar",
-      "hash": "sha256-JvmmV7I43Bpcp+MBk/tvaz5TlhOO1IdrnXEXNRlRsDE="
-    },
-    "native-gradle-plugin-0.11.2.module": {
-      "url": "https://plugins.gradle.org/m2/org/graalvm/buildtools/native-gradle-plugin/0.11.2/native-gradle-plugin-0.11.2.module",
-      "hash": "sha256-jIW6zpQj/F9aoJK9NvJft9Qel0+WLlDV3nt1MArOAVU="
-    },
-    "native-gradle-plugin-0.11.2.pom": {
-      "url": "https://plugins.gradle.org/m2/org/graalvm/buildtools/native-gradle-plugin/0.11.2/native-gradle-plugin-0.11.2.pom",
-      "hash": "sha256-+3N6xOFYQbRbtSOPP/w0f7hfj6alsFE/eVmbFuiugLk="
-    }
-  },
-  "org.graalvm.buildtools:utils:0.11.2": {
-    "utils-0.11.2.jar": {
-      "url": "https://plugins.gradle.org/m2/org/graalvm/buildtools/utils/0.11.2/utils-0.11.2.jar",
-      "hash": "sha256-9iNqHw8tmBpo1PwSkzNKbZdUJhQ/5HECfbtDGFmtn5E="
-    },
-    "utils-0.11.2.module": {
-      "url": "https://plugins.gradle.org/m2/org/graalvm/buildtools/utils/0.11.2/utils-0.11.2.module",
-      "hash": "sha256-u2sDZc8nXtZjsJSQU86K14GMxh8pobTvJ5El6TWzPTQ="
-    },
-    "utils-0.11.2.pom": {
-      "url": "https://plugins.gradle.org/m2/org/graalvm/buildtools/utils/0.11.2/utils-0.11.2.pom",
-      "hash": "sha256-+47wGNBXINAH6P3LfaIsbQHEeXPLcTBFXGRv/e3f9YQ="
-    }
-  },
-  "org.graalvm.buildtools.native:org.graalvm.buildtools.native.gradle.plugin:0.11.2": {
-    "org.graalvm.buildtools.native.gradle.plugin-0.11.2.pom": {
-      "url": "https://plugins.gradle.org/m2/org/graalvm/buildtools/native/org.graalvm.buildtools.native.gradle.plugin/0.11.2/org.graalvm.buildtools.native.gradle.plugin-0.11.2.pom",
-      "hash": "sha256-iOiJ1I+etWzUIPBcOUBBCkH1rNEmJrhBwBPMvwIyizs="
-    }
-  },
   "org.hamcrest:hamcrest:3.0": {
     "hamcrest-3.0.jar": {
       "url": "https://repo.maven.apache.org/maven2/org/hamcrest/hamcrest/3.0/hamcrest-3.0.jar",
@@ -1441,20 +1369,6 @@
       "hash": "sha256-E6l3Y7CJ0P0kyrrGE/d5pyEmm+5VHz5cHbr+mhzQ6tI="
     }
   },
-  "org.junit.platform:junit-platform-console:6.0.1": {
-    "junit-platform-console-6.0.1.jar": {
-      "url": "https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-console/6.0.1/junit-platform-console-6.0.1.jar",
-      "hash": "sha256-5jnpEZZm6nRQepxkwLvpX8+tH3ObTyG7Dl2QDt4J/jg="
-    },
-    "junit-platform-console-6.0.1.module": {
-      "url": "https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-console/6.0.1/junit-platform-console-6.0.1.module",
-      "hash": "sha256-nHX9DIKARIYK/TfuCMY2Npey7OlGxt5JyS8mjlcN5pw="
-    },
-    "junit-platform-console-6.0.1.pom": {
-      "url": "https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-console/6.0.1/junit-platform-console-6.0.1.pom",
-      "hash": "sha256-DBrlYe+/PpUFVxFMNheskLIw4Drf8BFqxBro1fpgzkI="
-    }
-  },
   "org.junit.platform:junit-platform-engine:6.0.1": {
     "junit-platform-engine-6.0.1.jar": {
       "url": "https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-engine/6.0.1/junit-platform-engine-6.0.1.jar",
@@ -1481,20 +1395,6 @@
     "junit-platform-launcher-6.0.1.pom": {
       "url": "https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-launcher/6.0.1/junit-platform-launcher-6.0.1.pom",
       "hash": "sha256-TNsMG5Lxon57UucN6Buik1shlBgC2MqoiOnZ4V+s/ho="
-    }
-  },
-  "org.junit.platform:junit-platform-reporting:6.0.1": {
-    "junit-platform-reporting-6.0.1.jar": {
-      "url": "https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-reporting/6.0.1/junit-platform-reporting-6.0.1.jar",
-      "hash": "sha256-a8zyLvkaMsfdHBEf6ljcORYtDhsT0ohYABNrG8rev+s="
-    },
-    "junit-platform-reporting-6.0.1.module": {
-      "url": "https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-reporting/6.0.1/junit-platform-reporting-6.0.1.module",
-      "hash": "sha256-hZUobj8fJCx409bQsuDgDtbnPK4Nt4zh6W27hL09au4="
-    },
-    "junit-platform-reporting-6.0.1.pom": {
-      "url": "https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-reporting/6.0.1/junit-platform-reporting-6.0.1.pom",
-      "hash": "sha256-FdRjOV4vYNfuEd/qYnsTeWjI/O+nnU+pi2PFP4LNVbg="
     }
   },
   "org.latencyutils:LatencyUtils:2.0.3": {
@@ -1585,20 +1485,6 @@
     "opentest4j-1.3.0.pom": {
       "url": "https://repo.maven.apache.org/maven2/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.pom",
       "hash": "sha256-m/fP/EEPPoNywlIleN+cpW2dQ72TfjCUhwbCMqlDs1U="
-    }
-  },
-  "org.opentest4j.reporting:open-test-reporting-tooling-spi:0.2.4": {
-    "open-test-reporting-tooling-spi-0.2.4.jar": {
-      "url": "https://repo.maven.apache.org/maven2/org/opentest4j/reporting/open-test-reporting-tooling-spi/0.2.4/open-test-reporting-tooling-spi-0.2.4.jar",
-      "hash": "sha256-BKxOz8r2Cr4ObVsY6DBjIK7HzZy/FeWe6sVPqfqhaQI="
-    },
-    "open-test-reporting-tooling-spi-0.2.4.module": {
-      "url": "https://repo.maven.apache.org/maven2/org/opentest4j/reporting/open-test-reporting-tooling-spi/0.2.4/open-test-reporting-tooling-spi-0.2.4.module",
-      "hash": "sha256-mvTpLrTw2fCmApVpFCX1EUXKaPPO+fzDH6PRAt2I8bI="
-    },
-    "open-test-reporting-tooling-spi-0.2.4.pom": {
-      "url": "https://repo.maven.apache.org/maven2/org/opentest4j/reporting/open-test-reporting-tooling-spi/0.2.4/open-test-reporting-tooling-spi-0.2.4.pom",
-      "hash": "sha256-nffVKkdWDP8ZU+Kvr2KLEALQ5dqQ1e3et7vHGB8ysyw="
     }
   },
   "org.osgi:org.osgi.annotation.bundle:2.0.0": {
