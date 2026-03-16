@@ -96,12 +96,12 @@
       # Use wheel for jsonschema-rs since it's a Rust extension
       jsonschema-rs = pythonPackages.buildPythonPackage {
         pname = "jsonschema_rs";
-        version = "0.41.0";
+        version = "0.45.0";
         format = "wheel";
 
         src = pkgs.fetchurl {
-          url = "https://files.pythonhosted.org/packages/71/25/239008288cf7a126107d948eb6798a33d8ddc0f9e138038443b419040a63/jsonschema_rs-0.41.0-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl";
-          hash = "sha256-zvaQw5+NZzvjDOhIEcEG3jMKIR+OnRTXkBh95sUs1XI=";
+          url = "https://files.pythonhosted.org/packages/3d/98/5d152fba7206d714eae5dc5d7bc4b9948d870bbbd84e62aeb50da5ab4e22/jsonschema_rs-0.45.0-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl";
+          hash = "sha256-rUOLq8CGe4CgQqSlEm/GeYq1WduXTwgFkKfd7yVajEo=";
         };
 
         pythonImportsCheck = [ "jsonschema_rs" ];
@@ -110,7 +110,7 @@
     rec {
       packages.schemathesis = pythonPackages.buildPythonApplication {
         pname = "schemathesis";
-        version = "4.10.2";
+        version = "4.12.1";
         pyproject = true;
 
         src = inputs.schemathesis;
