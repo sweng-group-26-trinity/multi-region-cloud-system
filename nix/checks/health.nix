@@ -19,11 +19,7 @@ in
           services.postgresql = {
             enable = true;
             ensureDatabases = [ "sweng" ];
-            ensureUsers = [
-              {
-                name = "scss";
-              }
-            ];
+            ensureUsers = [ ];
             authentication = pkgs.lib.mkOverride 10 ''
               local all all trust
               host all all 127.0.0.1/32 trust
@@ -32,7 +28,11 @@ in
           };
           services.backend = {
             enable = true;
-            database.name = "sweng";
+            database = {
+              name = "sweng";
+              user = "postgres";
+              password = "postgres";
+            };
           };
           # Ensure backend starts after PostgreSQL is ready
           systemd.services.backend.after = [
