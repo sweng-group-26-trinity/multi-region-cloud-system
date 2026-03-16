@@ -22,7 +22,6 @@ in
             ensureUsers = [
               {
                 name = "scss";
-                ensureDBOwnership = true;
               }
             ];
             authentication = pkgs.lib.mkOverride 10 ''
@@ -36,7 +35,10 @@ in
             database.name = "sweng";
           };
           # Ensure backend starts after PostgreSQL is ready
-          systemd.services.backend.after = [ "network.target" "postgresql.service" ];
+          systemd.services.backend.after = [
+            "network.target"
+            "postgresql.service"
+          ];
           systemd.services.backend.requires = [ "postgresql.service" ];
         };
         testScript = ''
