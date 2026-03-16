@@ -19,5 +19,5 @@ bearer = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0IiwiaWF0IjoxNTE2M
 
 # Spring Boot returns 404 (not 405) for undocumented methods on unmatched paths.
 # This is standard Spring behaviour, not an API bug.
-[checks.unsupported_methods]
+[checks.unsupported_method]
 enabled = false
