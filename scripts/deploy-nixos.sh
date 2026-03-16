@@ -16,11 +16,11 @@ set -euo pipefail
 
 # ── Fill in the IPs printed by create-vms.sh ──────────────────────────────────
 declare -A NODE_IPS=(
-  [backend - a]=""
-  [backend - b]=""
-  [db - coordinator]=""
-  [db - worker - 1]=""
-  [db - worker - 2]=""
+  [backend-a]=""
+  [backend-b]=""
+  [db-coordinator]=""
+  [db-worker-1]=""
+  [db-worker-2]=""
   [monitoring]=""
 )
 # ──────────────────────────────────────────────────────────────────────────────

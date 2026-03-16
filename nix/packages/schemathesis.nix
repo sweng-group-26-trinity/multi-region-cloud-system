@@ -128,7 +128,6 @@
           jsonschema-rs
           junit-xml
           pyrate-limiter
-          pytest-subtests
           pytest
           pyyaml
           requests

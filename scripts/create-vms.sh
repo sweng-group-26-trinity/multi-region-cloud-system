@@ -41,11 +41,11 @@ fi
 #   us-central1    → backend-a, db-coordinator, db-worker-1, monitoring
 #   europe-west1   → backend-b, db-worker-2
 declare -A NODE_ZONES=(
-  [backend - a]="us-central1-a"
-  [backend - b]="europe-west1-b"
-  [db - coordinator]="us-central1-a"
-  [db - worker - 1]="us-central1-a"
-  [db - worker - 2]="europe-west1-b"
+  [backend-a]="us-central1-a"
+  [backend-b]="europe-west1-b"
+  [db-coordinator]="us-central1-a"
+  [db-worker-1]="us-central1-a"
+  [db-worker-2]="europe-west1-b"
   [monitoring]="us-central1-a"
 )
 
