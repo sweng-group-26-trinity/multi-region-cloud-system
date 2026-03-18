@@ -1,95 +1,202 @@
 import { apiFetch } from "./clients";
-import type { Order, PaginatedResponse } from "./types";
 
 /**
- * Parameters for fetching orders via ordersApi.getAll.
+ * Represents a single line item within an order.
  */
-export interface GetAllOrdersParams {
-  /** Page number to fetch (default: 1) */
-  page?: number;
+export interface OrderItem {
+  /** The unique identifier of the menu item. */
+  itemId: string;
 
-  /** Number of items per page (default: 10) */
-  pageSize?: number;
+  /** Display name of the item. */
+  name: string;
 
-  /** Restaurant ID filter */
+  /** Number of units ordered. */
+  quantity: number;
+
+  /** Price per unit in the order currency. */
+  unitPrice: number;
+
+  /** Total price for this line item (`quantity × unitPrice`). */
+  subtotal: number;
+}
+
+/**
+ * Represents a customer order placed at a restaurant.
+ */
+export interface Order {
+  /** Unique identifier for the order. */
+  id: string;
+
+  /** ID of the restaurant fulfilling the order. */
+  restaurantId: string;
+
+  /** ID of the customer who placed the order. */
+  customerId: string;
+
+  /** Full name of the customer. */
+  customerName: string;
+
+  /** Email address of the customer. */
+  customerEmail: string;
+
+  /**
+   * Current lifecycle status of the order.
+   */
+  status:
+    | "pending"
+    | "confirmed"
+    | "preparing"
+    | "ready"
+    | "delivered"
+    | "cancelled";
+
+  /** Total order value in the order currency. */
+  totalAmount: number;
+
+  /** Optional free-text instructions from the customer. */
+  specialInstructions?: string;
+
+  /** Ordered line items. */
+  items: OrderItem[];
+
+  /** ISO 8601 timestamp when the order was created. */
+  createdAt: string;
+
+  /** ISO 8601 timestamp when the order was last updated. */
+  updatedAt: string;
+}
+
+/**
+ * Item reference used when creating or updating an order.
+ */
+export interface OrderItemInput {
+  /** ID of the menu item being ordered. */
+  itemId: string;
+
+  /** Quantity of the item requested. */
+  quantity: number;
+}
+
+/**
+ * Request body for creating a new order.
+ */
+export interface CreateOrderRequest {
+  /** ID of the restaurant where the order is placed. */
+  restaurantId: string;
+
+  /** Full name of the customer placing the order. */
+  customerName: string;
+
+  /** Email address of the customer placing the order. */
+  customerEmail: string;
+
+  /** Optional special instructions for the order. */
+  specialInstructions?: string;
+
+  /** Items included in the order. */
+  items: OrderItemInput[];
+}
+
+/**
+ * Request body for partially updating an order.
+ */
+export interface UpdateOrderRequest {
+  /** Updated customer name. */
+  customerName?: string;
+
+  /** Updated customer email. */
+  customerEmail?: string;
+
+  /** Updated special instructions. */
+  specialInstructions?: string;
+
+  /** Updated order status. */
+  status?: string;
+
+  /** Replacement list of order items. */
+  items?: OrderItemInput[];
+}
+
+/**
+ * Response returned when fetching a list of orders.
+ */
+export interface OrdersResponse {
+  /** Array of orders matching the query filters. */
+  data: Order[];
+}
+
+/**
+ * Query parameters used when fetching orders.
+ */
+export interface GetOrdersParams {
+  /** Filter orders by restaurant ID. */
   restaurantId?: string;
 
-  /** Order status filter (e.g., "pending") */
+  /** Filter orders by user ID. */
+  userId?: string;
+
+  /** Filter orders by order status. */
   status?: string;
 }
 
 /**
- * Orders API client.
+ * Fetches a list of orders with optional filters.
  *
- * Provides methods for fetching and mutating order data.
+ * @param params Optional query parameters used to filter results.
+ * @returns A paginated list of orders.
  */
-export const ordersApi = {
-  /**
-   * Fetches a paginated and filterable list of orders.
-   * @param params - Pagination and filter options
-   * @returns Paginated order response
-   */
-  getAll: async (
-    params?: GetAllOrdersParams,
-  ): Promise<PaginatedResponse<Order>> => {
-    const queryParams = new URLSearchParams();
-    if (params?.page) queryParams.append("page", params.page.toString());
-    if (params?.pageSize)
-      queryParams.append("pageSize", params.pageSize.toString());
-    if (params?.restaurantId)
-      queryParams.append("restaurantId", params.restaurantId);
-    if (params?.status) queryParams.append("status", params.status);
+export const getOrders = (params?: GetOrdersParams) => {
+  const query = new URLSearchParams();
 
-    const query = queryParams.toString();
-    return apiFetch<PaginatedResponse<Order>>(
-      `/orders${query ? `?${query}` : ""}`,
-    );
-  },
+  if (params?.restaurantId) query.set("restaurantId", params.restaurantId);
+  if (params?.userId) query.set("userId", params.userId);
+  if (params?.status) query.set("status", params.status);
 
-  /**
-   * Fetches a single order by ID.
-   * @param id - Order ID
-   * @returns The matching order
-   */
-  getById: async (id: string): Promise<Order> => {
-    return apiFetch<Order>(`/orders/${id}`);
-  },
+  const qs = query.toString();
 
-  /**
-   * Creates a new order.
-   * @param data - Order data without generated fields
-   * @returns The created order
-   */
-  create: async (
-    data: Omit<Order, "id" | "createdAt" | "updatedAt">,
-  ): Promise<Order> => {
-    return apiFetch<Order>("/orders", {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
-  },
-
-  /**
-   * Updates the status of an existing order.
-   * @param id - Order ID
-   * @param status - New order status
-   * @returns The updated order
-   */
-  updateStatus: async (id: string, status: Order["status"]): Promise<Order> => {
-    return apiFetch<Order>(`/orders/${id}/status`, {
-      method: "PATCH",
-      body: JSON.stringify({ status }),
-    });
-  },
-
-  /**
-   * Deletes an order by ID.
-   * @param id - Order ID
-   * @returns Void on success
-   */
-  delete: async (id: string): Promise<void> => {
-    return apiFetch<void>(`/orders/${id}`, {
-      method: "DELETE",
-    });
-  },
+  return apiFetch<OrdersResponse>(`/api/orders${qs ? `?${qs}` : ""}`);
 };
+
+/**
+ * Fetches a single order by its unique identifier.
+ *
+ * @param orderId ID of the order to retrieve.
+ * @returns The matching order.
+ */
+export const getOrder = (orderId: string) =>
+  apiFetch<Order>(`/api/orders/${orderId}`);
+
+/**
+ * Creates a new order.
+ *
+ * @param data Order creation payload.
+ * @returns The newly created order.
+ */
+export const createOrder = (data: CreateOrderRequest) =>
+  apiFetch<Order>("/api/orders", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+
+/**
+ * Updates an existing order.
+ *
+ * @param orderId ID of the order to update.
+ * @param data Fields to update on the order.
+ * @returns The updated order.
+ */
+export const updateOrder = (orderId: string, data: UpdateOrderRequest) =>
+  apiFetch<Order>(`/api/orders/${orderId}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+
+/**
+ * Deletes an order.
+ *
+ * @param orderId ID of the order to delete.
+ */
+export const deleteOrder = (orderId: string) =>
+  apiFetch<void>(`/api/orders/${orderId}`, {
+    method: "DELETE",
+  });

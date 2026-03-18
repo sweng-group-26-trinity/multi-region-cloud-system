@@ -46,6 +46,9 @@ export class Curve {
     scene: THREE.Scene,
     color: THREE.ColorRepresentation = 0xff0000,
     radius = 0.2,
+    opacity: number,
+    transparent: boolean,
+    p0: boolean,
   ): boolean {
     if (this.points.length < 2) {
       console.warn("Curve.draw(): not enough points");
@@ -65,7 +68,11 @@ export class Curve {
       8, // radial segments
       this.closed,
     );
-    const tubeMaterial = new THREE.MeshStandardMaterial({ color });
+    const tubeMaterial = new THREE.MeshStandardMaterial({
+      color,
+      opacity: opacity,
+      transparent: transparent,
+    });
     this.pathObject = new THREE.Mesh(tubeGeometry, tubeMaterial);
 
     scene.add(this.pathObject);

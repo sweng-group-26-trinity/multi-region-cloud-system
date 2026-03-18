@@ -1,5 +1,5 @@
-import type { Restaurant, Order } from "./types";
-
+import type { Restaurant } from "./types";
+import type { Order } from "./orders";
 /**
  * Mock restaurant data used for development and testing.
  */
@@ -38,12 +38,27 @@ export const mockOrders: Order[] = [
     id: "1",
     restaurantId: "1",
     customerId: "customer-1",
-    items: [
-      { id: "1", name: "Margherita Pizza", quantity: 2, price: 12.99 },
-      { id: "2", name: "Garlic Bread", quantity: 1, price: 5.99 },
-    ],
+    customerName: "John Doe",
+    customerEmail: "john@example.com",
     status: "pending",
     totalAmount: 31.97,
+    specialInstructions: undefined,
+    items: [
+      {
+        itemId: "1",
+        name: "Margherita Pizza",
+        quantity: 2,
+        unitPrice: 12.99,
+        subtotal: 25.98,
+      },
+      {
+        itemId: "2",
+        name: "Garlic Bread",
+        quantity: 1,
+        unitPrice: 5.99,
+        subtotal: 5.99,
+      },
+    ],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },

@@ -251,7 +251,7 @@ paths:
           description: Filter orders by status
           schema:
             type: string
-            enum: [pending, preparing, ready, completed, cancelled]
+            enum: [pending, confirmed, preparing, ready, delivered, completed, cancelled]
       responses:
         "200":
           description: List of orders
