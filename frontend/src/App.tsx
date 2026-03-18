@@ -329,14 +329,37 @@ function AppShell() {
   }
 
   return (
-    <div className="min-h-screen w-screen bg-white transition-colors duration-300 dark:bg-slate-950">
-      <div className="flex min-h-screen flex-col">
-        <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
-        <main className="flex-1">
-          <AnimatedRoutes />
-        </main>
-        <Footer />
-      </div>
+    <div className="relative min-h-screen w-screen bg-white transition-colors duration-300 dark:bg-slate-950">
+      {/* Brand Logo */}
+      <button
+        type="button"
+        onClick={() => navigate("/")}
+        className="fixed top-6 left-6 z-50 flex items-center gap-2 rounded-sm px-4 py-2
+                   bg-white text-slate-900 shadow-md transition-all duration-200
+                   hover:scale-[1.03] hover:shadow-lg active:scale-[0.98]
+                   dark:bg-slate-900 dark:text-slate-100 dark:shadow-black/30"
+      >
+        <div className="flex h-8 w-8 items-center justify-center rounded-xs bg-orange-500 text-white">
+          <UtensilsCrossed size={18} strokeWidth={2.5} />
+        </div>
+        <span className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+          DineHub
+        </span>
+      </button>
+
+      {/* Dark mode toggle */}
+      <button
+        type="button"
+        onClick={toggleDarkMode}
+        className="fixed top-6 right-6 z-50 flex items-center gap-2 rounded-3xl px-4 py-4
+                   bg-white text-slate-900 shadow-md transition-all duration-200
+                   hover:scale-[1.03] hover:shadow-lg active:scale-[0.98]
+                   dark:bg-slate-900 dark:text-slate-100 dark:shadow-black/30"
+      >
+        {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+      </button>
+
+      <AnimatedRoutes />
     </div>
   );
 }
