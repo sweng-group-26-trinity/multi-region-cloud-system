@@ -293,6 +293,7 @@ function Footer() {
  * @returns Main app layout wrapper.
  */
 function AppShell() {
+  const navigate = useNavigate();
   /** Tracks whether dark mode is enabled. */
   const [darkMode, setDarkMode] = useState(false);
 

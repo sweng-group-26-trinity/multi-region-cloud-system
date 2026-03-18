@@ -27,7 +27,6 @@ garnix_checks:
     OK_CONCLUSIONS: "success,neutral,skipped"
   before_script:
     - bash scripts/ubuntu-setup.sh
-    - export PATH="$HOME/.local/bin:$PATH"
   script:
     - bash scripts/check-garnix.sh
   rules:
