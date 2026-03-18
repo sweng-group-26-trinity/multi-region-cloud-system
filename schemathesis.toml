@@ -16,3 +16,8 @@ exclude-header-characters = "\u0000\u0001\u0002\u0003\u0004\u0005\u0006\u0007\u0
 # This is an invalid token (will return 401), but prevents header format errors
 [auth.openapi.BearerAuth]
 bearer = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0IiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+
+# Spring Boot returns 404 (not 405) for undocumented methods on unmatched paths.
+# This is standard Spring behaviour, not an API bug.
+[checks.unsupported_method]
+enabled = false

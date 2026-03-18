@@ -4,8 +4,9 @@ _: {
     { modulesPath, inputs, ... }:
     {
       imports = [
-        "${modulesPath}/virtualisation/amazon-image.nix"
+        "${modulesPath}/virtualisation/google-compute-image.nix"
         inputs.ragenix.nixosModules.default
+        inputs.disko.nixosModules.disko
       ];
 
       # allow ssh access for deployments
