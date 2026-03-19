@@ -135,7 +135,7 @@ export default function OrdersPage() {
       {/* Tabs */}
       <div className="flex gap-4 mb-10">
         <button
-          className={`px-6 py-2 rounded-full font-semibold transition ${
+          className={`px-6 py-2 rounded-full font-semibold transition-all duration-300 hover:scale-105 ${
             activeTab === "food" ? "bg-orange-500 text-white" : "bg-gray-200"
           }`}
           onClick={() => setActiveTab("food")}
@@ -144,7 +144,7 @@ export default function OrdersPage() {
         </button>
 
         <button
-          className={`px-6 py-2 rounded-full font-semibold transition ${
+         className={`px-6 py-2 rounded-full font-semibold transition-all duration-300 hover:scale-105 ${
             activeTab === "drinks" ? "bg-orange-500 text-white" : "bg-gray-200"
           }`}
           onClick={() => setActiveTab("drinks")}
@@ -165,7 +165,7 @@ export default function OrdersPage() {
           {products.map((product) => (
             <div
               key={product.id}
-              className="bg-white border rounded-xl shadow-sm hover:shadow-lg transition overflow-hidden"
+             className="bg-white border rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden"
             >
               <img
                 src={product.image}
@@ -183,7 +183,7 @@ export default function OrdersPage() {
 
                 <button
                   onClick={() => addToCart(product)}
-                  className="mt-4 w-full bg-orange-500 text-white py-2 rounded-lg hover:bg-orange-600 transition"
+                  className="mt-4 w-full bg-orange-500 text-white py-2 rounded-lg hover:bg-orange-600 transition-all duration-300 hover:scale-105"
                 >
                   Add to Cart
                 </button>
@@ -217,7 +217,7 @@ export default function OrdersPage() {
 
               <button
                 onClick={handleCheckout}
-                className="mt-6 w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition"
+               className="mt-6 w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition"
               >
                 Checkout
               </button>
@@ -248,14 +248,14 @@ export default function OrdersPage() {
             <div className="flex gap-4 mt-6">
               <button
                 onClick={() => setShowCheckout(false)}
-                className="flex-1 bg-gray-300 py-2 rounded"
+                className="flex-1 bg-gray-300 py-2 rounded transition-all duration-300 hover:scale-105 hover:bg-gray-400"
               >
                 Cancel
               </button>
 
               <button
                 onClick={confirmOrder}
-                className="flex-1 bg-green-600 text-white py-2 rounded hover:bg-green-700 transition"
+                className="flex-1 bg-green-600 text-white py-2 rounded hover:bg-green-700 transition-all duration-300 hover:scale-105"
               >
                 Confirm
               </button>
