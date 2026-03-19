@@ -45,9 +45,9 @@ const links: Array<{ from: string; to: string }> = [
 
 function AvatarNode({ person }: { person: Person }) {
   return (
-    <div className="flex flex-col items-center text-center">
+    <div className="flex flex-col items-center text-center transition-all duration-300 hover:scale-105">
       {/* 单圈橙色头像 */}
-      <div className="relative h-28 w-28">
+      <div className="relative h-28 w-28 transition-transform duration-300 hover:scale-110">
         <div className="absolute inset-0 rounded-full border-[5px] border-orange-500 shadow-md" />
         <div className="absolute inset-[5px] overflow-hidden rounded-full bg-white">
           <img
