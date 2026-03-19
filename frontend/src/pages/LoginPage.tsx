@@ -17,7 +17,7 @@ import { Label } from "@/components/ui/label";
 export function LoginPage() {
   return (
     <div className="w-full flex justify-center px-4">
-      <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8 space-y-6">
+      <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8 space-y-6 transition-all duration-300 hover:shadow-2xl">
         <div className="space-y-2 text-center">
           <h1 className="text-2xl font-semibold">Sign in to your account</h1>
           <p className="text-sm text-muted-foreground">Welcome back 👋</p>
@@ -51,7 +51,7 @@ export function LoginPage() {
             />
           </div>
 
-          <Button className="w-full h-11 bg-indigo-600 hover:bg-indigo-700">
+          <Button className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 transition-all duration-300 hover:scale-[1.02]">
             Sign in
           </Button>
         </form>
@@ -67,7 +67,7 @@ export function LoginPage() {
 
         <Button
           variant="outline"
-          className="w-full flex items-center justify-center gap-3 h-11"
+          className="w-full flex items-center justify-center gap-3 h-11 transition-all duration-300 hover:scale-[1.02] hover:shadow-md hover:bg-gray-50"
         >
           {/* Google SVG */}
           <svg

@@ -29,7 +29,7 @@ export function SignupPage() {
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-indigo-600 via-purple-600 to-blue-600 flex items-center justify-center px-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8 transition-all duration-300 hover:shadow-[0_20px_50px_rgba(0,0,0,0.18)]">
         <h1 className="text-2xl font-bold text-center mb-2">
           Create your account
         </h1>
@@ -79,7 +79,7 @@ export function SignupPage() {
           <Button
             type="submit"
             disabled={isPending}
-            className="w-full h-11 bg-indigo-600 hover:bg-indigo-700"
+           className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 transition-all duration-300 hover:scale-[1.02]"
           >
             {isPending ? "Creating account..." : "Create account"}
           </Button>
@@ -98,7 +98,7 @@ export function SignupPage() {
           <Button
             type="button"
             variant="outline"
-            className="w-full flex items-center justify-center gap-3 h-11"
+            className="w-full flex items-center justify-center gap-3 h-11 transition-all duration-300 hover:scale-[1.02] hover:shadow-md hover:bg-gray-50"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
