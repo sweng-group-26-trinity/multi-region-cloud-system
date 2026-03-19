@@ -303,7 +303,7 @@ const foodMenus: Record<string, Product[]> = {
     },
     {
       id: 42,
-      name: "Avocado Quinoa Salad",
+      name: "Prawn and Leaf Salad",
       description:
         "Prawns, watermelon, mixed leaves, cucumber, lemon dressing.",
       price: 11.5,
