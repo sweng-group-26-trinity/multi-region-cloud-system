@@ -102,13 +102,13 @@ export default function HomePage() {
             </p>
 
             <div className="pt-3 flex flex-wrap justify-center gap-3">
-              <Button asChild className="rounded-xl px-6">
+            <Button asChild className="rounded-xl px-6 transition-all duration-300 hover:scale-105 hover:shadow-lg">
                 <Link to="/orders">Go to Orders</Link>
               </Button>
-              <Button asChild variant="outline" className="rounded-xl px-6 bg-white">
+              <Button asChild variant="outline" className="rounded-xl px-6 bg-white transition-all duration-300 hover:scale-105 hover:shadow-md">
                 <Link to="/login">Login</Link>
               </Button>
-              <Button asChild variant="outline" className="rounded-xl px-6 bg-white">
+              <Button asChild variant="outline" className="rounded-xl px-6 bg-white transition-all duration-300 hover:scale-105 hover:shadow-md">
                 <Link to="/signup">Sign Up</Link>
               </Button>
             </div>
