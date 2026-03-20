@@ -1,16 +1,18 @@
 openapi: 3.0.0
 info:
   title: Restaurant Ordering API
-  description: A restaurant ordering system with authentication and restaurant management
-  version: 1.0.0
+  description: A restaurant ordering system with authentication, restaurant management, menu management, and ordering
+  version: 1.1.0
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
+
 servers:
   - url: http://localhost:8080/api
     description: Development server
   - url: https://api.restaurant.example.com/v1
     description: Production server
+
 security:
   - BearerAuth: []
   - GoogleOIDC:
@@ -41,6 +43,7 @@ paths:
           description: Invalid request
         "409":
           description: User already exists
+
   /auth/login:
     post:
       summary: Authenticate user and get JWT token
@@ -64,6 +67,7 @@ paths:
           description: Invalid or missing request body
         "401":
           description: Invalid credentials
+
   /auth/logout:
     post:
       summary: Logout user (invalidate token)
@@ -78,6 +82,7 @@ paths:
           description: Bad request - malformed headers
         "401":
           description: Unauthorized - invalid or missing token
+
   /auth/me:
     get:
       summary: Get current user profile
@@ -153,6 +158,7 @@ paths:
           description: Invalid query parameters
         "500":
           description: Internal server error
+
     post:
       summary: Create a new restaurant
       description: Creates a new restaurant entry. Requires ADMIN role. The authenticated user will be set as the restaurant owner.
@@ -207,6 +213,7 @@ paths:
           description: Restaurant not found
         "500":
           description: Internal server error
+
     put:
       summary: Update a restaurant
       description: Updates an existing restaurant's information. Requires ADMIN role.
@@ -242,6 +249,7 @@ paths:
           description: Forbidden - requires admin role
         "404":
           description: Restaurant not found
+
     delete:
       summary: Delete a restaurant
       description: Permanently deletes a restaurant and all associated data. Requires ADMIN role.
@@ -267,6 +275,186 @@ paths:
           description: Forbidden - requires admin role
         "404":
           description: Restaurant not found
+
+  /restaurants/{restaurantId}/menu:
+    get:
+      summary: List menu items for a restaurant
+      description: Retrieves all menu items for a specific restaurant. Public endpoint for customers browsing food options.
+      operationId: getRestaurantMenu
+      security: []
+      parameters:
+        - name: restaurantId
+          in: path
+          required: true
+          description: Unique identifier of the restaurant
+          schema:
+            type: string
+            format: uuid
+        - name: category
+          in: query
+          required: false
+          description: Optional category filter for menu items
+          schema:
+            type: string
+            maxLength: 50
+        - name: availableOnly
+          in: query
+          required: false
+          description: Whether to return only currently available menu items
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "200":
+          description: Restaurant menu items retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MenuItemListResponse"
+        "400":
+          description: Invalid restaurantId format or query parameters
+        "404":
+          description: Restaurant not found
+
+    post:
+      summary: Create a menu item for a restaurant
+      description: Creates a new menu item for the specified restaurant. Requires ADMIN or RESTAURANT_OWNER role.
+      operationId: createMenuItem
+      parameters:
+        - name: restaurantId
+          in: path
+          required: true
+          description: Unique identifier of the restaurant
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMenuItemRequest"
+      responses:
+        "201":
+          description: Menu item created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MenuItem"
+        "400":
+          description: Invalid restaurantId format or request body
+        "401":
+          description: Unauthorized - invalid or missing token
+        "403":
+          description: Forbidden - requires admin or restaurant owner role
+        "404":
+          description: Restaurant not found
+
+  /restaurants/{restaurantId}/menu/{menuItemId}:
+    get:
+      summary: Get a specific menu item
+      description: Retrieves details of a single menu item for a restaurant.
+      operationId: getMenuItem
+      security: []
+      parameters:
+        - name: restaurantId
+          in: path
+          required: true
+          description: Unique identifier of the restaurant
+          schema:
+            type: string
+            format: uuid
+        - name: menuItemId
+          in: path
+          required: true
+          description: Unique identifier of the menu item
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Menu item found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MenuItem"
+        "400":
+          description: Invalid restaurantId or menuItemId format
+        "404":
+          description: Restaurant or menu item not found
+
+    put:
+      summary: Update a menu item
+      description: Updates an existing menu item for a restaurant. Requires ADMIN or RESTAURANT_OWNER role.
+      operationId: updateMenuItem
+      parameters:
+        - name: restaurantId
+          in: path
+          required: true
+          description: Unique identifier of the restaurant
+          schema:
+            type: string
+            format: uuid
+        - name: menuItemId
+          in: path
+          required: true
+          description: Unique identifier of the menu item to update
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateMenuItemRequest"
+      responses:
+        "200":
+          description: Menu item updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MenuItem"
+        "400":
+          description: Invalid restaurantId, menuItemId, or request body
+        "401":
+          description: Unauthorized - invalid or missing token
+        "403":
+          description: Forbidden - requires admin or restaurant owner role
+        "404":
+          description: Restaurant or menu item not found
+
+    delete:
+      summary: Delete a menu item
+      description: Permanently deletes a menu item from a restaurant. Requires ADMIN or RESTAURANT_OWNER role.
+      operationId: deleteMenuItem
+      parameters:
+        - name: restaurantId
+          in: path
+          required: true
+          description: Unique identifier of the restaurant
+          schema:
+            type: string
+            format: uuid
+        - name: menuItemId
+          in: path
+          required: true
+          description: Unique identifier of the menu item to delete
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Menu item deleted
+        "400":
+          description: Invalid restaurantId or menuItemId format
+        "401":
+          description: Unauthorized - invalid or missing token
+        "403":
+          description: Forbidden - requires admin or restaurant owner role
+        "404":
+          description: Restaurant or menu item not found
+
   /orders:
     get:
       summary: List all orders
@@ -309,6 +497,7 @@ paths:
           description: Invalid query parameters
         "401":
           description: Unauthorized - invalid or missing token
+
     post:
       summary: Create a new order
       description: Creates a new order for a restaurant. Customer must be authenticated. Order must contain at least one item.
@@ -364,9 +553,10 @@ paths:
           description: Unauthorized - authentication required
         "404":
           description: Order not found
+
     put:
       summary: Update an order
-      description: Updates an existing order. Only allowed for orders in 'pending' status unless user has ADMIN role. Can update items, customer info, and status.
+      description: Updates an existing order. Only allowed for orders in pending status unless user has ADMIN role. Can update items, customer info, and status.
       operationId: updateOrder
       security:
         - BearerAuth: []
@@ -403,7 +593,7 @@ paths:
           description: Internal server error
     delete:
       summary: Delete an order
-      description: Cancels and deletes an order. Only the order owner or users with ADMIN/RESTAURANT_OWNER role can delete orders.
+      description: Cancels and deletes an order. Only the order owner or users with ADMIN or RESTAURANT_OWNER role can delete orders.
       operationId: deleteOrder
       security:
         - BearerAuth: []
@@ -502,6 +692,7 @@ components:
           type: string
           format: date-time
           description: Account creation timestamp
+
     RegisterRequest:
       type: object
       description: Request body for user registration
@@ -540,6 +731,7 @@ components:
           description: User's last name (optional, ASCII printable)
           pattern: "^[\\x20-\\x7E]*$"
           maxLength: 50
+
     LoginRequest:
       type: object
       description: Request body for user authentication
@@ -559,6 +751,7 @@ components:
           description: User's password (ASCII printable, at least one non-space)
           pattern: "^[\\x21-\\x7E][\\x20-\\x7E]*$"
           minLength: 1
+
     LoginResponse:
       type: object
       description: Response containing authentication token and user info
@@ -575,6 +768,7 @@ components:
           description: Token expiration time in seconds
         user:
           $ref: "#/components/schemas/User"
+
     Restaurant:
       type: object
       description: Restaurant business information
@@ -619,12 +813,22 @@ components:
           type: string
           nullable: true
           description: Contact email address
+        imageUrl:
+          type: string
+          format: uri
+          nullable: true
+          description: URL of the restaurant's main display image
+        logoUrl:
+          type: string
+          format: uri
+          nullable: true
+          description: URL of the restaurant's logo image
         cuisineType:
           type: string
           description: Type of cuisine (e.g., Italian, Asian, American)
         openingHours:
           type: string
-          description: "Business hours (e.g., Mon-Fri: 9AM-10PM)"
+          description: Business hours (e.g., Mon-Fri: 9AM-10PM)
         ownerId:
           type: string
           format: uuid
@@ -640,6 +844,7 @@ components:
           type: string
           format: date-time
           description: Last update timestamp
+
     CreateRestaurantRequest:
       type: object
       description: Request body for creating a new restaurant
@@ -678,6 +883,14 @@ components:
           nullable: true
           description: Contact email address
           pattern: "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
+        imageUrl:
+          type: string
+          format: uri
+          description: URL of the restaurant's main display image (optional)
+        logoUrl:
+          type: string
+          format: uri
+          description: URL of the restaurant's logo image (optional)
         cuisineType:
           type: string
           description: Type of cuisine served
@@ -719,6 +932,14 @@ components:
           type: string
           description: Contact email address (optional)
           pattern: "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
+        imageUrl:
+          type: string
+          format: uri
+          description: URL of the restaurant's main display image (optional)
+        logoUrl:
+          type: string
+          format: uri
+          description: URL of the restaurant's logo image (optional)
         cuisineType:
           type: string
           description: Type of cuisine served (optional)
@@ -732,6 +953,7 @@ components:
         isActive:
           type: boolean
           description: Whether the restaurant is active (optional)
+
     RestaurantPage:
       type: object
       description: Paginated response for restaurant listings
@@ -753,6 +975,128 @@ components:
         size:
           type: integer
           description: Number of items per page
+
+    MenuItem:
+      type: object
+      description: Menu item offered by a restaurant
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique menu item identifier (UUID)
+        restaurantId:
+          type: string
+          format: uuid
+          description: ID of the restaurant that owns this menu item
+        name:
+          type: string
+          description: Menu item name
+        description:
+          type: string
+          nullable: true
+          description: Description of the menu item
+        category:
+          type: string
+          description: Category of the menu item (e.g., Starter, Main, Dessert, Drink)
+        price:
+          type: number
+          format: double
+          description: Price of the menu item
+        imageUrl:
+          type: string
+          format: uri
+          nullable: true
+          description: URL of the menu item's image
+        isAvailable:
+          type: boolean
+          description: Whether the menu item is currently available to order
+        createdAt:
+          type: string
+          format: date-time
+          description: Menu item creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last menu item update timestamp
+
+    CreateMenuItemRequest:
+      type: object
+      description: Request body for creating a new menu item
+      additionalProperties: false
+      required:
+        - name
+        - category
+        - price
+      properties:
+        name:
+          type: string
+          description: Menu item name
+          minLength: 1
+          maxLength: 100
+        description:
+          type: string
+          description: Description of the menu item (optional)
+          maxLength: 500
+        category:
+          type: string
+          description: Category of the menu item
+          minLength: 1
+          maxLength: 50
+        price:
+          type: number
+          format: double
+          description: Price of the menu item
+          minimum: 0
+        imageUrl:
+          type: string
+          format: uri
+          description: URL of the menu item's image (optional)
+        isAvailable:
+          type: boolean
+          description: Whether the item is available for ordering
+          default: true
+
+    UpdateMenuItemRequest:
+      type: object
+      description: Request body for updating an existing menu item
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          description: Menu item name (optional)
+          minLength: 1
+          maxLength: 100
+        description:
+          type: string
+          description: Description of the menu item (optional)
+          maxLength: 500
+        category:
+          type: string
+          description: Category of the menu item (optional)
+          minLength: 1
+          maxLength: 50
+        price:
+          type: number
+          format: double
+          description: Price of the menu item (optional)
+          minimum: 0
+        imageUrl:
+          type: string
+          format: uri
+          description: URL of the menu item's image (optional)
+        isAvailable:
+          type: boolean
+          description: Whether the item is available for ordering (optional)
+
+    MenuItemListResponse:
+      type: object
+      description: Response containing menu items for a restaurant
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/MenuItem"
+
     Order:
       type: object
       description: Customer order information
@@ -810,12 +1154,14 @@ components:
           type: string
           format: date-time
           description: Last status update timestamp
+
     OrderItem:
       type: object
       description: Individual item within an order
       properties:
         itemId:
           type: string
+          format: uuid
           description: Menu item identifier
         name:
           type: string
@@ -830,6 +1176,7 @@ components:
         subtotal:
           type: number
           description: Total for this item (quantity * unitPrice) in dollars
+
     CreateOrderRequest:
       type: object
       description: Request body for creating a new order
@@ -868,6 +1215,7 @@ components:
             properties:
               itemId:
                 type: string
+                format: uuid
                 description: ID of the menu item
                 minLength: 1
                 maxLength: 255
@@ -912,6 +1260,7 @@ components:
             properties:
               itemId:
                 type: string
+                format: uuid
                 description: ID of the menu item
                 minLength: 1
                 maxLength: 255
