@@ -139,6 +139,8 @@ public class RestaurantController {
     e.setAddress(body.getAddress());
     e.setPhone(body.getPhone());
     e.setEmail(body.getEmail());
+    e.setImageUrl(body.getImageUrl());
+    e.setLogoUrl(body.getLogoUrl());
     e.setCuisineType(body.getCuisineType());
     e.setOpeningHours(body.getOpeningHours());
     e.setOwnerId(owner.getUid());
@@ -224,6 +226,8 @@ public class RestaurantController {
       ValidationUtils.rejectNullBytes(body.getEmail(), "email");
       found.setEmail(body.getEmail());
     }
+    if (body.getImageUrl() != null) found.setImageUrl(body.getImageUrl());
+    if (body.getLogoUrl() != null) found.setLogoUrl(body.getLogoUrl());
     if (body.getCuisineType() != null) {
       ValidationUtils.rejectNullBytes(body.getCuisineType(), "cuisineType");
       found.setCuisineType(body.getCuisineType());
@@ -301,7 +305,6 @@ public class RestaurantController {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
     }
 
-    // With your CustomUserDetailsService, principal username is available via auth.getName()
     String username = auth.getName();
     if (username == null || username.isBlank()) {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
@@ -317,6 +320,8 @@ public class RestaurantController {
     dto.setAddress(e.getAddress());
     dto.setPhone(e.getPhone());
     dto.setEmail(e.getEmail());
+    dto.setImageUrl(e.getImageUrl());
+    dto.setLogoUrl(e.getLogoUrl());
     dto.setCuisineType(e.getCuisineType());
     dto.setOpeningHours(e.getOpeningHours());
     dto.setOwnerId(e.getOwnerId().toString());

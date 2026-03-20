@@ -10,6 +10,8 @@ public class RestaurantDto {
   private String address;
   private String phone;
   private String email;
+  private String imageUrl;
+  private String logoUrl;
   private String cuisineType;
   private String openingHours;
   private String ownerId;
@@ -126,6 +128,42 @@ public class RestaurantDto {
    */
   public void setEmail(String email) {
     this.email = email;
+  }
+
+  /**
+   * Gets the restaurant's main image URL.
+   *
+   * @return the main image URL
+   */
+  public String getImageUrl() {
+    return imageUrl;
+  }
+
+  /**
+   * Sets the restaurant's main image URL.
+   *
+   * @param imageUrl the main image URL to set
+   */
+  public void setImageUrl(String imageUrl) {
+    this.imageUrl = imageUrl;
+  }
+
+  /**
+   * Gets the restaurant's logo URL.
+   *
+   * @return the logo URL
+   */
+  public String getLogoUrl() {
+    return logoUrl;
+  }
+
+  /**
+   * Sets the restaurant's logo URL.
+   *
+   * @param logoUrl the logo URL to set
+   */
+  public void setLogoUrl(String logoUrl) {
+    this.logoUrl = logoUrl;
   }
 
   /**

@@ -11,7 +11,7 @@ import org.hibernate.type.SqlTypes;
  * JPA entity representing a restaurant in the system.
  *
  * <p>This entity maps to the {@code restaurants} table and stores business information such as
- * name, address, contact details, ownership, and lifecycle timestamps.
+ * name, address, contact details, images, ownership, and lifecycle timestamps.
  */
 @Entity
 @Table(name = "restaurants")
@@ -46,6 +46,14 @@ public class RestaurantEntity {
   /** Optional contact email address. */
   @Column(length = 255)
   private String email;
+
+  /** Optional URL of the restaurant's main display image. */
+  @Column(length = 255)
+  private String imageUrl;
+
+  /** Optional URL of the restaurant's logo image. */
+  @Column(length = 255)
+  private String logoUrl;
 
   /** Type of cuisine served by the restaurant. */
   @NotNull
@@ -203,6 +211,42 @@ public class RestaurantEntity {
    */
   public void setEmail(String email) {
     this.email = email;
+  }
+
+  /**
+   * Gets the restaurant's main image URL.
+   *
+   * @return the main image URL
+   */
+  public String getImageUrl() {
+    return imageUrl;
+  }
+
+  /**
+   * Sets the restaurant's main image URL.
+   *
+   * @param imageUrl the main image URL to set
+   */
+  public void setImageUrl(String imageUrl) {
+    this.imageUrl = imageUrl;
+  }
+
+  /**
+   * Gets the restaurant's logo URL.
+   *
+   * @return the logo URL
+   */
+  public String getLogoUrl() {
+    return logoUrl;
+  }
+
+  /**
+   * Sets the restaurant's logo URL.
+   *
+   * @param logoUrl the logo URL to set
+   */
+  public void setLogoUrl(String logoUrl) {
+    this.logoUrl = logoUrl;
   }
 
   /**
