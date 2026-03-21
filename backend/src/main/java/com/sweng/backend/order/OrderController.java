@@ -1,5 +1,7 @@
 package com.sweng.backend.order;
 
+import com.sweng.backend.menu.MenuItemEntity;
+import com.sweng.backend.menu.MenuItemRepository;
 import com.sweng.backend.order.dto.CreateOrderItemRequest;
 import com.sweng.backend.order.dto.CreateOrderRequest;
 import com.sweng.backend.order.dto.OrderDto;
@@ -35,6 +37,7 @@ public class OrderController {
   private final OrderRepository orderRepository;
   private final RestaurantRepository restaurantRepository;
   private final UserRepository userRepository;
+  private final MenuItemRepository menuItemRepository;
 
   /**
    * Constructs the controller.
@@ -42,14 +45,17 @@ public class OrderController {
    * @param orderRepository order repository
    * @param restaurantRepository restaurant repository (used for existence checks)
    * @param userRepository user repository (used to resolve authenticated user UUID)
+   * @param menuItemRepository menu item repository (used to resolve item pricing)
    */
   public OrderController(
       OrderRepository orderRepository,
       RestaurantRepository restaurantRepository,
-      UserRepository userRepository) {
+      UserRepository userRepository,
+      MenuItemRepository menuItemRepository) {
     this.orderRepository = orderRepository;
     this.restaurantRepository = restaurantRepository;
     this.userRepository = userRepository;
+    this.menuItemRepository = menuItemRepository;
   }
 
   /**
@@ -68,8 +74,6 @@ public class OrderController {
       @RequestParam(required = false) String userId,
       @RequestParam(required = false) String status) {
 
-    // For now: simple in-memory filtering after fetching all.
-    // (You can optimize later with repository methods.)
     List<OrderEntity> all = orderRepository.findAll();
 
     AuthContext auth = requireAuth();
@@ -153,14 +157,12 @@ public class OrderController {
     e.setSpecialInstructions(body.getSpecialInstructions());
     e.setStatus(OrderStatus.pending);
 
-    // Map items
+    // Map items with real menu item pricing
     List<OrderItemEmbeddable> items =
         body.getItems().stream()
-            .map(OrderController::toEmbeddable)
+            .map(this::toEmbeddable)
             .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
 
-    // Compute totals
-    items.forEach(OrderController::computeSubtotalIfMissing);
     BigDecimal total =
         items.stream()
             .map(OrderItemEmbeddable::getSubtotal)
@@ -266,9 +268,8 @@ public class OrderController {
       }
       List<OrderItemEmbeddable> items =
           body.getItems().stream()
-              .map(OrderController::toEmbeddable)
+              .map(this::toEmbeddable)
               .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
-      items.forEach(OrderController::computeSubtotalIfMissing);
       BigDecimal total =
           items.stream()
               .map(OrderItemEmbeddable::getSubtotal)
@@ -323,6 +324,27 @@ public class OrderController {
     return ResponseEntity.noContent().build();
   }
 
+  private OrderItemEmbeddable toEmbeddable(CreateOrderItemRequest req) {
+    UUID itemId = parseUuidOr400(req.getItemId(), "itemId");
+
+    MenuItemEntity menuItem =
+        menuItemRepository
+            .findById(itemId)
+            .orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid menu item"));
+
+    OrderItemEmbeddable e = new OrderItemEmbeddable();
+    e.setItemId(req.getItemId());
+    e.setQuantity(req.getQuantity());
+    e.setName(menuItem.getName());
+    e.setUnitPrice(menuItem.getPrice());
+
+    BigDecimal qty = BigDecimal.valueOf(req.getQuantity());
+    e.setSubtotal(menuItem.getPrice().multiply(qty));
+
+    return e;
+  }
+
   private static void enforceVisibility(AuthContext auth, OrderEntity order) {
     boolean isAdmin = auth.hasRole("ROLE_ADMIN");
     boolean isOwner = auth.hasRole("ROLE_RESTAURANT_OWNER");
@@ -351,27 +373,6 @@ public class OrderController {
       return OrderStatus.valueOf(raw);
     } catch (IllegalArgumentException ex) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid status");
-    }
-  }
-
-  private static OrderItemEmbeddable toEmbeddable(CreateOrderItemRequest req) {
-    OrderItemEmbeddable e = new OrderItemEmbeddable();
-    e.setItemId(req.getItemId());
-    e.setQuantity(req.getQuantity());
-
-    // Spec has name/unitPrice/subtotal in OrderItem, but CreateOrder only supplies itemId+quantity.
-    // Until menu items exist, we store placeholders and totals as 0.
-    e.setName(req.getItemId());
-    e.setUnitPrice(BigDecimal.ZERO);
-    e.setSubtotal(BigDecimal.ZERO);
-    return e;
-  }
-
-  private static void computeSubtotalIfMissing(OrderItemEmbeddable item) {
-    if (item.getUnitPrice() == null) item.setUnitPrice(BigDecimal.ZERO);
-    if (item.getSubtotal() == null) {
-      BigDecimal qty = BigDecimal.valueOf(item.getQuantity());
-      item.setSubtotal(item.getUnitPrice().multiply(qty));
     }
   }
 
