@@ -1,9 +1,16 @@
 package com.sweng.backend.order;
 
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import tools.jackson.databind.ObjectMapper;
+import com.sweng.backend.menu.MenuItemEntity;
+import com.sweng.backend.menu.MenuItemRepository;
 import com.sweng.backend.order.dto.CreateOrderItemRequest;
 import com.sweng.backend.order.dto.CreateOrderRequest;
 import com.sweng.backend.order.dto.UpdateOrderRequest;
@@ -12,6 +19,7 @@ import com.sweng.backend.restaurant.RestaurantRepository;
 import com.sweng.backend.user.Role;
 import com.sweng.backend.user.User;
 import com.sweng.backend.user.UserRepository;
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -25,22 +33,22 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import tools.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @ActiveProfiles("test")
 class OrderSecurityIT {
 
   @Autowired WebApplicationContext context;
-
   @Autowired UserRepository userRepository;
   @Autowired RestaurantRepository restaurantRepository;
+  @Autowired MenuItemRepository menuItemRepository;
   @Autowired OrderRepository orderRepository;
 
   private MockMvc mockMvc;
   private final ObjectMapper objectMapper = new ObjectMapper();
 
   private UUID restaurantId;
+  private MenuItemEntity burger;
   private String orderIdOfCustomerA;
   private String orderIdOfCustomerB;
 
@@ -49,6 +57,7 @@ class OrderSecurityIT {
     this.mockMvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
 
     orderRepository.deleteAll();
+    menuItemRepository.deleteAll();
     restaurantRepository.deleteAll();
 
     seedUserIfMissing("admin", Role.ADMIN);
@@ -62,19 +71,15 @@ class OrderSecurityIT {
     r.setId(UUID.randomUUID());
     r.setName("Test Resto");
     r.setAddress("1 Test Street");
-    r.setPhone("+123456789");
-    r.setCuisineType("Test Cuisine");
-    r.setOpeningHours("Mon-Fri 09:00-17:00");
     r.setActive(true);
     r.setOwnerId(ownerUid);
     restaurantId = restaurantRepository.save(r).getId();
 
-    // Create order as customerA
+    burger = seedMenuItem("Burger", "Main", new BigDecimal("12.50"), true);
+
     CreateOrderRequest a = new CreateOrderRequest();
     a.setRestaurantId(restaurantId.toString());
-    a.setCustomerName("Customer A");
-    a.setCustomerEmail("customerA@test.com");
-    a.setItems(List.of(buildItem("item-a", 1)));
+    a.setItems(List.of(buildItem(burger.getId(), 1)));
 
     String aResp =
         mockMvc
@@ -92,12 +97,9 @@ class OrderSecurityIT {
             .getContentAsString();
     orderIdOfCustomerA = objectMapper.readTree(aResp).get("id").asText();
 
-    // Create order as customerB
     CreateOrderRequest b = new CreateOrderRequest();
     b.setRestaurantId(restaurantId.toString());
-    b.setCustomerName("Customer B");
-    b.setCustomerEmail("customerB@test.com");
-    b.setItems(List.of(buildItem("item-b", 1)));
+    b.setItems(List.of(buildItem(burger.getId(), 1)));
 
     String bResp =
         mockMvc
@@ -116,13 +118,6 @@ class OrderSecurityIT {
     orderIdOfCustomerB = objectMapper.readTree(bResp).get("id").asText();
   }
 
-  private CreateOrderItemRequest buildItem(String itemId, int quantity) {
-    CreateOrderItemRequest item = new CreateOrderItemRequest();
-    item.setItemId(itemId);
-    item.setQuantity(quantity);
-    return item;
-  }
-
   private User seedUserIfMissing(String username, Role role) {
     return userRepository
         .findByUsername(username)
@@ -138,6 +133,26 @@ class OrderSecurityIT {
               u.getRoles().add(role);
               return userRepository.save(u);
             });
+  }
+
+  private MenuItemEntity seedMenuItem(
+      String name, String category, BigDecimal price, boolean isAvailable) {
+    MenuItemEntity item = new MenuItemEntity();
+    item.setId(UUID.randomUUID());
+    item.setRestaurantId(restaurantId);
+    item.setName(name);
+    item.setDescription(name + " description");
+    item.setCategory(category);
+    item.setPrice(price);
+    item.setAvailable(isAvailable);
+    return menuItemRepository.save(item);
+  }
+
+  private CreateOrderItemRequest buildItem(UUID itemId, int quantity) {
+    CreateOrderItemRequest item = new CreateOrderItemRequest();
+    item.setItemId(itemId.toString());
+    item.setQuantity(quantity);
+    return item;
   }
 
   @Test

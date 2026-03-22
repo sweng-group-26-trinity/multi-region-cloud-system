@@ -1,6 +1,9 @@
 package com.sweng.backend.menu;
 
-import com.sweng.backend.menu.dto.*;
+import com.sweng.backend.menu.dto.CreateMenuItemRequest;
+import com.sweng.backend.menu.dto.MenuItemDto;
+import com.sweng.backend.menu.dto.MenuItemListResponse;
+import com.sweng.backend.menu.dto.UpdateMenuItemRequest;
 import jakarta.validation.Valid;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -8,7 +11,15 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 /** REST controller for menu item endpoints. */
@@ -26,14 +37,24 @@ public class MenuItemController {
   @GetMapping
   public ResponseEntity<MenuItemListResponse> getMenu(
       @PathVariable String restaurantId,
+      @RequestParam(required = false) String category,
       @RequestParam(required = false) Boolean availableOnly) {
 
     UUID rid = parseUuidOr400(restaurantId);
 
-    List<MenuItemEntity> items =
-        Boolean.TRUE.equals(availableOnly)
-            ? repository.findByRestaurantIdAndIsAvailableTrue(rid)
-            : repository.findByRestaurantId(rid);
+    List<MenuItemEntity> items;
+
+    if (category != null && !category.isBlank()) {
+      items =
+          Boolean.TRUE.equals(availableOnly)
+              ? repository.findByRestaurantIdAndCategoryAndIsAvailableTrue(rid, category)
+              : repository.findByRestaurantIdAndCategory(rid, category);
+    } else {
+      items =
+          Boolean.TRUE.equals(availableOnly)
+              ? repository.findByRestaurantIdAndIsAvailableTrue(rid)
+              : repository.findByRestaurantId(rid);
+    }
 
     List<MenuItemDto> dtoList = items.stream().map(MenuItemController::toDto).toList();
 
@@ -67,8 +88,7 @@ public class MenuItemController {
   /** Get a single menu item. */
   @GetMapping("/{menuItemId}")
   public ResponseEntity<MenuItemDto> getMenuItem(
-      @PathVariable String restaurantId,
-      @PathVariable String menuItemId) {
+      @PathVariable String restaurantId, @PathVariable String menuItemId) {
 
     UUID rid = parseUuidOr400(restaurantId);
     UUID mid = parseUuidOr400(menuItemId);
@@ -76,7 +96,8 @@ public class MenuItemController {
     MenuItemEntity item =
         repository
             .findByIdAndRestaurantId(mid, rid)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Menu item not found"));
+            .orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Menu item not found"));
 
     return ResponseEntity.ok(toDto(item));
   }
@@ -94,7 +115,8 @@ public class MenuItemController {
     MenuItemEntity item =
         repository
             .findByIdAndRestaurantId(mid, rid)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Menu item not found"));
+            .orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Menu item not found"));
 
     if (body.getName() != null) item.setName(body.getName());
     if (body.getDescription() != null) item.setDescription(body.getDescription());
@@ -110,8 +132,7 @@ public class MenuItemController {
   /** Delete a menu item. */
   @DeleteMapping("/{menuItemId}")
   public ResponseEntity<Void> deleteMenuItem(
-      @PathVariable String restaurantId,
-      @PathVariable String menuItemId) {
+      @PathVariable String restaurantId, @PathVariable String menuItemId) {
 
     UUID rid = parseUuidOr400(restaurantId);
     UUID mid = parseUuidOr400(menuItemId);
@@ -119,7 +140,8 @@ public class MenuItemController {
     MenuItemEntity item =
         repository
             .findByIdAndRestaurantId(mid, rid)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Menu item not found"));
+            .orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Menu item not found"));
 
     repository.delete(item);
     return ResponseEntity.noContent().build();

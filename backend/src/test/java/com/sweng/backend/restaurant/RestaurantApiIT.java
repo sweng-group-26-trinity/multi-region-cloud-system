@@ -1,9 +1,14 @@
 package com.sweng.backend.restaurant;
 
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import tools.jackson.databind.ObjectMapper;
 import com.sweng.backend.restaurant.dto.CreateRestaurantRequest;
 import com.sweng.backend.restaurant.dto.UpdateRestaurantRequest;
 import com.sweng.backend.user.Role;
@@ -21,7 +26,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import tools.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -33,21 +37,10 @@ class RestaurantApiIT {
   private MockMvc mockMvc;
   private final ObjectMapper objectMapper = new ObjectMapper();
 
-  private CreateRestaurantRequest validCreateRequest(String name, String address) {
-    CreateRestaurantRequest req = new CreateRestaurantRequest();
-    req.setName(name);
-    req.setAddress(address);
-    req.setPhone("+123456789");
-    req.setCuisineType("Test Cuisine");
-    req.setOpeningHours("Mon-Fri 09:00-17:00");
-    return req;
-  }
-
   @BeforeEach
   void setup() {
     this.mockMvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
 
-    // Seed admin user if not present
     userRepository
         .findByUsername("admin")
         .orElseGet(
@@ -82,10 +75,11 @@ class RestaurantApiIT {
   @Test
   @WithMockUser(username = "admin", roles = "ADMIN")
   void createRestaurant_setsOwnerIdToAuthenticatedUsersUuid() throws Exception {
-    // Get expected UID from DB
     UUID expectedUid = userRepository.findByUsername("admin").orElseThrow().getUid();
 
-    CreateRestaurantRequest req = validCreateRequest("Owned Place", "1 Owner Street");
+    CreateRestaurantRequest req = new CreateRestaurantRequest();
+    req.setName("Owned Place");
+    req.setAddress("1 Owner Street");
 
     String response =
         mockMvc
@@ -99,7 +93,6 @@ class RestaurantApiIT {
             .getResponse()
             .getContentAsString();
 
-    // Optional extra check: fetch and ensure it stayed correct
     String id = objectMapper.readTree(response).get("id").asText();
 
     mockMvc
@@ -111,7 +104,9 @@ class RestaurantApiIT {
   @Test
   @WithMockUser(username = "admin", roles = "ADMIN")
   void createRestaurant_returns201_andCanFetchById() throws Exception {
-    CreateRestaurantRequest req = validCreateRequest("New Place", "1 Test Street");
+    CreateRestaurantRequest req = new CreateRestaurantRequest();
+    req.setName("New Place");
+    req.setAddress("1 Test Street");
 
     String response =
         mockMvc
@@ -135,7 +130,9 @@ class RestaurantApiIT {
   @Test
   @WithMockUser(username = "admin", roles = "ADMIN")
   void updateRestaurant_changesFields() throws Exception {
-    CreateRestaurantRequest create = validCreateRequest("Before", "Addr");
+    CreateRestaurantRequest create = new CreateRestaurantRequest();
+    create.setName("Before");
+    create.setAddress("Addr");
 
     String createResponse =
         mockMvc
@@ -143,6 +140,7 @@ class RestaurantApiIT {
                 post("/api/restaurants")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(create)))
+            .andExpect(status().isCreated())
             .andReturn()
             .getResponse()
             .getContentAsString();
@@ -164,7 +162,9 @@ class RestaurantApiIT {
   @Test
   @WithMockUser(username = "admin", roles = "ADMIN")
   void deleteRestaurant_thenGetReturns404() throws Exception {
-    CreateRestaurantRequest create = validCreateRequest("To Delete", "Addr");
+    CreateRestaurantRequest create = new CreateRestaurantRequest();
+    create.setName("To Delete");
+    create.setAddress("Addr");
 
     String createResponse =
         mockMvc
@@ -172,6 +172,7 @@ class RestaurantApiIT {
                 post("/api/restaurants")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(create)))
+            .andExpect(status().isCreated())
             .andReturn()
             .getResponse()
             .getContentAsString();

@@ -16,12 +16,31 @@ public interface MenuItemRepository extends JpaRepository<MenuItemEntity, UUID> 
   List<MenuItemEntity> findByRestaurantId(UUID restaurantId);
 
   /**
+   * Finds all menu items for a given restaurant and category.
+   *
+   * @param restaurantId the restaurant ID
+   * @param category the category
+   * @return list of menu items
+   */
+  List<MenuItemEntity> findByRestaurantIdAndCategory(UUID restaurantId, String category);
+
+  /**
    * Finds all available menu items for a given restaurant.
    *
    * @param restaurantId the restaurant ID
    * @return list of available menu items
    */
   List<MenuItemEntity> findByRestaurantIdAndIsAvailableTrue(UUID restaurantId);
+
+  /**
+   * Finds all available menu items for a given restaurant and category.
+   *
+   * @param restaurantId the restaurant ID
+   * @param category the category
+   * @return list of available menu items
+   */
+  List<MenuItemEntity> findByRestaurantIdAndCategoryAndIsAvailableTrue(
+      UUID restaurantId, String category);
 
   /**
    * Finds a menu item by its ID and restaurant ID.

@@ -1,9 +1,15 @@
 package com.sweng.backend.order;
 
+import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.sweng.backend.menu.MenuItemEntity;
+import com.sweng.backend.menu.MenuItemRepository;
 import com.sweng.backend.order.dto.CreateOrderItemRequest;
 import com.sweng.backend.order.dto.CreateOrderRequest;
 import com.sweng.backend.order.dto.UpdateOrderRequest;
@@ -12,6 +18,7 @@ import com.sweng.backend.restaurant.RestaurantRepository;
 import com.sweng.backend.user.Role;
 import com.sweng.backend.user.User;
 import com.sweng.backend.user.UserRepository;
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -34,18 +41,22 @@ class OrderApiIT {
   @Autowired WebApplicationContext context;
   @Autowired UserRepository userRepository;
   @Autowired RestaurantRepository restaurantRepository;
+  @Autowired MenuItemRepository menuItemRepository;
   @Autowired OrderRepository orderRepository;
 
   private MockMvc mockMvc;
   private final ObjectMapper objectMapper = new ObjectMapper();
 
   private UUID restaurantId;
+  private MenuItemEntity burger;
+  private MenuItemEntity cola;
 
   @BeforeEach
   void setup() {
     this.mockMvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
 
     orderRepository.deleteAll();
+    menuItemRepository.deleteAll();
     restaurantRepository.deleteAll();
 
     seedUserIfMissing("admin", Role.ADMIN);
@@ -59,13 +70,13 @@ class OrderApiIT {
     r.setId(UUID.randomUUID());
     r.setName("Test Resto");
     r.setAddress("1 Test Street");
-    r.setPhone("+123456789");
-    r.setCuisineType("Test Cuisine");
-    r.setOpeningHours("Mon-Fri 09:00-17:00");
     r.setActive(true);
     r.setOwnerId(ownerUid);
 
     restaurantId = restaurantRepository.save(r).getId();
+
+    burger = seedMenuItem("Burger", "Main", new BigDecimal("12.50"), true);
+    cola = seedMenuItem("Cola", "Drink", new BigDecimal("3.00"), true);
   }
 
   private User seedUserIfMissing(String username, Role role) {
@@ -85,9 +96,22 @@ class OrderApiIT {
             });
   }
 
-  private CreateOrderItemRequest buildItem(String itemId, int quantity) {
+  private MenuItemEntity seedMenuItem(
+      String name, String category, BigDecimal price, boolean isAvailable) {
+    MenuItemEntity item = new MenuItemEntity();
+    item.setId(UUID.randomUUID());
+    item.setRestaurantId(restaurantId);
+    item.setName(name);
+    item.setDescription(name + " description");
+    item.setCategory(category);
+    item.setPrice(price);
+    item.setAvailable(isAvailable);
+    return menuItemRepository.save(item);
+  }
+
+  private CreateOrderItemRequest buildItem(UUID itemId, int quantity) {
     CreateOrderItemRequest item = new CreateOrderItemRequest();
-    item.setItemId(itemId);
+    item.setItemId(itemId.toString());
     item.setQuantity(quantity);
     return item;
   }
@@ -96,9 +120,7 @@ class OrderApiIT {
   void createOrder_withoutAuth_isRejected() throws Exception {
     CreateOrderRequest req = new CreateOrderRequest();
     req.setRestaurantId(restaurantId.toString());
-    req.setCustomerName("Customer A");
-    req.setCustomerEmail("customerA@test.com");
-    req.setItems(List.of(buildItem("item-1", 1)));
+    req.setItems(List.of(buildItem(burger.getId(), 1)));
 
     mockMvc
         .perform(
@@ -115,9 +137,7 @@ class OrderApiIT {
 
     CreateOrderRequest req = new CreateOrderRequest();
     req.setRestaurantId(restaurantId.toString());
-    req.setCustomerName("Customer A");
-    req.setCustomerEmail("customerA@test.com");
-    req.setItems(List.of(buildItem("item-1", 2)));
+    req.setItems(List.of(buildItem(burger.getId(), 2), buildItem(cola.getId(), 1)));
 
     mockMvc
         .perform(
@@ -128,8 +148,14 @@ class OrderApiIT {
         .andExpect(jsonPath("$.restaurantId").value(restaurantId.toString()))
         .andExpect(jsonPath("$.customerId").value(expectedCustomerUid.toString()))
         .andExpect(jsonPath("$.status").value("pending"))
-        .andExpect(jsonPath("$.items[0].itemId").value("item-1"))
-        .andExpect(jsonPath("$.items[0].quantity").value(2));
+        .andExpect(jsonPath("$.items").isArray())
+        .andExpect(jsonPath("$.items.length()").value(2))
+        .andExpect(jsonPath("$.items[*].itemId", hasItem(burger.getId().toString())))
+        .andExpect(jsonPath("$.items[*].itemId", hasItem(cola.getId().toString())))
+        .andExpect(jsonPath("$.items[*].name", hasItem("Burger")))
+        .andExpect(jsonPath("$.items[*].name", hasItem("Cola")))
+        .andExpect(jsonPath("$.items[*].quantity", hasItem(2)))
+        .andExpect(jsonPath("$.items[*].quantity", hasItem(1)));
   }
 
   @Test
@@ -137,8 +163,6 @@ class OrderApiIT {
   void createOrder_withEmptyItems_returns400() throws Exception {
     CreateOrderRequest req = new CreateOrderRequest();
     req.setRestaurantId(restaurantId.toString());
-    req.setCustomerName("Customer A");
-    req.setCustomerEmail("customerA@test.com");
     req.setItems(List.of());
 
     mockMvc
@@ -154,9 +178,7 @@ class OrderApiIT {
   void getOrders_returnsWrappedDataArray() throws Exception {
     CreateOrderRequest req = new CreateOrderRequest();
     req.setRestaurantId(restaurantId.toString());
-    req.setCustomerName("Customer A");
-    req.setCustomerEmail("customerA@test.com");
-    req.setItems(List.of(buildItem("item-1", 1)));
+    req.setItems(List.of(buildItem(burger.getId(), 1)));
 
     mockMvc
         .perform(
@@ -176,9 +198,7 @@ class OrderApiIT {
   void updateOrder_ownerCanUpdateWhenPending() throws Exception {
     CreateOrderRequest create = new CreateOrderRequest();
     create.setRestaurantId(restaurantId.toString());
-    create.setCustomerName("Customer A");
-    create.setCustomerEmail("customerA@test.com");
-    create.setItems(List.of(buildItem("item-1", 1)));
+    create.setItems(List.of(buildItem(burger.getId(), 1)));
 
     String response =
         mockMvc
