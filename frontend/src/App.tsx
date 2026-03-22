@@ -5,7 +5,7 @@ import { LoginPage } from "./pages/LoginPage";
 import { SignupPage } from "./pages/SignupPage";
 import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
 import HomePage from "./pages/HomePage";
-import { RestaurantsPage } from "./pages/RestaurantPage";
+import RestaurantPage from "./pages/RestaurantPage";
 import OrdersPage from "./pages/OrdersPage";
 import OrderSummaryPage from "./pages/OrderSummaryPage";
 import DatabaseHealth from "./pages/DatabaseHealth";
@@ -26,6 +26,7 @@ import "./index.css";
 
 function AnimatedRoutes() {
   const location = useLocation();
+
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
@@ -87,7 +88,7 @@ function AnimatedRoutes() {
             path="/dashboard"
             element={
               <Page>
-                <RestaurantsPage />
+                <RestaurantPage />
               </Page>
             }
           />

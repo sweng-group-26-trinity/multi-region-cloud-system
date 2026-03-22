@@ -1,37 +1,47 @@
 /**
  * Base URL for API requests.
- *
- * Uses the Vite environment variable if available,
- * otherwise falls back to a local development URL.
+ * Defaults to localhost backend if env variable is not set.
  */
 const API_BASE_URL =
   import.meta.env?.VITE_API_BASE_URL || "http://localhost:8080/api";
 
 /**
- * Performs a typed HTTP request to the API.
- * @param url - API endpoint path
- * @param options - Fetch request options
- * @returns Parsed JSON response
- * @throws Error if the response is not OK
+ * Generic API fetch wrapper.
+ *
+ * Automatically:
+ * - prefixes base URL
+ * - attaches JSON headers
+ * - includes JWT token if present
+ *
+ * @template T expected response type
+ * @param path endpoint path (e.g. /restaurants)
+ * @param options fetch options
+ * @returns parsed JSON response
  */
 export async function apiFetch<T>(
-  url: string,
-  options?: RequestInit,
+  path: string,
+  options: RequestInit = {}
 ): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${url}`, {
+  const token = localStorage.getItem("token");
+
+  const res = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
     headers: {
       "Content-Type": "application/json",
-      ...options?.headers,
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(options.headers || {}),
     },
   });
 
-  if (!response.ok) {
-    const error = await response
-      .json()
-      .catch(() => ({ message: "An error occurred" }));
-    throw new Error(error.message || `HTTP error! status: ${response.status}`);
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || "Request failed");
   }
 
-  return response.json();
+  // Handle empty responses (e.g. DELETE 204)
+  if (res.status === 204) {
+    return undefined as T;
+  }
+
+  return res.json();
 }

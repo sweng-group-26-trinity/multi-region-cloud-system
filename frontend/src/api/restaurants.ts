@@ -1,21 +1,82 @@
 import { apiFetch } from "./clients";
-import type { Restaurant, PaginatedResponse } from "./types";
+import type { Restaurant, RestaurantPage } from "./types";
 
 /**
  * Parameters for fetching restaurants via restaurantsApi.getAll.
  */
 export interface GetAllRestaurantsParams {
-  /** Page number to fetch (default: 1) */
+  /** Page number to fetch (0-indexed, default: 0) */
   page?: number;
 
-  /** Number of items per page (default: 10) */
-  pageSize?: number;
+  /** Number of items per page (default: 20) */
+  size?: number;
+}
 
-  /** Region filter (e.g., "us-east") */
-  region?: string;
+/**
+ * Request payload for creating a restaurant.
+ */
+export interface CreateRestaurantRequest {
+  /** Restaurant business name */
+  name: string;
 
-  /** Cuisine filter (e.g., "Italian") */
-  cuisine?: string;
+  /** Brief description of the restaurant */
+  description?: string;
+
+  /** Physical address of the restaurant */
+  address: string;
+
+  /** Contact phone number */
+  phone?: string;
+
+  /** Contact email address */
+  email?: string;
+
+  /** URL of the restaurant's main display image */
+  imageUrl?: string;
+
+  /** URL of the restaurant's logo */
+  logoUrl?: string;
+
+  /** Type of cuisine served */
+  cuisineType?: string;
+
+  /** Business opening hours */
+  openingHours?: string;
+}
+
+/**
+ * Request payload for updating a restaurant.
+ */
+export interface UpdateRestaurantRequest {
+  /** Restaurant business name */
+  name?: string;
+
+  /** Brief description of the restaurant */
+  description?: string;
+
+  /** Physical address of the restaurant */
+  address?: string;
+
+  /** Contact phone number */
+  phone?: string;
+
+  /** Contact email address */
+  email?: string;
+
+  /** URL of the restaurant's main display image */
+  imageUrl?: string;
+
+  /** URL of the restaurant's logo */
+  logoUrl?: string;
+
+  /** Type of cuisine served */
+  cuisineType?: string;
+
+  /** Business opening hours */
+  openingHours?: string;
+
+  /** Whether the restaurant is active */
+  isActive?: boolean;
 }
 
 /**
@@ -25,24 +86,21 @@ export interface GetAllRestaurantsParams {
  */
 export const restaurantsApi = {
   /**
-   * Fetches a paginated and filterable list of restaurants.
-   * @param params - Pagination and filter options
+   * Fetches a paginated list of restaurants.
+   * @param params - Pagination options
    * @returns Paginated restaurant response
    */
-  getAll: async (
-    params?: GetAllRestaurantsParams,
-  ): Promise<PaginatedResponse<Restaurant>> => {
+  getAll: async (params?: GetAllRestaurantsParams): Promise<RestaurantPage> => {
     const queryParams = new URLSearchParams();
-    if (params?.page) queryParams.append("page", params.page.toString());
-    if (params?.pageSize)
-      queryParams.append("pageSize", params.pageSize.toString());
-    if (params?.region) queryParams.append("region", params.region);
-    if (params?.cuisine) queryParams.append("cuisine", params.cuisine);
+    if (params?.page !== undefined) {
+      queryParams.append("page", params.page.toString());
+    }
+    if (params?.size !== undefined) {
+      queryParams.append("size", params.size.toString());
+    }
 
     const query = queryParams.toString();
-    return apiFetch<PaginatedResponse<Restaurant>>(
-      `/restaurants${query ? `?${query}` : ""}`,
-    );
+    return apiFetch<RestaurantPage>(`/restaurants${query ? `?${query}` : ""}`);
   },
 
   /**
@@ -56,12 +114,10 @@ export const restaurantsApi = {
 
   /**
    * Creates a new restaurant.
-   * @param data - Restaurant data without generated fields
+   * @param data - Restaurant creation payload
    * @returns The created restaurant
    */
-  create: async (
-    data: Omit<Restaurant, "id" | "createdAt" | "updatedAt">,
-  ): Promise<Restaurant> => {
+  create: async (data: CreateRestaurantRequest): Promise<Restaurant> => {
     return apiFetch<Restaurant>("/restaurants", {
       method: "POST",
       body: JSON.stringify(data),
@@ -76,7 +132,7 @@ export const restaurantsApi = {
    */
   update: async (
     id: string,
-    data: Partial<Restaurant>,
+    data: UpdateRestaurantRequest,
   ): Promise<Restaurant> => {
     return apiFetch<Restaurant>(`/restaurants/${id}`, {
       method: "PUT",

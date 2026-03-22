@@ -1,13 +1,20 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  createOrder,
-  deleteOrder,
-  getOrders,
-  updateOrder,
-  getOrder,
-  type GetOrdersParams,
-  type UpdateOrderRequest,
-} from "./orders";
+import { ordersApi } from "./orders";
+import type { UpdateOrderRequest, CreateOrderRequest } from "./types";
+
+/**
+ * Parameters required to fetch orders.
+ */
+export interface GetOrdersParams {
+  /** Filter orders by restaurant ID. */
+  restaurantId?: string;
+
+  /** Filter orders by user ID. */
+  userId?: string;
+
+  /** Filter orders by order status. */
+  status?: string;
+}
 
 /**
  * Parameters required to update an order.
@@ -29,7 +36,7 @@ export interface UpdateOrderParams {
 export function useOrders(params?: GetOrdersParams) {
   return useQuery({
     queryKey: ["orders", params],
-    queryFn: () => getOrders(params),
+    queryFn: () => ordersApi.getAll(params),
   });
 }
 
@@ -44,7 +51,7 @@ export function useCreateOrder() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: createOrder,
+    mutationFn: (data: CreateOrderRequest) => ordersApi.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
     },
@@ -63,7 +70,7 @@ export function useUpdateOrder() {
 
   return useMutation({
     mutationFn: ({ orderId, data }: UpdateOrderParams) =>
-      updateOrder(orderId, data),
+      ordersApi.update(orderId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
     },
@@ -81,21 +88,23 @@ export function useDeleteOrder() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: deleteOrder,
+    mutationFn: (orderId: string) => ordersApi.delete(orderId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
     },
   });
 }
+
 /**
  * Fetches a single order by its ID.
+ *
  * @param id - Order ID
  * @returns React Query result containing the order data
  */
 export const useOrder = (id: string) => {
   return useQuery({
     queryKey: ["orders", id],
-    queryFn: () => getOrder(id),
+    queryFn: () => ordersApi.getById(id),
     enabled: !!id,
   });
 };
