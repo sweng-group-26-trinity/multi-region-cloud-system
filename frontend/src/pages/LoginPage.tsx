@@ -50,13 +50,13 @@ export function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen w-full justify-center px-4 pt-16 bg-transparent">
+    <div className="flex min-h-screen w-full items-center justify-center px-4 bg-transparent">
       {/* 
         Main login card.
         Dark mode support is added here so the card remains readable
         against the darker global page background.
       */}
-      <div className="w-full max-w-md space-y-6 rounded-xl bg-white p-8 shadow-lg dark:bg-slate-900 dark:shadow-black/30">
+      <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-lg dark:bg-slate-900 dark:shadow-black/30">
         <div className="space-y-2 text-center">
           <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">
             Sign in to your account
@@ -66,7 +66,7 @@ export function LoginPage() {
           </p>
         </div>
 
-        <form className="space-y-4" onSubmit={handleSubmit}>
+        <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
           <div className="space-y-2">
             <Label
               htmlFor="identifier"
@@ -126,7 +126,7 @@ export function LoginPage() {
           Divider between standard login and Google sign-in.
           Background text chip is dark-mode aware so it blends with the card correctly.
         */}
-        <div className="relative text-center text-sm">
+        <div className="relative mt-6 text-center text-sm">
           <div className="absolute inset-0 flex items-center">
             <span className="w-full border-t border-slate-300 dark:border-slate-700" />
           </div>
@@ -137,7 +137,7 @@ export function LoginPage() {
 
         <Button
           variant="outline"
-          className="flex h-11 w-full items-center justify-center gap-3 border-slate-300 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+          className="mt-6 flex h-11 w-full items-center justify-center gap-3 border-slate-300 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -164,7 +164,7 @@ export function LoginPage() {
           Sign in with Google
         </Button>
 
-        <p className="text-center text-sm text-muted-foreground dark:text-slate-400">
+        <p className="mt-6 text-center text-sm text-muted-foreground dark:text-slate-400">
           Don't have an account?{" "}
           <Link
             to="/signup"

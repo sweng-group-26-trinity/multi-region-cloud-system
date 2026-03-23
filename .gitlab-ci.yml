@@ -12,7 +12,7 @@ mirror_to_github:
     - bash scripts/ubuntu-setup.sh
   script:
     - git remote add github "https://oauth2:${GITHUB_TOKEN}@github.com/${GITHUB_REPO}.git" 2>/dev/null || git remote set-url github "https://oauth2:${GITHUB_TOKEN}@github.com/${GITHUB_REPO}.git"
-    - git push github "HEAD:${CI_COMMIT_BRANCH}" --force
+    - git push github "HEAD:refs/heads/${CI_COMMIT_BRANCH}" --force
   rules:
     - if: $CI_COMMIT_BRANCH
 garnix_checks:
