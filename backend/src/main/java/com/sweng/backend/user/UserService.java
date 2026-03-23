@@ -75,6 +75,12 @@ public class UserService {
         .orElseThrow(() -> new RuntimeException("User not found"));
   }
 
+  /**
+   * Finds a user by email, or creates a new one if they don't exist. Used for Google OAuth2 sign-in.
+   *
+   * @param email the Google account email
+   * @return the existing or newly created user
+   */
   public User findOrCreateGoogleUser(String email) {
     return userRepository
         .findByEmail(email)

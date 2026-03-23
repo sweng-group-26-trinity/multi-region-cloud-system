@@ -147,6 +147,12 @@ public class AuthController {
     return ResponseEntity.ok("Logout successful");
   }
 
+  /**
+   * Authenticates a user via Google OAuth2 ID token.
+   *
+   * @param request the request containing the Google ID token
+   * @return response entity containing authentication details
+   */
   @PostMapping("/google")
   public ResponseEntity<?> googleAuth(@Valid @RequestBody GoogleAuthRequest request) {
     try {
