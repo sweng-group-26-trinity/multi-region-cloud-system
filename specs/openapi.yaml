@@ -828,7 +828,7 @@ components:
           description: Type of cuisine (e.g., Italian, Asian, American)
         openingHours:
           type: string
-          description: Business hours (e.g., Mon-Fri: 9AM-10PM)
+          description: "Business hours (e.g., Mon-Fri: 9AM-10PM)"
         ownerId:
           type: string
           format: uuid

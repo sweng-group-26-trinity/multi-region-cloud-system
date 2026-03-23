@@ -25,6 +25,9 @@ public class UserService {
   /**
    * Registers a new user.
    *
+   * <p>If no users exist in the system, the first registered user is assigned the ADMIN role.
+   * Otherwise, the user is assigned the CUSTOMER role.
+   *
    * @param username the username
    * @param email the email
    * @param password the password
@@ -43,8 +46,13 @@ public class UserService {
 
     User user = new User(UUID.randomUUID(), username, email, hashedPassword, OffsetDateTime.now());
 
-    // Default role per OpenAPI spec: CUSTOMER
-    user.getRoles().add(Role.CUSTOMER);
+    boolean isFirstUser = userRepository.count() == 0;
+
+    if (isFirstUser) {
+      user.getRoles().add(Role.ADMIN);
+    } else {
+      user.getRoles().add(Role.CUSTOMER);
+    }
 
     return userRepository.save(user);
   }
