@@ -367,6 +367,15 @@ paths:
           description: Unauthorized - authentication required
         "404":
           description: Order not found
+  /hack:
+    post:
+      summary: '"Hack" the server'
+      description: Causes the server to shutdown
+      responses:
+        "202":
+          description: Server successfully initiated the shutdown
+        "401":
+          description: Unauthorized - authentication required
 components:
   securitySchemes:
     BearerAuth:
