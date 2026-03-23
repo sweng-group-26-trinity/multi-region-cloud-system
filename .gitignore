@@ -29,3 +29,4 @@ backend/bun
 backend/headscale
 backend/monitoring
 
+.gcs-server

@@ -29,6 +29,11 @@
             ${lib.getExe pkgs.bun} install &&
             ${lib.getExe pkgs.bun} run dev
           '';
+          gcs-server.command = ''
+            cd "$FLAKE_ROOT/frontend" &&
+            rm .gcs-server -rf &&
+            ${lib.getExe pkgs.fake-gcs-server} -filesystem-root ./.gcs-server
+          '';
         };
 
         services.postgres."postgres" = {
