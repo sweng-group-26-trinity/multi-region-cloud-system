@@ -76,7 +76,8 @@ public class UserService {
   }
 
   /**
-   * Finds a user by email, or creates a new one if they don't exist. Used for Google OAuth2 sign-in.
+   * Finds a user by email, or creates a new one if they don't exist. Used for Google OAuth2
+   * sign-in.
    *
    * @param email the Google account email
    * @return the existing or newly created user
