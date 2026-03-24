@@ -1,4 +1,4 @@
-{ self, ... }:
+{ lib, self, ... }:
 let
   sourceDir = "${self}";
   openapiSpec = "specs/openapi.yaml";
@@ -26,6 +26,50 @@ in
               host all all ::1/128 trust
             '';
           };
+
+          systemd.services.gcs-server = {
+            enable = true;
+            description = "Fake GCS server";
+            after = [
+              "network.target"
+            ];
+            wantedBy = [ "multi-user.target" ];
+
+            serviceConfig = {
+              ExecStart = lib.getExe (
+                pkgs.writeShellApplication {
+                  name = "gcs-server";
+                  runtimeInputs = [
+                    pkgs.fake-gcs-server
+                  ];
+                  text = ''
+                    rm .gcs-server -rf
+
+                    fake-gcs-server -filesystem-root ./.gcs-server
+                  '';
+                }
+              );
+
+              DynamicUser = true;
+
+              Restart = "always";
+
+              RestrictRealtime = true;
+              RestrictNamespaces = true;
+              LockPersonality = true;
+              ProtectKernelModules = true;
+              ProtectKernelTunables = true;
+              ProtectKernelLogs = true;
+              ProtectControlGroups = true;
+              ProtectClock = true;
+              RestrictSUIDSGID = true;
+              SystemCallArchitectures = "native";
+              CapabilityBoundingSet = [ "CAP_NET_BIND_SERVICE" ];
+              AmbientCapabilities = [ "CAP_NET_BIND_SERVICE" ];
+              ProtectProc = "invisible";
+            };
+          };
+
           services.backend = {
             enable = true;
             database = {
