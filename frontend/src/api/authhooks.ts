@@ -1,20 +1,28 @@
 import { useMutation } from "@tanstack/react-query";
-import { login, signup } from "./auth";
+import {
+  login,
+  loginWithGoogle,
+  signup,
+  type LoginRequest,
+  type SignupRequest,
+  type GoogleLoginRequest,
+  type AuthResponse,
+} from "./auth";
 
 /**
- * useLogin hook.
+ * React Query hook for standard user login.
  *
- * Custom React Query mutation hook used to authenticate an existing user.
- * On success, stores the returned JWT access token in localStorage.
+ * Sends the provided identifier and password to the backend and stores
+ * the returned JWT access token in local storage on success.
  *
- * @returns React Query mutation object with mutate, isPending, and error fields
+ * @returns Mutation for email/username login.
  *
  * @example
  * const { mutate, isPending, error } = useLogin();
- * mutate({ identifier: "john", password: "secret" }, { onSuccess: () => navigate("/") });
+ * mutate({ identifier: "alice", password: "secret" });
  */
 export function useLogin() {
-  return useMutation({
+  return useMutation<AuthResponse, Error, LoginRequest>({
     mutationFn: login,
     onSuccess: (data) => {
       localStorage.setItem("token", data.accessToken);
@@ -23,20 +31,46 @@ export function useLogin() {
 }
 
 /**
- * useSignup hook.
+ * React Query hook for user registration.
  *
- * Custom React Query mutation hook used to register a new user account.
- * On success, stores the returned JWT access token in localStorage.
+ * Sends registration details to the backend and stores the returned JWT
+ * access token in local storage on success.
  *
- * @returns React Query mutation object with mutate, isPending, and error fields
+ * @returns Mutation for signup.
  *
  * @example
  * const { mutate, isPending, error } = useSignup();
- * mutate({ username: "john", firstName: "John", lastName: "Doe", email: "john@example.com", password: "secret" }, { onSuccess: () => navigate("/") });
+ * mutate({
+ *   username: "john",
+ *   firstName: "John",
+ *   lastName: "Doe",
+ *   email: "john@example.com",
+ *   password: "secret",
+ * });
  */
 export function useSignup() {
-  return useMutation({
+  return useMutation<AuthResponse, Error, SignupRequest>({
     mutationFn: signup,
+    onSuccess: (data) => {
+      localStorage.setItem("token", data.accessToken);
+    },
+  });
+}
+
+/**
+ * React Query hook for Google OAuth login.
+ *
+ * Exchanges a Google ID token with the backend for a normal application JWT.
+ *
+ * @returns Mutation for Google sign-in.
+ *
+ * @example
+ * const { mutate } = useGoogleLogin();
+ * mutate({ idToken: googleCredential });
+ */
+export function useGoogleLogin() {
+  return useMutation<AuthResponse, Error, GoogleLoginRequest>({
+    mutationFn: loginWithGoogle,
     onSuccess: (data) => {
       localStorage.setItem("token", data.accessToken);
     },
