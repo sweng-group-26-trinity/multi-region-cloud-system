@@ -1,35 +1,87 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { useLogin } from "../api/authhooks";
+import { useLogin, useGoogleLogin } from "../api/authhooks";
 import { useAuth } from "../context/AuthContext";
+
+console.log("env object:", import.meta.env);
+console.log("google client id:", import.meta.env?.VITE_GOOGLE_CLIENT_ID);
+/**
+ * Minimal type definition for the Google Identity Services object
+ * injected onto the global window after loading the Google script.
+ */
+declare global {
+  interface Window {
+    google?: {
+      accounts: {
+        id: {
+          initialize: (config: {
+            client_id: string;
+            callback: (response: GoogleCredentialResponse) => void;
+          }) => void;
+          renderButton: (
+            parent: HTMLElement,
+            options: {
+              theme?: "outline" | "filled_blue" | "filled_black";
+              size?: "large" | "medium" | "small";
+              text?:
+                | "signin_with"
+                | "signup_with"
+                | "continue_with"
+                | "signin";
+              shape?: "rectangular" | "pill" | "circle" | "square";
+              width?: string | number;
+              logo_alignment?: "left" | "center";
+            },
+          ) => void;
+        };
+      };
+    };
+  }
+}
+
+/**
+ * Response returned by Google Identity Services after a successful sign-in.
+ */
+interface GoogleCredentialResponse {
+  /** Google-issued ID token JWT */
+  credential: string;
+}
 
 /**
  * LoginPage component.
  *
  * Renders a card-style login form accepting either an email address or username
  * alongside a password. On successful authentication the user is redirected to
- * `/dashboard`. Also provides a Google SSO button and a link to `/signup`.
+ * `/dashboard`. Also provides a Google SSO option and a link to `/signup`.
  *
- * Uses the {@link useLogin} hook to communicate with the backend authentication service.
+ * Uses:
+ * - {@link useLogin} for standard email/username login
+ * - {@link useGoogleLogin} for Google OAuth login via backend token exchange
  *
  * @returns The login page JSX element.
  *
  * @example
- * // Typically mounted by the router, no props required.
  * <LoginPage />
  */
 export function LoginPage() {
   const { mutate, isPending, error } = useLogin();
+  const {
+    mutate: googleLogin,
+    isPending: isGooglePending,
+    error: googleError,
+  } = useGoogleLogin();
+
   const { login } = useAuth();
   const navigate = useNavigate();
+  const googleButtonRef = useRef<HTMLDivElement | null>(null);
 
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
 
   /**
-   * Handles the login form submission.
+   * Handles the standard login form submission.
    *
    * Prevents the default browser form submission and calls the login mutation
    * with the current identifier and password. Navigates to `/dashboard` on success.
@@ -41,16 +93,62 @@ export function LoginPage() {
     mutate(
       { identifier, password },
       {
-        onSuccess: () => {
-          login("loggedIn");
+        onSuccess: (data) => {
+          login(data.accessToken);
           navigate("/dashboard");
         },
       },
     );
   };
 
+  /**
+   * Initializes the Google Identity Services sign-in button once the component
+   * mounts and the Google script is available on `window`.
+   *
+   * On successful Google authentication, the returned ID token is exchanged
+   * with the backend for a normal application JWT.
+   */
+  useEffect(() => {
+    if (!window.google || !googleButtonRef.current) return;
+  
+    const clientId =
+  import.meta.env?.VITE_GOOGLE_CLIENT_ID ??
+  "625744063797-sg9hkugo999aqivfpgjai87418662n0e.apps.googleusercontent.com";
+  
+    if (!clientId) {
+      console.error("Missing VITE_GOOGLE_CLIENT_ID");
+      return;
+    }
+  
+    window.google.accounts.id.initialize({
+      client_id: clientId,
+      callback: (response: GoogleCredentialResponse) => {
+        googleLogin(
+          { idToken: response.credential },
+          {
+            onSuccess: (data) => {
+              login(data.accessToken);
+              navigate("/dashboard");
+            },
+          },
+        );
+      },
+    });
+  
+    googleButtonRef.current.innerHTML = "";
+  
+    window.google.accounts.id.renderButton(googleButtonRef.current, {
+      theme: "outline",
+      size: "large",
+      text: "signin_with",
+      shape: "rectangular",
+      width: "100%",
+      logo_alignment: "left",
+    });
+  }, [googleLogin, login, navigate]);
+
   return (
-    <div className="flex min-h-screen w-full items-center justify-center px-4 bg-transparent">
+    <div className="flex min-h-screen w-full items-center justify-center bg-transparent px-4">
       {/* 
         Main login card.
         Dark mode support is added here so the card remains readable
@@ -135,37 +233,28 @@ export function LoginPage() {
           </span>
         </div>
 
-        <Button
-          variant="outline"
-          className="mt-6 flex h-11 w-full items-center justify-center gap-3 border-slate-300 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 48 48"
-            className="h-5 w-5"
-          >
-            <path
-              fill="#EA4335"
-              d="M24 9.5c3.15 0 5.97 1.08 8.2 3.2l6.1-6.1C34.2 2.5 29.5 0 24 0 14.6 0 6.5 5.5 2.6 13.5l7.5 5.8C12 13.2 17.5 9.5 24 9.5z"
-            />
-            <path
-              fill="#4285F4"
-              d="M46.1 24.5c0-1.7-.15-3.3-.45-4.9H24v9.3h12.4c-.5 2.7-2 5-4.3 6.6l6.6 5.1c3.9-3.6 6.4-9 6.4-15.1z"
-            />
-            <path
-              fill="#FBBC05"
-              d="M10.1 28.3c-.6-1.7-.9-3.5-.9-5.3s.3-3.6.9-5.3l-7.5-5.8C1 15.4 0 19.6 0 24s1 8.6 2.6 12.1l7.5-5.8z"
-            />
-            <path
-              fill="#34A853"
-              d="M24 48c6.5 0 12-2.1 16-5.7l-6.6-5.1c-2 1.4-4.6 2.3-9.4 2.3-6.5 0-12-3.7-14.9-9l-7.5 5.8C6.5 42.5 14.6 48 24 48z"
-            />
-          </svg>
-          Sign in with Google
-        </Button>
+        {/* 
+          Container for the official Google-rendered sign-in button.
+          Google injects the actual button UI into this div.
+        */}
+        <div className="mt-6 flex justify-center">
+          <div ref={googleButtonRef} className="w-full" />
+        </div>
+
+        {googleError && (
+          <p className="mt-3 text-center text-sm text-red-500">
+            {googleError.message}
+          </p>
+        )}
+
+        {isGooglePending && (
+          <p className="mt-3 text-center text-sm text-slate-500 dark:text-slate-400">
+            Signing in with Google…
+          </p>
+        )}
 
         <p className="mt-6 text-center text-sm text-muted-foreground dark:text-slate-400">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <Link
             to="/signup"
             className="text-indigo-600 hover:underline dark:text-indigo-400"

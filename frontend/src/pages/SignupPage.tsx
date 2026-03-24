@@ -1,28 +1,80 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { useSignup } from "../api/authhooks";
+import { useGoogleLogin, useSignup } from "../api/authhooks";
 import { useAuth } from "../context/AuthContext";
+
+/**
+ * Response returned by Google Identity Services after a successful sign-in.
+ */
+interface GoogleCredentialResponse {
+  /** Google-issued ID token JWT */
+  credential: string;
+}
+
+/**
+ * Minimal type definition for the Google Identity Services object
+ * injected onto the global window after loading the Google script.
+ */
+declare global {
+  interface Window {
+    google?: {
+      accounts: {
+        id: {
+          initialize: (config: {
+            client_id: string;
+            callback: (response: GoogleCredentialResponse) => void;
+          }) => void;
+          renderButton: (
+            parent: HTMLElement,
+            options: {
+              theme?: "outline" | "filled_blue" | "filled_black";
+              size?: "large" | "medium" | "small";
+              text?:
+                | "signin_with"
+                | "signup_with"
+                | "continue_with"
+                | "signin";
+              shape?: "rectangular" | "pill" | "circle" | "square";
+              width?: string | number;
+              logo_alignment?: "left" | "center";
+            },
+          ) => void;
+        };
+      };
+    };
+  }
+}
 
 /**
  * SignupPage component.
  *
  * Provides user registration functionality. Collects a username, first name,
  * last name, email address, and password. On successful registration the user
- * is redirected to `/restaurants`.
+ * is redirected to `/dashboard`.
  *
- * Uses the {@link useSignup} hook to communicate with the backend authentication service.
+ * Also provides Google sign-up/sign-in using Google Identity Services.
+ *
+ * Uses:
+ * - {@link useSignup} for standard registration
+ * - {@link useGoogleLogin} for Google OAuth registration/login via backend token exchange
  *
  * @returns The signup page JSX element.
  *
  * @example
- * // Typically mounted by the router, no props required.
  * <SignupPage />
  */
 export function SignupPage() {
   const { mutate, isPending, error } = useSignup();
+  const {
+    mutate: googleLogin,
+    isPending: isGooglePending,
+    error: googleError,
+  } = useGoogleLogin();
+
   const navigate = useNavigate();
   const { login } = useAuth();
+  const googleButtonRef = useRef<HTMLDivElement | null>(null);
 
   const [username, setUsername] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -34,7 +86,7 @@ export function SignupPage() {
    * Handles the signup form submission.
    *
    * Prevents the default browser form submission and calls the signup mutation
-   * with the collected user details. Navigates to `/restaurants` on success.
+   * with the collected user details. Navigates to `/dashboard` on success.
    *
    * @param e - The React form submission event.
    */
@@ -43,12 +95,12 @@ export function SignupPage() {
     mutate(
       { username, firstName, lastName, email, password },
       {
-        onSuccess: () => {
+        onSuccess: (data) => {
           /**
            * Automatically authenticates the user after account creation
            * so protected routes can be accessed immediately.
            */
-          login("loggedIn");
+          login(data.accessToken);
 
           /**
            * Redirects the newly created user straight to the dashboard.
@@ -58,6 +110,47 @@ export function SignupPage() {
       },
     );
   };
+
+  /**
+   * Initializes the Google Identity Services sign-up/sign-in button once
+   * the component mounts and the Google script is available on `window`.
+   *
+   * On successful Google authentication, the returned ID token is exchanged
+   * with the backend for a normal application JWT.
+   */
+  useEffect(() => {
+    if (!googleButtonRef.current || !window.google) return;
+
+    const clientId =
+      import.meta.env?.VITE_GOOGLE_CLIENT_ID ??
+      "625744063797-sg9hkugo999aqivfpgjai87418662n0e.apps.googleusercontent.com";
+
+    window.google.accounts.id.initialize({
+      client_id: clientId,
+      callback: (response: GoogleCredentialResponse) => {
+        googleLogin(
+          { idToken: response.credential },
+          {
+            onSuccess: (data) => {
+              login(data.accessToken);
+              navigate("/dashboard");
+            },
+          },
+        );
+      },
+    });
+
+    googleButtonRef.current.innerHTML = "";
+
+    window.google.accounts.id.renderButton(googleButtonRef.current, {
+      theme: "outline",
+      size: "large",
+      text: "signup_with",
+      shape: "rectangular",
+      width: 398,
+      logo_alignment: "left",
+    });
+  }, [googleLogin, login, navigate]);
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center px-4 bg-transparent">
@@ -201,35 +294,25 @@ export function SignupPage() {
             </span>
           </div>
 
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full flex items-center justify-center gap-3 h-11 border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 48 48"
-              className="w-5 h-5"
-            >
-              <path
-                fill="#EA4335"
-                d="M24 9.5c3.15 0 5.97 1.08 8.2 3.2l6.1-6.1C34.2 2.5 29.5 0 24 0 14.6 0 6.5 5.5 2.6 13.5l7.5 5.8C12 13.2 17.5 9.5 24 9.5z"
-              />
-              <path
-                fill="#4285F4"
-                d="M46.1 24.5c0-1.7-.15-3.3-.45-4.9H24v9.3h12.4c-.5 2.7-2 5-4.3 6.6l6.6 5.1c3.9-3.6 6.4-9 6.4-15.1z"
-              />
-              <path
-                fill="#FBBC05"
-                d="M10.1 28.3c-.6-1.7-.9-3.5-.9-5.3s.3-3.6.9-5.3l-7.5-5.8C1 15.4 0 19.6 0 24s1 8.6 2.6 12.1l7.5-5.8z"
-              />
-              <path
-                fill="#34A853"
-                d="M24 48c6.5 0 12-2.1 16-5.7l-6.6-5.1c-2 1.4-4.6 2.3-9.4 2.3-6.5 0-12-3.7-14.9-9l-7.5 5.8C6.5 42.5 14.6 48 24 48z"
-              />
-            </svg>
-            Sign up with Google
-          </Button>
+          {/* 
+            Container for the official Google-rendered sign-up button.
+            Google injects the actual button UI into this div.
+          */}
+          <div className="flex justify-center">
+            <div ref={googleButtonRef} />
+          </div>
+
+          {googleError && (
+            <p className="text-red-500 text-sm text-center">
+              {googleError.message}
+            </p>
+          )}
+
+          {isGooglePending && (
+            <p className="text-sm text-center text-slate-500 dark:text-slate-400">
+              Signing up with Google…
+            </p>
+          )}
         </form>
 
         <p className="text-center text-sm text-gray-500 dark:text-slate-400 mt-6">
