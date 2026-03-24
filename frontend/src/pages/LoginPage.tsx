@@ -1,35 +1,87 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { useLogin } from "../api/authhooks";
+import { useLogin, useGoogleLogin } from "../api/authhooks";
 import { useAuth } from "../context/AuthContext";
+
+console.log("env object:", import.meta.env);
+console.log("google client id:", import.meta.env?.VITE_GOOGLE_CLIENT_ID);
+/**
+ * Minimal type definition for the Google Identity Services object
+ * injected onto the global window after loading the Google script.
+ */
+declare global {
+  interface Window {
+    google?: {
+      accounts: {
+        id: {
+          initialize: (config: {
+            client_id: string;
+            callback: (response: GoogleCredentialResponse) => void;
+          }) => void;
+          renderButton: (
+            parent: HTMLElement,
+            options: {
+              theme?: "outline" | "filled_blue" | "filled_black";
+              size?: "large" | "medium" | "small";
+              text?:
+              | "signin_with"
+              | "signup_with"
+              | "continue_with"
+              | "signin";
+              shape?: "rectangular" | "pill" | "circle" | "square";
+              width?: string | number;
+              logo_alignment?: "left" | "center";
+            },
+          ) => void;
+        };
+      };
+    };
+  }
+}
+
+/**
+ * Response returned by Google Identity Services after a successful sign-in.
+ */
+interface GoogleCredentialResponse {
+  /** Google-issued ID token JWT */
+  credential: string;
+}
 
 /**
  * LoginPage component.
  *
  * Renders a card-style login form accepting either an email address or username
  * alongside a password. On successful authentication the user is redirected to
- * `/dashboard`. Also provides a Google SSO button and a link to `/signup`.
+ * `/dashboard`. Also provides a Google SSO option and a link to `/signup`.
  *
- * Uses the {@link useLogin} hook to communicate with the backend authentication service.
+ * Uses:
+ * - {@link useLogin} for standard email/username login
+ * - {@link useGoogleLogin} for Google OAuth login via backend token exchange
  *
  * @returns The login page JSX element.
  *
  * @example
- * // Typically mounted by the router, no props required.
  * <LoginPage />
  */
 export function LoginPage() {
   const { mutate, isPending, error } = useLogin();
+  const {
+    mutate: googleLogin,
+    isPending: isGooglePending,
+    error: googleError,
+  } = useGoogleLogin();
+
   const { login } = useAuth();
   const navigate = useNavigate();
+  const googleButtonRef = useRef<HTMLDivElement | null>(null);
 
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
 
   /**
-   * Handles the login form submission.
+   * Handles the standard login form submission.
    *
    * Prevents the default browser form submission and calls the login mutation
    * with the current identifier and password. Navigates to `/dashboard` on success.
@@ -41,13 +93,59 @@ export function LoginPage() {
     mutate(
       { identifier, password },
       {
-        onSuccess: () => {
-          login("loggedIn");
+        onSuccess: (data) => {
+          login(data.accessToken);
           navigate("/dashboard");
         },
       },
     );
   };
+
+  /**
+   * Initializes the Google Identity Services sign-in button once the component
+   * mounts and the Google script is available on `window`.
+   *
+   * On successful Google authentication, the returned ID token is exchanged
+   * with the backend for a normal application JWT.
+   */
+  useEffect(() => {
+    if (!window.google || !googleButtonRef.current) return;
+
+    const clientId =
+      import.meta.env?.VITE_GOOGLE_CLIENT_ID ??
+      "625744063797-sg9hkugo999aqivfpgjai87418662n0e.apps.googleusercontent.com";
+
+    if (!clientId) {
+      console.error("Missing VITE_GOOGLE_CLIENT_ID");
+      return;
+    }
+
+    window.google.accounts.id.initialize({
+      client_id: clientId,
+      callback: (response: GoogleCredentialResponse) => {
+        googleLogin(
+          { idToken: response.credential },
+          {
+            onSuccess: (data) => {
+              login(data.accessToken);
+              navigate("/dashboard");
+            },
+          },
+        );
+      },
+    });
+
+    googleButtonRef.current.innerHTML = "";
+
+    window.google.accounts.id.renderButton(googleButtonRef.current, {
+      theme: "outline",
+      size: "large",
+      text: "signin_with",
+      shape: "rectangular",
+      width: "100%",
+      logo_alignment: "left",
+    });
+  }, [googleLogin, login, navigate]);
 
   return (
     <div className="flex min-h-screen w-full items-center justify-center px-4 bg-transparent">
