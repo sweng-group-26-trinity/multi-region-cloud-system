@@ -25,11 +25,7 @@ declare global {
             options: {
               theme?: "outline" | "filled_blue" | "filled_black";
               size?: "large" | "medium" | "small";
-              text?:
-                | "signin_with"
-                | "signup_with"
-                | "continue_with"
-                | "signin";
+              text?: "signin_with" | "signup_with" | "continue_with" | "signin";
               shape?: "rectangular" | "pill" | "circle" | "square";
               width?: string | number;
               logo_alignment?: "left" | "center";
@@ -110,16 +106,16 @@ export function LoginPage() {
    */
   useEffect(() => {
     if (!window.google || !googleButtonRef.current) return;
-  
+
     const clientId =
-  import.meta.env?.VITE_GOOGLE_CLIENT_ID ??
-  "625744063797-sg9hkugo999aqivfpgjai87418662n0e.apps.googleusercontent.com";
-  
+      import.meta.env?.VITE_GOOGLE_CLIENT_ID ??
+      "625744063797-sg9hkugo999aqivfpgjai87418662n0e.apps.googleusercontent.com";
+
     if (!clientId) {
       console.error("Missing VITE_GOOGLE_CLIENT_ID");
       return;
     }
-  
+
     window.google.accounts.id.initialize({
       client_id: clientId,
       callback: (response: GoogleCredentialResponse) => {
@@ -134,9 +130,9 @@ export function LoginPage() {
         );
       },
     });
-  
+
     googleButtonRef.current.innerHTML = "";
-  
+
     window.google.accounts.id.renderButton(googleButtonRef.current, {
       theme: "outline",
       size: "large",

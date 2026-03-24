@@ -29,8 +29,7 @@ export interface SignupRequest {
 /**
  * Request payload for Google OAuth login.
  */
-export interface GoogleLoginRequest 
-{
+export interface GoogleLoginRequest {
   /**
    * Google ID token returned from Google Identity Services.
    * This is a JWT issued by Google after successful authentication.
