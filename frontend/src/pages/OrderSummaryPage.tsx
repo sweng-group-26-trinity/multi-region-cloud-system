@@ -15,6 +15,11 @@ type OrderSummaryState = {
   total: number;
 };
 
+/**
+ * Display the order confirmation page after a successful food order.
+ * Shows the order summary with total, items, and navigation options.
+ * @returns The rendered order summary component
+ */
 export default function OrderSummaryPage() {
   const navigate = useNavigate();
   const location = useLocation();

@@ -443,6 +443,7 @@ const drinks: Product[] = [
 ];
 
 /**
+<<<<<<< HEAD
  * Orders page for a selected restaurant.
  *
  * Displays the restaurant menu, allows users to add items to a cart,
@@ -458,6 +459,11 @@ const drinks: Product[] = [
  * - `id` — identifier of the restaurant whose menu is being displayed
  *
  * @returns React page component rendering the restaurant ordering interface.
+=======
+ * Display the restaurant menu with food and drinks sections.
+ * Allows users to browse products, add items to cart, and place orders.
+ * @returns The rendered orders page component
+>>>>>>> 78b8c57 (Add missing typedoc)
  */
 export default function OrdersPage() {
   const { id } = useParams<{ id: string }>();
