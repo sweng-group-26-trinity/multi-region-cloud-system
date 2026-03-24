@@ -6,6 +6,7 @@ import {
   GlassWater,
   ArrowLeft,
 } from "lucide-react";
+import { useCreateOrder } from "../api/ordershooks";
 
 type Product = {
   id: number;
@@ -534,7 +535,7 @@ export default function OrdersPage() {
           setCart([]);
           setShowCheckout(false);
         },
-        onError: (err) => {
+        onError: (err: Error) => {
           console.error("Order failed:", err);
           alert("Failed to place order. Please try again.");
         },
@@ -546,7 +547,7 @@ export default function OrdersPage() {
     <div className="min-h-screen bg-slate-50">
       <div className="bg-white border-b border-slate-200 sticky top-0 z-20">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
-<div className="flex items-center gap-3">
+          <div className="flex items-center gap-3">
             <button
               onClick={() => navigate("/dashboard")}
               className="flex items-center gap-1 text-sm font-medium text-slate-500 transition hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
@@ -605,7 +606,8 @@ export default function OrdersPage() {
             return (
               <div
                 key={product.id}
-                className="flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
+                className="flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
+              >
                 <div className="h-44 overflow-hidden bg-slate-100 dark:bg-slate-800">
                   <img
                     src={product.image}
@@ -629,7 +631,8 @@ export default function OrdersPage() {
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => removeOne(product.id)}
-                          className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-lg font-bold transition hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700">
+                          className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-lg font-bold transition hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
+                        >
                           −
                         </button>
                         <span className="w-5 text-center font-semibold text-slate-900 dark:text-slate-100">
@@ -641,14 +644,6 @@ export default function OrdersPage() {
                         >
                           +
                         </button>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => addToCart(product)}
-                        className={`rounded-full px-4 py-1.5 text-sm font-semibold text-white transition ${meta.btnClass}`}
-                      >
-                        Add
-                      </button>
                       </div>
                     ) : (
                       <button
