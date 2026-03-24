@@ -97,6 +97,7 @@ paths:
       summary: Authenticate via Google OAuth2
       description: >
         Accepts a Google OAuth2 ID token obtained via Google Identity Services (GSI) on the client side. Validates the token against Google's tokeninfo endpoint, then finds or creates a user account for the associated email. Returns a JWT access token identical to the standard login response.
+
       operationId: googleAuth
       security: []
       requestBody:
