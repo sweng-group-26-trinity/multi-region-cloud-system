@@ -13,7 +13,10 @@ servers:
     description: Production server
 security:
   - BearerAuth: []
-  - OAuth2Google: []
+  - GoogleOIDC:
+      - openid
+      - email
+      - profile
 paths:
   /auth/register:
     post:
@@ -409,17 +412,10 @@ components:
       scheme: bearer
       bearerFormat: JWT
       description: JWT token for Spring Security authentication
-    OAuth2Google:
-      type: oauth2
-      description: Google OAuth2 authentication via OpenID Connect
-      flows:
-        authorizationCode:
-          authorizationUrl: https://accounts.google.com/o/oauth2/v2/auth
-          tokenUrl: https://oauth2.googleapis.com/token
-          scopes:
-            openid: OpenID Connect scope
-            email: Access user email address
-            profile: Access user profile information
+    GoogleOIDC:
+      type: openIdConnect
+      description: Google OpenID Connect authentication
+      openIdConnectUrl: https://accounts.google.com/.well-known/openid-configuration
   schemas:
     GoogleAuthRequest:
       type: object
