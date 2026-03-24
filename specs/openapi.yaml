@@ -13,6 +13,7 @@ servers:
     description: Production server
 security:
   - BearerAuth: []
+  - OAuth2Google: []
 paths:
   /auth/register:
     post:
@@ -88,6 +89,31 @@ paths:
           description: Bad request - malformed headers
         "401":
           description: Unauthorized - invalid or missing token
+  /auth/google:
+    post:
+      summary: Authenticate via Google OAuth2
+      description: >
+        Accepts a Google OAuth2 ID token obtained via Google Identity Services (GSI)
+        on the client side. Validates the token against Google's tokeninfo endpoint,
+        then finds or creates a user account for the associated email. Returns a JWT
+        access token identical to the standard login response.
+      operationId: googleAuth
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GoogleAuthRequest"
+      responses:
+        "200":
+          description: Google authentication successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "401":
+          description: Invalid or expired Google ID token
   /restaurants:
     get:
       summary: List all restaurants
@@ -383,7 +409,28 @@ components:
       scheme: bearer
       bearerFormat: JWT
       description: JWT token for Spring Security authentication
+    OAuth2Google:
+      type: oauth2
+      description: Google OAuth2 authentication via OpenID Connect
+      flows:
+        authorizationCode:
+          authorizationUrl: https://accounts.google.com/o/oauth2/v2/auth
+          tokenUrl: https://oauth2.googleapis.com/token
+          scopes:
+            openid: OpenID Connect scope
+            email: Access user email address
+            profile: Access user profile information
   schemas:
+    GoogleAuthRequest:
+      type: object
+      description: Request body for Google OAuth2 sign-in callback
+      additionalProperties: false
+      required:
+        - idToken
+      properties:
+        idToken:
+          type: string
+          description: Google OAuth2 ID token obtained from Google Identity Services (GSI) client-side flow
     User:
       type: object
       description: User account information
