@@ -30,11 +30,7 @@ declare global {
             options: {
               theme?: "outline" | "filled_blue" | "filled_black";
               size?: "large" | "medium" | "small";
-              text?:
-              | "signin_with"
-              | "signup_with"
-              | "continue_with"
-              | "signin";
+              text?: "signin_with" | "signup_with" | "continue_with" | "signin";
               shape?: "rectangular" | "pill" | "circle" | "square";
               width?: string | number;
               logo_alignment?: "left" | "center";
