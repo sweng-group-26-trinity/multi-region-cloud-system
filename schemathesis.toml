@@ -21,3 +21,8 @@ bearer = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0IiwiaWF0IjoxNTE2M
 # This is standard Spring behaviour, not an API bug.
 [checks.unsupported_method]
 enabled = false
+
+# Exclude /auth/google from testing — endpoint calls Google's tokeninfo API
+# which is unreachable from the NixOS test VM (no external network access)
+[[operations]]
+exclude-operation-id = "googleAuth"

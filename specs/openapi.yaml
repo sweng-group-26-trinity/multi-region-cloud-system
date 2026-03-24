@@ -96,10 +96,7 @@ paths:
     post:
       summary: Authenticate via Google OAuth2
       description: >
-        Accepts a Google OAuth2 ID token obtained via Google Identity Services (GSI)
-        on the client side. Validates the token against Google's tokeninfo endpoint,
-        then finds or creates a user account for the associated email. Returns a JWT
-        access token identical to the standard login response.
+        Accepts a Google OAuth2 ID token obtained via Google Identity Services (GSI) on the client side. Validates the token against Google's tokeninfo endpoint, then finds or creates a user account for the associated email. Returns a JWT access token identical to the standard login response.
       operationId: googleAuth
       security: []
       requestBody:
@@ -115,6 +112,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/LoginResponse"
+        "400":
+          description: Invalid or missing request body
         "401":
           description: Invalid or expired Google ID token
   /restaurants:
