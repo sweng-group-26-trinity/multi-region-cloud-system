@@ -28,22 +28,78 @@ function AnimatedRoutes() {
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
-        <Route path="/" element={<Page><HomePage /></Page>} />
+        <Route
+          path="/"
+          element={
+            <Page>
+              <HomePage />
+            </Page>
+          }
+        />
 
         <Route element={<PublicRoute />}>
-          <Route path="/login" element={<Page><LoginPage /></Page>} />
-          <Route path="/signup" element={<Page><SignupPage /></Page>} />
+          <Route
+            path="/login"
+            element={
+              <Page>
+                <LoginPage />
+              </Page>
+            }
+          />
+          <Route
+            path="/signup"
+            element={
+              <Page>
+                <SignupPage />
+              </Page>
+            }
+          />
         </Route>
 
-        <Route path="/forgot-password" element={<Page><ForgotPasswordPage /></Page>} />
-        <Route path="/health" element={<Page><DatabaseHealth /></Page>} />
+        <Route
+          path="/forgot-password"
+          element={
+            <Page>
+              <ForgotPasswordPage />
+            </Page>
+          }
+        />
+        <Route
+          path="/health"
+          element={
+            <Page>
+              <DatabaseHealth />
+            </Page>
+          }
+        />
 
         <Route element={<ProtectedRoute />}>
-          <Route path="/dashboard" element={<Page><RestaurantsPage /></Page>} />
-          <Route path="/menu/:id" element={<Page><OrdersPage /></Page>} />
+          <Route
+            path="/dashboard"
+            element={
+              <Page>
+                <RestaurantsPage />
+              </Page>
+            }
+          />
+          <Route
+            path="/menu/:id"
+            element={
+              <Page>
+                <OrdersPage />
+              </Page>
+            }
+          />
         </Route>
 
-        <Route path="/order-summary" element={<Page><OrderSummaryPage /></Page>} />
+        <Route
+          path="/order-summary"
+          element={
+            <Page>
+              <OrderSummaryPage />
+            </Page>
+          }
+        />
       </Routes>
     </AnimatePresence>
   );
@@ -63,7 +119,13 @@ function Page({ children }: { children: ReactNode }) {
   );
 }
 
-function Header({ darkMode, toggleDarkMode }: { darkMode: boolean; toggleDarkMode: () => void }) {
+function Header({
+  darkMode,
+  toggleDarkMode,
+}: {
+  darkMode: boolean;
+  toggleDarkMode: () => void;
+}) {
   const navigate = useNavigate();
   const location = useLocation();
   const { logout } = useAuth();
@@ -85,30 +147,58 @@ function Header({ darkMode, toggleDarkMode }: { darkMode: boolean; toggleDarkMod
 
   return (
     <header className="sticky top-0 z-50 flex items-center justify-between border-b border-slate-200 bg-white/90 px-6 py-4 backdrop-blur transition-colors duration-300 dark:border-slate-800 dark:bg-slate-950/90">
-      <button type="button" onClick={() => navigate("/")} className="flex items-center gap-2 rounded-xl px-3 py-2 transition-all duration-200 hover:scale-[1.02] hover:bg-slate-100 dark:hover:bg-slate-900">
+      <button
+        type="button"
+        onClick={() => navigate("/")}
+        className="flex items-center gap-2 rounded-xl px-3 py-2 transition-all duration-200 hover:scale-[1.02] hover:bg-slate-100 dark:hover:bg-slate-900"
+      >
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500 text-white">
           <UtensilsCrossed size={18} strokeWidth={2.5} />
         </div>
-        <span className="text-lg font-semibold text-slate-900 dark:text-slate-100">DineHub</span>
+        <span className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+          DineHub
+        </span>
       </button>
 
       <div className="flex items-center gap-3">
-        <button type="button" onClick={toggleDarkMode} title={darkMode ? "Light Mode" : "Dark Mode"} className="flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-slate-900 shadow-md transition-all duration-200 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98] dark:bg-slate-900 dark:text-slate-100 dark:shadow-black/30">
+        <button
+          type="button"
+          onClick={toggleDarkMode}
+          title={darkMode ? "Light Mode" : "Dark Mode"}
+          className="flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-slate-900 shadow-md transition-all duration-200 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98] dark:bg-slate-900 dark:text-slate-100 dark:shadow-black/30"
+        >
           {darkMode ? <Sun size={18} /> : <Moon size={18} />}
-          <span className="hidden font-medium sm:inline">{darkMode ? "Light Mode" : "Dark Mode"}</span>
+          <span className="hidden font-medium sm:inline">
+            {darkMode ? "Light Mode" : "Dark Mode"}
+          </span>
         </button>
 
         {showPrivateButtons && (
           <>
-            <button type="button" onClick={() => navigate("/dashboard")} title="Dashboard" className="flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-slate-900 shadow-md transition-all duration-200 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98] dark:bg-slate-900 dark:text-slate-100 dark:shadow-black/30">
+            <button
+              type="button"
+              onClick={() => navigate("/dashboard")}
+              title="Dashboard"
+              className="flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-slate-900 shadow-md transition-all duration-200 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98] dark:bg-slate-900 dark:text-slate-100 dark:shadow-black/30"
+            >
               <LayoutDashboard size={18} />
               <span className="hidden font-medium sm:inline">Dashboard</span>
             </button>
-            <button type="button" onClick={() => navigate("/health")} title="Health" className="flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-slate-900 shadow-md transition-all duration-200 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98] dark:bg-slate-900 dark:text-slate-100 dark:shadow-black/30">
+            <button
+              type="button"
+              onClick={() => navigate("/health")}
+              title="Health"
+              className="flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-slate-900 shadow-md transition-all duration-200 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98] dark:bg-slate-900 dark:text-slate-100 dark:shadow-black/30"
+            >
               <HeartPulse size={18} />
               <span className="hidden font-medium sm:inline">Health</span>
             </button>
-            <button type="button" onClick={handleLogout} title="Logout" className="flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-slate-900 shadow-md transition-all duration-200 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98] dark:bg-slate-900 dark:text-slate-100 dark:shadow-black/30">
+            <button
+              type="button"
+              onClick={handleLogout}
+              title="Logout"
+              className="flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-slate-900 shadow-md transition-all duration-200 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98] dark:bg-slate-900 dark:text-slate-100 dark:shadow-black/30"
+            >
               <LogOut size={18} />
               <span className="hidden font-medium sm:inline">Logout</span>
             </button>

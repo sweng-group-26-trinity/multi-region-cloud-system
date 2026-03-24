@@ -39,23 +39,39 @@ export default function OrderSummaryPage() {
       <div className="mx-auto max-w-2xl px-6 py-12">
         <div className="mb-8 flex flex-col items-center gap-3 text-center">
           <CheckCircle size={56} className="text-green-500" />
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Order Confirmed!</h1>
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
+            Order Confirmed!
+          </h1>
           <p className="text-slate-500 dark:text-slate-400">
-            Your order from <span className="font-semibold text-slate-700 dark:text-slate-200">{state.restaurantName}</span> has been placed successfully.
+            Your order from{" "}
+            <span className="font-semibold text-slate-700 dark:text-slate-200">
+              {state.restaurantName}
+            </span>{" "}
+            has been placed successfully.
           </p>
         </div>
 
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div className="border-b border-slate-100 px-6 py-4 dark:border-slate-800">
-            <h2 className="font-semibold text-slate-900 dark:text-slate-100">Order Summary</h2>
+            <h2 className="font-semibold text-slate-900 dark:text-slate-100">
+              Order Summary
+            </h2>
           </div>
           <div className="divide-y divide-slate-100 dark:divide-slate-800">
             {state.items.map((item) => (
               <div key={item.id} className="flex items-center gap-4 px-6 py-4">
-                <img src={item.image} alt={item.name} className="h-14 w-14 shrink-0 rounded-xl object-cover" />
+                <img
+                  src={item.image}
+                  alt={item.name}
+                  className="h-14 w-14 shrink-0 rounded-xl object-cover"
+                />
                 <div className="min-w-0 flex-1">
-                  <p className="font-medium text-slate-900 dark:text-slate-100">{item.name}</p>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">x{item.quantity}</p>
+                  <p className="font-medium text-slate-900 dark:text-slate-100">
+                    {item.name}
+                  </p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                    x{item.quantity}
+                  </p>
                 </div>
                 <span className="font-semibold text-slate-900 dark:text-slate-100">
                   €{(item.price * item.quantity).toFixed(2)}
