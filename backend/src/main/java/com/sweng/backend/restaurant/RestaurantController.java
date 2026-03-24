@@ -40,42 +40,63 @@ public class RestaurantController {
   }
 
   private static final Set<String> ALLOWED_RESTAURANT_LIST_PARAMS = Set.of("page", "size");
+  private static final java.util.regex.Pattern INTEGER_PATTERN =
+      java.util.regex.Pattern.compile("^-?\\d+$");
 
   /**
-   * List restaurants with pagination.
+   * Validates that all query parameters are allowed, non-empty, and strict integers.
    *
-   * @param page the page number (0-indexed)
-   * @param size the page size
-   * @param request the HTTP request for parameter validation
-   * @return paginated list of restaurants
+   * @param params the raw query parameter map from the HTTP request
+   * @throws org.springframework.web.server.ResponseStatusException 400 if any parameter is unknown,
+   *     empty, or not a strict integer string
    */
-  @GetMapping
-  public ResponseEntity<RestaurantPageDto> getRestaurants(
-      @RequestParam(defaultValue = "0") int page,
-      @RequestParam(defaultValue = "20") int size,
-      HttpServletRequest request) {
-
-    // Reject unknown query parameters and empty values
-    Map<String, String[]> params = request.getParameterMap();
+  private void validateIntegerQueryParams(Map<String, String[]> params) {
     for (Map.Entry<String, String[]> entry : params.entrySet()) {
       String key = entry.getKey();
       if (!ALLOWED_RESTAURANT_LIST_PARAMS.contains(key)) {
         throw new ResponseStatusException(
             HttpStatus.BAD_REQUEST, "Unknown query parameter: " + key);
       }
-      // Reject empty parameter values
       String[] values = entry.getValue();
-      if (values != null && values.length > 0 && values[0] != null && values[0].isEmpty()) {
+      if (values == null || values.length == 0 || values[0] == null) {
+        continue;
+      }
+      String val = values[0];
+      if (val.isEmpty()) {
         throw new ResponseStatusException(
             HttpStatus.BAD_REQUEST, "Empty value for parameter: " + key);
       }
+      if (!INTEGER_PATTERN.matcher(val).matches()) {
+        throw new ResponseStatusException(
+            HttpStatus.BAD_REQUEST, "Invalid integer value for parameter: " + key);
+      }
     }
+  }
 
-    if (page < 0 || size < 1 || page > 10000 || size > 100) {
+  /**
+   * List restaurants with pagination.
+   *
+   * @param page the page number (0-indexed), defaults to 0
+   * @param size the number of items per page, defaults to 20
+   * @param request the HTTP request used for raw query parameter validation
+   * @return paginated list of restaurants
+   */
+  @GetMapping
+  public ResponseEntity<RestaurantPageDto> getRestaurants(
+      @RequestParam(required = false) String page,
+      @RequestParam(required = false) String size,
+      HttpServletRequest request) {
+
+    validateIntegerQueryParams(request.getParameterMap());
+
+    int pageInt = parseIntParam(page, 0);
+    int sizeInt = parseIntParam(size, 20);
+
+    if (pageInt < 0 || sizeInt < 1 || pageInt > 10000 || sizeInt > 100) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid page/size");
     }
 
-    var pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+    var pageable = PageRequest.of(pageInt, sizeInt, Sort.by(Sort.Direction.DESC, "createdAt"));
     var p = repository.findByIsActiveTrue(pageable);
 
     var content = p.getContent().stream().map(RestaurantController::toDto).toList();
@@ -217,6 +238,25 @@ public class RestaurantController {
 
     repository.deleteById(id);
     return ResponseEntity.noContent().build();
+  }
+
+  /**
+   * Parses a string query parameter as an int, returning the default when null.
+   *
+   * @param value the raw string value, or {@code null} if the parameter was absent
+   * @param defaultValue the value to use when {@code value} is {@code null}
+   * @return the parsed integer
+   * @throws org.springframework.web.server.ResponseStatusException 400 if the value overflows int
+   */
+  private static int parseIntParam(String value, int defaultValue) {
+    if (value == null) {
+      return defaultValue;
+    }
+    try {
+      return Integer.parseInt(value);
+    } catch (NumberFormatException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Integer value out of range");
+    }
   }
 
   private static UUID parseUuidOr400(String raw) {

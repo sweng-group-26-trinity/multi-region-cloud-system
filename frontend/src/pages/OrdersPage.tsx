@@ -1,21 +1,13 @@
-/**
- * @file OrdersPage.tsx
- * @description Menu and ordering page for a selected restaurant.
- * Displays food and drinks tabs, manages a cart, and handles checkout.
- */
-
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ShoppingCart,
   UtensilsCrossed,
   GlassWater,
-  PartyPopper,
   ArrowLeft,
 } from "lucide-react";
 import { useCreateOrder } from "../api/ordershooks";
 
-/** A single menu item */
 type Product = {
   id: number;
   name: string;
@@ -24,7 +16,6 @@ type Product = {
   image: string;
 };
 
-/** A product with a quantity, used in the cart */
 type CartItem = Product & { quantity: number };
 
 const restaurantMeta: Record<
@@ -303,7 +294,7 @@ const foodMenus: Record<string, Product[]> = {
     },
     {
       id: 42,
-      name: "Avocado Quinoa Salad",
+      name: "Prawn and Leaf Salad",
       description:
         "Prawns, watermelon, mixed leaves, cucumber, lemon dressing.",
       price: 11.5,
@@ -451,7 +442,9 @@ const drinks: Product[] = [
       "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=600&q=80",
   },
 ];
+
 /**
+<<<<<<< HEAD
  * Orders page for a selected restaurant.
  *
  * Displays the restaurant menu, allows users to add items to a cart,
@@ -467,6 +460,11 @@ const drinks: Product[] = [
  * - `id` — identifier of the restaurant whose menu is being displayed
  *
  * @returns React page component rendering the restaurant ordering interface.
+=======
+ * Display the restaurant menu with food and drinks sections.
+ * Allows users to browse products, add items to cart, and place orders.
+ * @returns The rendered orders page component
+>>>>>>> 78b8c57 (Add missing typedoc)
  */
 export default function OrdersPage() {
   const { id } = useParams<{ id: string }>();
@@ -482,13 +480,11 @@ export default function OrdersPage() {
 
   if (!meta || !id) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
-        <h2 className="text-xl font-semibold text-slate-800">
-          Restaurant not found.
-        </h2>
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+        <h2 className="text-xl font-semibold">Restaurant not found.</h2>
         <button
           onClick={() => navigate("/dashboard")}
-          className="bg-slate-900 text-white px-5 py-2 rounded-xl hover:bg-slate-700 transition"
+          className="rounded-xl bg-slate-900 px-5 py-2 text-white transition hover:bg-slate-700 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200"
         >
           Back to Restaurants
         </button>
@@ -539,7 +535,7 @@ export default function OrdersPage() {
           setCart([]);
           setShowCheckout(false);
         },
-        onError: (err) => {
+        onError: (err: Error) => {
           console.error("Order failed:", err);
           alert("Failed to place order. Please try again.");
         },
@@ -554,17 +550,18 @@ export default function OrdersPage() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate("/dashboard")}
-              className="text-slate-500 hover:text-slate-900 transition text-sm font-medium flex items-center gap-1"
+              className="flex items-center gap-1 text-sm font-medium text-slate-500 transition hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
             >
-              <ArrowLeft size={16} />
-              Back
+              <ArrowLeft size={16} /> Back
             </button>
-            <h1 className="text-xl font-bold text-slate-900">{meta.name}</h1>
+            <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">
+              {meta.name}
+            </h1>
           </div>
           <button
             onClick={() => setShowCheckout(true)}
             disabled={cart.length === 0}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full text-white text-sm font-semibold transition ${meta.btnClass} disabled:opacity-40 disabled:cursor-not-allowed`}
+            className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-white transition ${meta.btnClass} disabled:cursor-not-allowed disabled:opacity-40`}
           >
             <ShoppingCart size={16} />
             {totalQty > 0 ? (
@@ -584,7 +581,7 @@ export default function OrdersPage() {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`capitalize px-5 py-2 text-sm font-semibold border-b-2 transition flex items-center gap-2 ${activeTab === tab ? "border-slate-900 text-slate-900" : "border-transparent text-slate-500 hover:text-slate-700"}`}
+              className={`flex items-center gap-2 border-b-2 px-5 py-2 text-sm font-semibold capitalize transition ${activeTab === tab ? "border-slate-900 text-slate-900 dark:border-slate-100 dark:text-slate-100" : "border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"}`}
             >
               {tab === "food" ? (
                 <UtensilsCrossed size={15} />
@@ -600,7 +597,6 @@ export default function OrdersPage() {
       <div className="max-w-6xl mx-auto px-6 py-8">
         {orderPlaced && (
           <div className="mb-6 flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-2xl text-green-800 font-medium">
-            <PartyPopper size={22} />
             Order placed! Your food is on its way.
           </div>
         )}
@@ -610,9 +606,9 @@ export default function OrdersPage() {
             return (
               <div
                 key={product.id}
-                className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition overflow-hidden flex flex-col"
+                className="flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
               >
-                <div className="h-44 overflow-hidden bg-slate-100">
+                <div className="h-44 overflow-hidden bg-slate-100 dark:bg-slate-800">
                   <img
                     src={product.image}
                     alt={product.name}
@@ -620,31 +616,31 @@ export default function OrdersPage() {
                     loading="lazy"
                   />
                 </div>
-                <div className="p-4 flex flex-col flex-1">
-                  <h2 className="font-semibold text-slate-900">
+                <div className="flex flex-1 flex-col p-4">
+                  <h2 className="font-semibold text-slate-900 dark:text-slate-100">
                     {product.name}
                   </h2>
-                  <p className="text-slate-500 text-sm mt-1 leading-snug flex-1">
+                  <p className="mt-1 flex-1 text-sm leading-snug text-slate-500 dark:text-slate-400">
                     {product.description}
                   </p>
                   <div className="mt-4 flex items-center justify-between">
-                    <span className="font-bold text-slate-900">
+                    <span className="font-bold text-slate-900 dark:text-slate-100">
                       €{product.price.toFixed(2)}
                     </span>
                     {inCart ? (
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => removeOne(product.id)}
-                          className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 transition font-bold text-lg flex items-center justify-center"
+                          className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-lg font-bold transition hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
                         >
                           −
                         </button>
-                        <span className="w-5 text-center font-semibold">
+                        <span className="w-5 text-center font-semibold text-slate-900 dark:text-slate-100">
                           {inCart.quantity}
                         </span>
                         <button
                           onClick={() => addToCart(product)}
-                          className={`w-8 h-8 rounded-full text-white transition font-bold text-lg flex items-center justify-center ${meta.btnClass}`}
+                          className={`flex h-8 w-8 items-center justify-center rounded-full text-lg font-bold text-white transition ${meta.btnClass}`}
                         >
                           +
                         </button>
@@ -652,7 +648,7 @@ export default function OrdersPage() {
                     ) : (
                       <button
                         onClick={() => addToCart(product)}
-                        className={`px-4 py-1.5 rounded-full text-white text-sm font-semibold transition ${meta.btnClass}`}
+                        className={`rounded-full px-4 py-1.5 text-sm font-semibold text-white transition ${meta.btnClass}`}
                       >
                         Add
                       </button>
@@ -675,7 +671,7 @@ export default function OrdersPage() {
             </div>
             <div className="px-6 py-4 max-h-64 overflow-y-auto divide-y divide-slate-100">
               {cart.length === 0 ? (
-                <p className="text-slate-500 py-4 text-center">
+                <p className="py-4 text-center text-slate-500 dark:text-slate-400">
                   Your cart is empty.
                 </p>
               ) : (
@@ -684,15 +680,17 @@ export default function OrdersPage() {
                     <img
                       src={item.image}
                       alt={item.name}
-                      className="w-12 h-12 rounded-xl object-cover shrink-0"
+                      className="h-12 w-12 shrink-0 rounded-xl object-cover"
                     />
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-slate-900 truncate">
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-medium text-slate-900 dark:text-slate-100">
                         {item.name}
                       </p>
-                      <p className="text-slate-500 text-sm">x{item.quantity}</p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">
+                        x{item.quantity}
+                      </p>
                     </div>
-                    <span className="font-semibold text-slate-900 shrink-0">
+                    <span className="shrink-0 font-semibold text-slate-900 dark:text-slate-100">
                       €{(item.price * item.quantity).toFixed(2)}
                     </span>
                   </div>
@@ -705,17 +703,17 @@ export default function OrdersPage() {
                 <span>€{total.toFixed(2)}</span>
               </div>
             )}
-            <div className="px-6 py-4 flex gap-3">
+            <div className="flex gap-3 px-6 py-4">
               <button
                 onClick={() => setShowCheckout(false)}
-                className="flex-1 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 transition font-semibold text-slate-700"
+                className="flex-1 rounded-xl bg-slate-100 py-3 font-semibold text-slate-700 transition hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
               >
                 Keep browsing
               </button>
               <button
                 onClick={confirmOrder}
                 disabled={cart.length === 0 || isPending}
-                className={`flex-1 py-3 rounded-xl text-white font-bold transition ${meta.btnClass} disabled:opacity-40 disabled:cursor-not-allowed`}
+                className={`flex-1 rounded-xl py-3 font-bold text-white transition ${meta.btnClass} disabled:cursor-not-allowed disabled:opacity-40`}
               >
                 {isPending ? "Placing..." : "Place Order"}
               </button>
