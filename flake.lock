@@ -576,11 +576,11 @@
     "schemathesis": {
       "flake": false,
       "locked": {
-        "lastModified": 1773675111,
-        "narHash": "sha256-Pap24Fhys8V8Ubw0UjTbYEV34M83EMuqGD6yh79OBco=",
+        "lastModified": 1774347809,
+        "narHash": "sha256-mqVAmhRjA6DrxjBPISd/2GkIf29nJqjfaGM1Uebpulo=",
         "owner": "schemathesis",
         "repo": "schemathesis",
-        "rev": "62b28799fda6f1d73c40fc9a601e8eca1ad582d3",
+        "rev": "9986b220ae11c6b812f5581d4b61f0fbbc8a5c89",
         "type": "github"
       },
       "original": {
