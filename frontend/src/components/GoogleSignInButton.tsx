@@ -12,7 +12,7 @@ import { loginWithGoogle } from "../api/auth";
 /**
  * Props for the GoogleSignInButton component.
  */
-type Props = {
+export type Props = {
   /**
    * Optional callback executed after a successful login.
    * Useful for triggering additional UI updates or state changes.
