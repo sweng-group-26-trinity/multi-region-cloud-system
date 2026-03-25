@@ -56,7 +56,7 @@ export function LoginPage() {
         Dark mode support is added here so the card remains readable
         against the darker global page background.
       */}
-      <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-lg dark:bg-slate-900 dark:shadow-black/30">
+      <div className="w-full max-w-md space-y-6 rounded-xl bg-white p-8 shadow-lg transition-all duration-300 hover:shadow-xl dark:bg-slate-900 dark:shadow-black/30">
         <div className="space-y-2 text-center">
           <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">
             Sign in to your account
@@ -81,7 +81,7 @@ export function LoginPage() {
               value={identifier}
               onChange={(e) => setIdentifier(e.target.value)}
               required
-              className="h-11 w-full rounded-md border border-slate-300 bg-white px-3 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
+              className="h-11 w-full rounded-md border border-slate-300 bg-white px-3 text-slate-900 placeholder:text-slate-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
             />
           </div>
 
@@ -95,7 +95,7 @@ export function LoginPage() {
               </Label>
               <Link
                 to="/forgot-password"
-                className="text-sm text-indigo-600 hover:underline dark:text-indigo-400"
+                className="text-sm text-indigo-600 transition-colors duration-200 hover:underline dark:text-indigo-400"
               >
                 Forgot password?
               </Link>
@@ -107,7 +107,7 @@ export function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="h-11 w-full rounded-md border border-slate-300 bg-white px-3 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
+              className="h-11 w-full rounded-md border border-slate-300 bg-white px-3 text-slate-900 placeholder:text-slate-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
             />
           </div>
 
@@ -116,7 +116,7 @@ export function LoginPage() {
           <Button
             type="submit"
             disabled={isPending}
-            className="h-11 w-full bg-indigo-600 hover:bg-indigo-700"
+            className="h-11 w-full bg-indigo-600 transition-all duration-200 hover:scale-[1.02] hover:bg-indigo-700 hover:shadow-md"
           >
             {isPending ? "Signing in…" : "Sign in"}
           </Button>
@@ -137,7 +137,7 @@ export function LoginPage() {
 
         <Button
           variant="outline"
-          className="mt-6 flex h-11 w-full items-center justify-center gap-3 border-slate-300 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+          className="mt-6 flex h-11 w-full items-center justify-center gap-3 border-slate-300 bg-white text-slate-900 transition-all duration-200 hover:scale-[1.02] hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:text-white"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -168,7 +168,7 @@ export function LoginPage() {
           Don't have an account?{" "}
           <Link
             to="/signup"
-            className="text-indigo-600 hover:underline dark:text-indigo-400"
+            className="text-indigo-600 transition-colors duration-200 hover:underline dark:text-indigo-400"
           >
             Create account
           </Link>

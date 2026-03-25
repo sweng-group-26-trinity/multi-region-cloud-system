@@ -444,7 +444,6 @@ const drinks: Product[] = [
 ];
 
 /**
-<<<<<<< HEAD
  * Orders page for a selected restaurant.
  *
  * Displays the restaurant menu, allows users to add items to a cart,
@@ -460,11 +459,6 @@ const drinks: Product[] = [
  * - `id` — identifier of the restaurant whose menu is being displayed
  *
  * @returns React page component rendering the restaurant ordering interface.
-=======
- * Display the restaurant menu with food and drinks sections.
- * Allows users to browse products, add items to cart, and place orders.
- * @returns The rendered orders page component
->>>>>>> 78b8c57 (Add missing typedoc)
  */
 export default function OrdersPage() {
   const { id } = useParams<{ id: string }>();
@@ -550,7 +544,7 @@ export default function OrdersPage() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate("/dashboard")}
-              className="flex items-center gap-1 text-sm font-medium text-slate-500 transition hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+              className="flex items-center gap-1 text-sm font-medium text-slate-500 transition-all duration-200 hover:-translate-x-0.5 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
             >
               <ArrowLeft size={16} /> Back
             </button>
@@ -561,7 +555,7 @@ export default function OrdersPage() {
           <button
             onClick={() => setShowCheckout(true)}
             disabled={cart.length === 0}
-            className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-white transition ${meta.btnClass} disabled:cursor-not-allowed disabled:opacity-40`}
+            className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-white transition-all duration-200 hover:scale-[1.02] hover:shadow-md ${meta.btnClass} disabled:cursor-not-allowed disabled:opacity-40`}
           >
             <ShoppingCart size={16} />
             {totalQty > 0 ? (
@@ -581,7 +575,7 @@ export default function OrdersPage() {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`flex items-center gap-2 border-b-2 px-5 py-2 text-sm font-semibold capitalize transition ${activeTab === tab ? "border-slate-900 text-slate-900 dark:border-slate-100 dark:text-slate-100" : "border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"}`}
+              className={`flex items-center gap-2 border-b-2 px-5 py-2 text-sm font-semibold capitalize transition-all duration-200 ${activeTab === tab ? "border-slate-900 text-slate-900 dark:border-slate-100 dark:text-slate-100" : "border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"}`}
             >
               {tab === "food" ? (
                 <UtensilsCrossed size={15} />
@@ -606,13 +600,13 @@ export default function OrdersPage() {
             return (
               <div
                 key={product.id}
-                className="flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
+                className="flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900"
               >
                 <div className="h-44 overflow-hidden bg-slate-100 dark:bg-slate-800">
                   <img
                     src={product.image}
                     alt={product.name}
-                    className="h-full w-full object-cover"
+                    className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
                     loading="lazy"
                   />
                 </div>
@@ -631,7 +625,7 @@ export default function OrdersPage() {
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => removeOne(product.id)}
-                          className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-lg font-bold transition hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
+                          className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-lg font-bold transition-all duration-200 hover:scale-105 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
                         >
                           −
                         </button>
@@ -640,7 +634,7 @@ export default function OrdersPage() {
                         </span>
                         <button
                           onClick={() => addToCart(product)}
-                          className={`flex h-8 w-8 items-center justify-center rounded-full text-lg font-bold text-white transition ${meta.btnClass}`}
+                          className={`flex h-8 w-8 items-center justify-center rounded-full text-lg font-bold text-white transition-all duration-200 hover:scale-105 hover:shadow-md ${meta.btnClass}`}
                         >
                           +
                         </button>
@@ -648,7 +642,7 @@ export default function OrdersPage() {
                     ) : (
                       <button
                         onClick={() => addToCart(product)}
-                        className={`rounded-full px-4 py-1.5 text-sm font-semibold text-white transition ${meta.btnClass}`}
+                        className={`rounded-full px-4 py-1.5 text-sm font-semibold text-white transition-all duration-200 hover:scale-105 hover:shadow-md ${meta.btnClass}`}
                       >
                         Add
                       </button>
@@ -706,14 +700,14 @@ export default function OrdersPage() {
             <div className="flex gap-3 px-6 py-4">
               <button
                 onClick={() => setShowCheckout(false)}
-                className="flex-1 rounded-xl bg-slate-100 py-3 font-semibold text-slate-700 transition hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
+                className="flex-1 rounded-xl bg-slate-100 py-3 font-semibold text-slate-700 transition-all duration-200 hover:scale-[1.02] hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
               >
                 Keep browsing
               </button>
               <button
                 onClick={confirmOrder}
                 disabled={cart.length === 0 || isPending}
-                className={`flex-1 rounded-xl py-3 font-bold text-white transition ${meta.btnClass} disabled:cursor-not-allowed disabled:opacity-40`}
+                className={`flex-1 rounded-xl py-3 font-bold text-white transition-all duration-200 hover:scale-[1.02] hover:shadow-md ${meta.btnClass} disabled:cursor-not-allowed disabled:opacity-40`}
               >
                 {isPending ? "Placing..." : "Place Order"}
               </button>

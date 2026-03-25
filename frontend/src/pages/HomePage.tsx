@@ -415,7 +415,7 @@ export default function HomePage() {
           {/* Dashboard navigation */}
           <button
             onClick={() => navigate("/dashboard")}
-            className="inline-flex items-center gap-2 px-8 py-4 bg-[#ef6b3a] hover:bg-[#d95a2a] text-white font-semibold rounded-xl shadow-lg shadow-[#ef6b3a]/30 transition-all hover:scale-105"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#ef6b3a] px-8 py-4 font-semibold text-white shadow-lg shadow-[#ef6b3a]/30 transition-all duration-200 hover:scale-105 hover:bg-[#d95a2a] hover:shadow-xl"
           >
             <CookingPot className="w-5 h-5" />
             View Dashboard
@@ -424,7 +424,7 @@ export default function HomePage() {
           {/* Health monitoring page */}
           <button
             onClick={() => navigate("/health")}
-            className="inline-flex items-center gap-2 px-8 py-4 bg-gray-800 hover:bg-gray-700 text-white font-semibold rounded-xl shadow-lg transition-all hover:scale-105"
+            className="inline-flex items-center gap-2 rounded-xl bg-gray-800 px-8 py-4 font-semibold text-white shadow-lg transition-all duration-200 hover:scale-105 hover:bg-gray-700 hover:shadow-xl"
           >
             <Activity className="w-5 h-5" />
             Check Health Status
@@ -441,7 +441,7 @@ export default function HomePage() {
           {["US East", "US West"].map((region) => (
             <div
               key={region}
-              className="flex items-center gap-2 px-4 py-2 bg-white/90 backdrop-blur-sm rounded-full shadow-sm"
+              className="flex items-center gap-2 rounded-full bg-white/90 px-4 py-2 shadow-sm backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
             >
               <span className="w-2 h-2 rounded-l bg-green-500 animate-pulse" />
               <span className="text-sm text-gray-700 font-medium">

@@ -68,7 +68,7 @@ export function SignupPage() {
         application theme switches to dark mode. The background and text colours
         adapt automatically using Tailwind's `dark:` variants.
       */}
-      <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-2xl p-8">
+      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl transition-all duration-300 hover:shadow-xl dark:bg-slate-900">
         <h1 className="text-2xl font-bold text-center mb-2 text-slate-900 dark:text-white">
           Create your account
         </h1>
@@ -93,7 +93,7 @@ export function SignupPage() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
-              className="w-full border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-slate-900 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
             />
           </div>
 
@@ -113,7 +113,7 @@ export function SignupPage() {
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 required
-                className="w-full border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-slate-900 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
               />
             </div>
 
@@ -132,7 +132,7 @@ export function SignupPage() {
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 required
-                className="w-full border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-slate-900 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
               />
             </div>
           </div>
@@ -152,7 +152,7 @@ export function SignupPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-slate-900 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
             />
           </div>
 
@@ -180,7 +180,7 @@ export function SignupPage() {
           <Button
             type="submit"
             disabled={isPending}
-            className="w-full h-11 bg-indigo-600 hover:bg-indigo-700"
+            className="h-11 w-full bg-indigo-600 transition-all duration-200 hover:scale-[1.02] hover:bg-indigo-700 hover:shadow-md"
           >
             {isPending ? "Creating account…" : "Create account"}
           </Button>
@@ -204,7 +204,7 @@ export function SignupPage() {
           <Button
             type="button"
             variant="outline"
-            className="w-full flex items-center justify-center gap-3 h-11 border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+            className="flex h-11 w-full items-center justify-center gap-3 border-gray-300 bg-white text-slate-900 transition-all duration-200 hover:scale-[1.02] hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:text-white"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -236,7 +236,7 @@ export function SignupPage() {
           Already have an account?{" "}
           <Link
             to="/login"
-            className="text-indigo-600 dark:text-indigo-400 hover:underline"
+            className="text-indigo-600 transition-colors duration-200 hover:underline dark:text-indigo-400"
           >
             Sign in
           </Link>
