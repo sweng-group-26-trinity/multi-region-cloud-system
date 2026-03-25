@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { loadObject, type SceneObject } from "../components/js/loader";
@@ -14,16 +14,16 @@ import { Terminal } from "../components/js/Terminal";
  * Main 3D visualization component for the application.
  *
  * Responsibilities:
- * - Initializes a Three.js Scene with lighting and starfield * - Loads Earth and plane models
+ * - Initializes a Three.js scene with lighting and starfield
+ * - Loads Earth and plane models
  * - Renders a curved orbital path
  * - Creates floating UI nodes attached to geographic coordinates
  * - Handles dark/light theme switching
  * - Runs the animation loop
  * - Displays an interactive terminal overlay
  *
- *
  * This component uses WebGLRenderer for 3D rendering
- * and CSS2DRenderer for DOM-based labels attached to 3D objects..
+ * and CSS2DRenderer for DOM-based labels attached to 3D objects.
  *
  * @example
  * ```tsx
@@ -56,6 +56,11 @@ export default function ThreeScene() {
     const isDark = () => document.documentElement.classList.contains("dark");
 
     /**
+     * Returns whether the current viewport should be treated as mobile.
+     */
+    const isMobile = () => window.innerWidth < 640;
+
+    /**
      * WebGL renderer responsible for drawing the 3D scene.
      */
     const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -78,12 +83,16 @@ export default function ThreeScene() {
       1000,
     );
 
-    camera.position.set(25, 15, 40);
+    camera.position.set(25, 15, isMobile() ? 48 : 40);
 
     /**
      * Camera orbit controls allowing the user to rotate around the scene.
      */
     const orbit = new OrbitControls(camera, renderer.domElement);
+    orbit.enableDamping = true;
+    orbit.dampingFactor = 0.05;
+    orbit.minDistance = 20;
+    orbit.maxDistance = 80;
     orbit.update();
 
     /**
@@ -132,9 +141,6 @@ export default function ThreeScene() {
 
     /**
      * Atmospheric glow layers around the Earth.
-     *
-     * Multiple spheres are stacked with varying radii and opacity
-     * to simulate atmospheric scattering.
      */
     const glowMeshes: THREE.Mesh[] = [];
 
@@ -201,8 +207,6 @@ export default function ThreeScene() {
 
     /**
      * Defines an orbital path around the Earth.
-     *
-     * The path is a sinusoidal circular curve used for plane movement.
      */
     const orbitRadius = 15;
     const numPoints = 50;
@@ -210,7 +214,6 @@ export default function ThreeScene() {
 
     for (let i = 0; i < numPoints; i++) {
       const angle = (i / numPoints) * Math.PI * 2;
-
       const x = Math.cos(angle) * orbitRadius;
       const z = Math.sin(angle) * orbitRadius;
       const y = Math.sin(angle * 3) * 3;
@@ -240,6 +243,9 @@ export default function ThreeScene() {
     labelRenderer.setSize(window.innerWidth, window.innerHeight);
     labelRenderer.domElement.style.position = "absolute";
     labelRenderer.domElement.style.top = "0px";
+    labelRenderer.domElement.style.left = "0px";
+    labelRenderer.domElement.style.width = "100%";
+    labelRenderer.domElement.style.height = "100%";
     labelRenderer.domElement.style.pointerEvents = "none";
 
     mount.appendChild(labelRenderer.domElement);
@@ -261,7 +267,7 @@ export default function ThreeScene() {
         description: "Server: US-East-1",
         lat: 40,
         lon: -100,
-        floatDistance: 4,
+        floatDistance: isMobile() ? 3 : 4,
         buttons: [
           {
             label: "Connect",
@@ -269,7 +275,7 @@ export default function ThreeScene() {
           },
           {
             label: "Details",
-            onClick: () => console.log("Show details for NA"),
+            onClick: () => console.log("Show details for North America"),
           },
         ],
       });
@@ -279,7 +285,7 @@ export default function ThreeScene() {
         description: "Server: US-West-1",
         lat: 51,
         lon: 10,
-        floatDistance: 4,
+        floatDistance: isMobile() ? 3 : 4,
         buttons: [
           {
             label: "Connect",
@@ -287,7 +293,7 @@ export default function ThreeScene() {
           },
           {
             label: "Details",
-            onClick: () => console.log("Show details for NA"),
+            onClick: () => console.log("Show details for Europe"),
           },
         ],
       });
@@ -312,8 +318,6 @@ export default function ThreeScene() {
 
     /**
      * Main animation loop.
-     *
-     * Updates object positions and renders each frame.
      */
     let animationId: number;
 
@@ -337,11 +341,15 @@ export default function ThreeScene() {
      * Handles viewport resizing.
      */
     const handleResize = () => {
+      const mobile = isMobile();
+
       camera.aspect = window.innerWidth / window.innerHeight;
+      camera.position.set(25, 15, mobile ? 48 : 40);
       camera.updateProjectionMatrix();
 
       renderer.setSize(window.innerWidth, window.innerHeight);
       labelRenderer.setSize(window.innerWidth, window.innerHeight);
+      orbit.update();
     };
 
     window.addEventListener("resize", handleResize);
@@ -352,9 +360,7 @@ export default function ThreeScene() {
     return () => {
       observer.disconnect();
       cancelAnimationFrame(animationId);
-
       window.removeEventListener("resize", handleResize);
-
       orbit.dispose();
       renderer.dispose();
 
@@ -363,38 +369,161 @@ export default function ThreeScene() {
     };
   }, []);
 
-  /**
-   * React UI layout.
-   *
-   * Includes:
-   * - WebGL scene mount
-   * - Dashboard navigation button
-   * - Interactive terminal overlay
-   */
   return (
-    <div className="relative w-screen h-screen">
-      <div className="absolute top-6 left-1/2 -translate-x-1/2 z-50">
+    <div className="relative h-screen w-screen overflow-hidden">
+      {/* Desktop-only dashboard shortcut */}
+      <div className="absolute left-1/2 top-6 z-50 hidden -translate-x-1/2 sm:block">
         <button
           onClick={() => navigate("/dashboard")}
-          className="px-6 py-2 rounded-full bg-indigo-600 text-white font-semibold shadow-md hover:shadow-lg hover:bg-indigo-700 transition-all duration-200 hover:scale-[1.03] active:scale-[0.98]"
+          className="rounded-full bg-indigo-600 px-6 py-2 font-semibold text-white shadow-md transition-all duration-200 hover:scale-[1.03] hover:bg-indigo-700 hover:shadow-lg active:scale-[0.98]"
         >
-          Dashboard{" "}
+          Dashboard
         </button>
       </div>
-      <div ref={mountRef} className="w-full h-full" />
-      <Terminal
-        title="dinehub-terminal"
-        initialLines={['Type a command. Try "/kill"']}
-        commands={[
-          {
-            command: "/kill",
-            description: "terminate all active nodes",
-            onExecute: () => {
-              console.log("hello");
-            },
-          },
-        ]}
-      />
+
+      {/* 3D scene */}
+      <div ref={mountRef} className="h-full w-full" />
+
+      {/* Terminal sheet */}
+      <MobileTerminalSheet />
     </div>
+  );
+}
+
+/**
+ * Mobile and desktop terminal wrapper.
+ *
+ * On mobile, the terminal behaves like a draggable bottom sheet.
+ * On desktop, the terminal remains as a floating panel.
+ *
+ * @returns Responsive terminal overlay.
+ */
+function MobileTerminalSheet() {
+  const [mobileHeightVh, setMobileHeightVh] = useState(18);
+  const [dragging, setDragging] = useState(false);
+
+  const startYRef = useRef<number | null>(null);
+  const startHeightRef = useRef<number>(18);
+
+  const COLLAPSED = 18;
+  const MID = 42;
+  const EXPANDED = 72;
+
+  const terminalProps = {
+    title: "dinehub-terminal",
+    initialLines: ['Type a command. Try "/kill"'],
+    commands: [
+      {
+        command: "/kill",
+        description: "terminate all active nodes",
+        onExecute: () => {
+          console.log("hello");
+        },
+      },
+    ],
+  };
+
+  const clampHeight = (value: number) =>
+    Math.max(COLLAPSED, Math.min(EXPANDED, value));
+
+  const snapHeight = (value: number) => {
+    const snapPoints = [COLLAPSED, MID, EXPANDED];
+    return snapPoints.reduce((closest, point) =>
+      Math.abs(point - value) < Math.abs(closest - value) ? point : closest,
+    );
+  };
+
+  const beginDrag = (clientY: number) => {
+    startYRef.current = clientY;
+    startHeightRef.current = mobileHeightVh;
+    setDragging(true);
+  };
+
+  const updateDrag = (clientY: number) => {
+    if (startYRef.current === null) return;
+
+    const deltaY = startYRef.current - clientY;
+    const deltaVh = (deltaY / window.innerHeight) * 100;
+    setMobileHeightVh(clampHeight(startHeightRef.current + deltaVh));
+  };
+
+  const endDrag = () => {
+    setDragging(false);
+    startYRef.current = null;
+    setMobileHeightVh((prev) => snapHeight(prev));
+  };
+
+  useEffect(() => {
+    const onMouseMove = (e: MouseEvent) => updateDrag(e.clientY);
+    const onMouseUp = () => endDrag();
+    const onTouchMove = (e: TouchEvent) => {
+      const touch = e.touches[0];
+      if (!touch) return;
+      updateDrag(touch.clientY);
+    };
+    const onTouchEnd = () => endDrag();
+
+    if (dragging) {
+      window.addEventListener("mousemove", onMouseMove);
+      window.addEventListener("mouseup", onMouseUp);
+      window.addEventListener("touchmove", onTouchMove, { passive: true });
+      window.addEventListener("touchend", onTouchEnd);
+    }
+
+    return () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+      window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("touchend", onTouchEnd);
+    };
+  }, [dragging]);
+
+  return (
+    <>
+      {/* Mobile draggable bottom sheet */}
+      <div
+        className="absolute bottom-0 left-0 right-0 z-40 rounded-t-3xl bg-slate-950/82 shadow-2xl backdrop-blur transition-[height] duration-200 sm:hidden"
+        style={{ height: `${mobileHeightVh}vh` }}
+      >
+        <div
+          role="button"
+          tabIndex={0}
+          aria-label="Drag terminal"
+          onMouseDown={(e) => beginDrag(e.clientY)}
+          onTouchStart={(e) => {
+            const touch = e.touches[0];
+            if (!touch) return;
+            beginDrag(touch.clientY);
+          }}
+          onDoubleClick={() =>
+            setMobileHeightVh((prev) => (prev < MID ? EXPANDED : COLLAPSED))
+          }
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              setMobileHeightVh((prev) => (prev < MID ? EXPANDED : COLLAPSED));
+            }
+          }}
+          className="flex w-full cursor-row-resize flex-col items-center gap-2 px-4 pb-2 pt-3"
+        >
+          <div className="h-1.5 w-14 rounded-full bg-slate-500" />
+          <span className="text-xs text-slate-300">
+            Swipe or drag terminal
+          </span>
+        </div>
+
+        <div className="h-[calc(100%-44px)] overflow-hidden px-2 pb-2">
+          <div className="h-full overflow-hidden rounded-2xl">
+            <Terminal {...terminalProps} />
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop terminal */}
+      <div className="pointer-events-auto absolute bottom-6 left-1/2 z-40 hidden w-[min(92%,900px)] -translate-x-1/2 sm:block">
+        <div className="overflow-hidden rounded-2xl shadow-2xl">
+          <Terminal {...terminalProps} />
+        </div>
+      </div>
+    </>
   );
 }
