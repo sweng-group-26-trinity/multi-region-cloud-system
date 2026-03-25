@@ -1,45 +1,17 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
-/**
- * Header component for the application.
- *
- * Displays the app logo and top-level navigation links.
- * The component conditionally renders authentication actions
- * depending on the current route and whether a token exists
- * in local storage.
- *
- * Behaviour:
- * - Always shows the logo
- * - Always shows Dashboard and Health links
- * - Hides auth action on login and signup pages
- * - Shows Logout when a user token exists
- * - Shows Login when no user token exists
- *
- * @returns The application header.
- */
 export default function Header() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  /**
-   * Authentication token stored in local storage.
-   * Used to determine whether the user is currently logged in.
-   */
   const token = localStorage.getItem("token");
 
-  /**
-   * Determines whether the current page is an authentication page.
-   * On these pages, the login/logout action is hidden.
-   */
-  const isAuthPage =
-    location.pathname === "/login" || location.pathname === "/signup";
+  const pathname = location.pathname;
 
-  /**
-   * Handles user logout.
-   *
-   * Removes the stored authentication token and redirects
-   * the user to the login page.
-   */
+  const isAuthPage = pathname === "/login" || pathname === "/signup";
+  const isDashboardPage = pathname.startsWith("/dashboard");
+  const isHealthPage = pathname.startsWith("/health");
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/login");
@@ -47,66 +19,100 @@ export default function Header() {
 
   return (
     <header style={styles.header}>
-      {/* Logo / brand section */}
-      <div style={styles.logo}>
-        <Link to="/">🍽 FoodApp</Link>
+      <div style={styles.topRow}>
+        <div style={styles.logo}>
+          <Link to="/" style={styles.logoLink}>
+            🍽 DineHub
+          </Link>
+        </div>
+
+        <nav style={styles.nav}>
+          {!isDashboardPage && (
+            <Link to="/dashboard" style={styles.link}>
+              Dashboard
+            </Link>
+          )}
+
+          {!isHealthPage && (
+            <Link to="/health" style={styles.link}>
+              Health
+            </Link>
+          )}
+
+          {!isAuthPage &&
+            (token ? (
+              <button onClick={handleLogout} style={styles.button}>
+                Logout
+              </button>
+            ) : (
+              <Link to="/login" style={styles.link}>
+                Login
+              </Link>
+            ))}
+        </nav>
       </div>
-
-      {/* Main navigation links */}
-      <nav style={styles.nav}>
-        <Link to="/dashboard">Dashboard</Link>
-        <Link to="/health">Health</Link>
-
-        {!isAuthPage &&
-          (token ? (
-            <button onClick={handleLogout} style={styles.button}>
-              Logout
-            </button>
-          ) : (
-            <Link to="/login">Login</Link>
-          ))}
-      </nav>
     </header>
   );
 }
 
-/**
- * Inline style definitions for the header layout and controls.
- */
 const styles = {
-  /**
-   * Main header container styling.
-   */
   header: {
-    display: "flex",
-    justifyContent: "space-between",
-    padding: "1rem 2rem",
+    position: "sticky" as const,
+    top: 0,
+    zIndex: 1000,
+    backgroundColor: "#fff",
     borderBottom: "1px solid #ddd",
-    alignItems: "center",
+    padding: "0.75rem 1rem",
   },
 
-  /**
-   * Logo text styling.
-   */
+  topRow: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: "0.75rem",
+    flexWrap: "wrap" as const,
+  },
+
   logo: {
     fontSize: "1.4rem",
     fontWeight: "bold",
+    flexShrink: 0,
   },
 
-  /**
-   * Navigation container styling.
-   */
+  logoLink: {
+    textDecoration: "none",
+    color: "#111827",
+  },
+
   nav: {
     display: "flex",
-    gap: "1.5rem",
     alignItems: "center",
+    justifyContent: "flex-end",
+    gap: "0.5rem",
+    flexWrap: "wrap" as const,
   },
 
-  /**
-   * Logout button styling.
-   */
+  link: {
+    textDecoration: "none",
+    color: "#111827",
+    fontWeight: 500,
+    padding: "0.45rem 0.7rem",
+    border: "1px solid #ddd",
+    borderRadius: "8px",
+    backgroundColor: "#fff",
+    fontSize: "0.9rem",
+    whiteSpace: "nowrap" as const,
+  },
+
   button: {
-    padding: "6px 12px",
+    padding: "0.45rem 0.7rem",
     cursor: "pointer",
+    border: "1px solid #ddd",
+    borderRadius: "8px",
+    backgroundColor: "#fff",
+    color: "#111827",
+    fontWeight: 500,
+    fontSize: "0.9rem",
+    whiteSpace: "nowrap" as const,
   },
 };

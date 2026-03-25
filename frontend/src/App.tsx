@@ -131,11 +131,16 @@ function Header({
   const { logout } = useAuth();
   const token = localStorage.getItem("token");
 
+  const pathname = location.pathname;
+
   const isSimpleHeaderPage =
-    location.pathname === "/" ||
-    location.pathname === "/login" ||
-    location.pathname === "/signup" ||
-    location.pathname === "/forgot-password";
+    pathname === "/" ||
+    pathname === "/login" ||
+    pathname === "/signup" ||
+    pathname === "/forgot-password";
+
+  const isDashboardPage = pathname === "/dashboard";
+  const isHealthPage = pathname === "/health";
 
   const showPrivateButtons = !isSimpleHeaderPage && !!token;
 
@@ -146,64 +151,70 @@ function Header({
   };
 
   return (
-    <header className="sticky top-0 z-50 flex items-center justify-between border-b border-slate-200 bg-white/90 px-6 py-4 backdrop-blur transition-colors duration-300 dark:border-slate-800 dark:bg-slate-950/90">
-      <button
-        type="button"
-        onClick={() => navigate("/")}
-        className="flex items-center gap-2 rounded-xl px-3 py-2 transition-all duration-200 hover:scale-[1.02] hover:bg-slate-100 dark:hover:bg-slate-900"
-      >
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500 text-white">
-          <UtensilsCrossed size={18} strokeWidth={2.5} />
-        </div>
-        <span className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-          DineHub
-        </span>
-      </button>
-
-      <div className="flex items-center gap-3">
+    <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur transition-colors duration-300 dark:border-slate-800 dark:bg-slate-950/90">
+      <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
         <button
           type="button"
-          onClick={toggleDarkMode}
-          title={darkMode ? "Light Mode" : "Dark Mode"}
-          className="flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-slate-900 shadow-md transition-all duration-200 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98] dark:bg-slate-900 dark:text-slate-100 dark:shadow-black/30"
+          onClick={() => navigate("/")}
+          className="flex shrink-0 items-center gap-2 rounded-xl px-2 py-2 transition-all duration-200 hover:scale-[1.02] hover:bg-slate-100 dark:hover:bg-slate-900"
         >
-          {darkMode ? <Sun size={18} /> : <Moon size={18} />}
-          <span className="hidden font-medium sm:inline">
-            {darkMode ? "Light Mode" : "Dark Mode"}
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500 text-white">
+            <UtensilsCrossed size={18} strokeWidth={2.5} />
+          </div>
+          <span className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+            DineHub
           </span>
         </button>
 
-        {showPrivateButtons && (
-          <>
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <button
+            type="button"
+            onClick={toggleDarkMode}
+            title={darkMode ? "Light Mode" : "Dark Mode"}
+            className="flex items-center gap-2 rounded-xl bg-white px-3 py-2 text-slate-900 shadow-md transition-all duration-200 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98] dark:bg-slate-900 dark:text-slate-100 dark:shadow-black/30"
+          >
+            {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+            <span className="hidden font-medium sm:inline">
+              {darkMode ? "Light Mode" : "Dark Mode"}
+            </span>
+          </button>
+
+          {showPrivateButtons && !isDashboardPage && (
             <button
               type="button"
               onClick={() => navigate("/dashboard")}
               title="Dashboard"
-              className="flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-slate-900 shadow-md transition-all duration-200 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98] dark:bg-slate-900 dark:text-slate-100 dark:shadow-black/30"
+              className="flex items-center gap-2 rounded-xl bg-white px-3 py-2 text-slate-900 shadow-md transition-all duration-200 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98] dark:bg-slate-900 dark:text-slate-100 dark:shadow-black/30"
             >
               <LayoutDashboard size={18} />
               <span className="hidden font-medium sm:inline">Dashboard</span>
             </button>
+          )}
+
+          {showPrivateButtons && !isHealthPage && (
             <button
               type="button"
               onClick={() => navigate("/health")}
               title="Health"
-              className="flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-slate-900 shadow-md transition-all duration-200 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98] dark:bg-slate-900 dark:text-slate-100 dark:shadow-black/30"
+              className="flex items-center gap-2 rounded-xl bg-white px-3 py-2 text-slate-900 shadow-md transition-all duration-200 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98] dark:bg-slate-900 dark:text-slate-100 dark:shadow-black/30"
             >
               <HeartPulse size={18} />
               <span className="hidden font-medium sm:inline">Health</span>
             </button>
+          )}
+
+          {showPrivateButtons && (
             <button
               type="button"
               onClick={handleLogout}
               title="Logout"
-              className="flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-slate-900 shadow-md transition-all duration-200 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98] dark:bg-slate-900 dark:text-slate-100 dark:shadow-black/30"
+              className="flex items-center gap-2 rounded-xl bg-white px-3 py-2 text-slate-900 shadow-md transition-all duration-200 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98] dark:bg-slate-900 dark:text-slate-100 dark:shadow-black/30"
             >
               <LogOut size={18} />
               <span className="hidden font-medium sm:inline">Logout</span>
             </button>
-          </>
-        )}
+          )}
+        </div>
       </div>
     </header>
   );
