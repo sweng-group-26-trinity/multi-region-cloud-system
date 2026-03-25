@@ -21,7 +21,7 @@ import { CookingPot, Activity } from "lucide-react";
  * - Dark/light mode reactive rendering
  * - Interactive UI overlays for navigation
  *
- * * Built using WebGLRenderer and OrbitControls.
+ * Built using WebGLRenderer and OrbitControls.
  * The scene is mounted into a DOM element using a React ref.
  *
  * @example
@@ -67,7 +67,6 @@ export default function HomePage() {
 
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setClearColor(isDark() ? 0x0a0f1e : 0x20a7db);
-
     mount.appendChild(renderer.domElement);
 
     /**
@@ -96,7 +95,6 @@ export default function HomePage() {
     controls.dampingFactor = 0.05;
     controls.minDistance = 20;
     controls.maxDistance = 80;
-
     controls.update();
 
     /**
@@ -148,9 +146,6 @@ export default function HomePage() {
 
     /**
      * Atmospheric glow layers surrounding the Earth model.
-     *
-     * Multiple sphere meshes with increasing radius create
-     * a halo-like atmospheric effect.
      */
     const glowMeshes: THREE.Mesh[] = [];
 
@@ -289,10 +284,8 @@ export default function HomePage() {
       const dark = isDark();
 
       renderer.setClearColor(dark ? 0x0a0f1e : 0x20a7db);
-
       dLight.intensity = dark ? 0.5 : 1;
       ambientLight.intensity = dark ? 0.2 : 0.5;
-
       starsMaterial.opacity = dark ? 1.0 : 0.15;
     });
 
@@ -303,8 +296,6 @@ export default function HomePage() {
 
     /**
      * Main animation loop.
-     *
-     * Updates object positions and renders each frame.
      */
     let animationId: number;
 
@@ -343,7 +334,6 @@ export default function HomePage() {
     const handleResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
-
       renderer.setSize(window.innerWidth, window.innerHeight);
     };
 
@@ -354,109 +344,74 @@ export default function HomePage() {
      */
     return () => {
       mounted = false;
-
       observer.disconnect();
-
       cancelAnimationFrame(animationId);
-
       window.removeEventListener("resize", handleResize);
-
       controls.dispose();
       renderer.dispose();
-
       mount.removeChild(renderer.domElement);
     };
   }, []);
 
-  /**
-   * React UI overlay rendered above the WebGL canvas.
-   */
-  /**
-   * React UI overlay.
-   *
-   * Contains:
-   * - Centered title and description
-   * - Navigation buttons for dashboard and health monitoring
-   * - Region status indicators
-   * - Project attribution footer
-   */
   return (
-    <div className="relative w-screen h-screen">
+    <div className="relative h-screen w-screen overflow-hidden">
       {/* WebGL canvas mount point */}
-      <div ref={mountRef} className="w-full h-full" />
+      <div ref={mountRef} className="h-full w-full" />
 
-      {/* Center text overlay */}
-      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center pointer-events-none">
-        {/**
-         * Main page title.
-         *
-         * Describes the system architecture being visualized.
-         */}
-        <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white drop-shadow-lg text-center text-balance">
-          Multi-regional
-          <br />
-          Database
-        </h1>
+      {/* Soft overlay to improve text readability */}
+      <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-b from-black/10 via-transparent to-black/30 dark:from-black/20 dark:to-black/50" />
 
-        {/**
-         * Supporting subtitle describing system capabilities.
-         */}
-        <p className="mt-4 text-lg md:text-xl text-white/80 max-w-lg text-center text-pretty drop-shadow">
-          Multi-region cloud-native database with real-time health monitoring
-        </p>
-      </div>
+      {/* Hero content */}
+      <div className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-between px-5 pb-8 pt-20 sm:px-8 sm:pb-10 sm:pt-24">
+        <div className="flex-1" />
 
-      {/* Bottom action buttons and system status */}
-      <div className="absolute bottom-0 left-0 right-0 z-10 flex flex-col items-center pb-8">
-        {/**
-         * Primary navigation actions.
-         */}
-        <div className="flex flex-col sm:flex-row items-center gap-4 pointer-events-auto">
-          {/* Dashboard navigation */}
+        <div className="max-w-[22rem] text-center sm:max-w-2xl">
+          <h1 className="text-4xl font-bold leading-[0.95] text-white drop-shadow-lg sm:text-5xl md:text-6xl lg:text-7xl">
+            Multi-regional
+            <br />
+            Database
+          </h1>
+
+          <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-white/85 drop-shadow sm:mt-5 sm:text-base md:text-lg">
+            Multi-region cloud-native database with real-time health monitoring
+          </p>
+        </div>
+
+        <div className="mt-8 flex w-full max-w-sm flex-col items-center gap-3 pointer-events-auto sm:max-w-md">
           <button
             onClick={() => navigate("/dashboard")}
-            className="inline-flex items-center gap-2 rounded-xl bg-[#ef6b3a] px-8 py-4 font-semibold text-white shadow-lg shadow-[#ef6b3a]/30 transition-all duration-200 hover:scale-105 hover:bg-[#d95a2a] hover:shadow-xl"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#ef6b3a] px-6 py-4 font-semibold text-white shadow-lg shadow-[#ef6b3a]/30 transition-all duration-200 hover:scale-[1.02] hover:bg-[#d95a2a] hover:shadow-xl"
           >
-            <CookingPot className="w-5 h-5" />
+            <CookingPot className="h-5 w-5" />
             View Dashboard
           </button>
 
-          {/* Health monitoring page */}
           <button
             onClick={() => navigate("/health")}
-            className="inline-flex items-center gap-2 rounded-xl bg-gray-800 px-8 py-4 font-semibold text-white shadow-lg transition-all duration-200 hover:scale-105 hover:bg-gray-700 hover:shadow-xl"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900/85 px-6 py-4 font-semibold text-white shadow-lg backdrop-blur-sm transition-all duration-200 hover:scale-[1.02] hover:bg-slate-800/90 hover:shadow-xl"
           >
-            <Activity className="w-5 h-5" />
+            <Activity className="h-5 w-5" />
             Check Health Status
           </button>
-        </div>
 
-        {/**
-         * Region health indicators.
-         *
-         * Each pill represents a database region
-         * with a pulsing status light.
-         */}
-        <div className="flex flex-wrap justify-center gap-3 mt-6 pointer-events-auto">
-          {["US East", "US West"].map((region) => (
-            <div
-              key={region}
-              className="flex items-center gap-2 rounded-full bg-white/90 px-4 py-2 shadow-sm backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
-            >
-              <span className="w-2 h-2 rounded-l bg-green-500 animate-pulse" />
-              <span className="text-sm text-gray-700 font-medium">
-                {region}
-              </span>
-            </div>
-          ))}
-        </div>
+          <div className="mt-3 flex flex-wrap justify-center gap-2">
+            {["US East", "US West"].map((region) => (
+              <div
+                key={region}
+                className="flex items-center gap-2 rounded-full bg-white/85 px-3 py-1.5 shadow-sm backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+              >
+                <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                <span className="text-xs font-medium text-slate-700 sm:text-sm">
+                  {region}
+                </span>
+              </div>
+            ))}
+          </div>
 
-        {/**
-         * Project attribution footer.
-         */}
-        <p className="text-white/70 text-sm mt-6">
-          Group 26 - In collaboration with Toast
-        </p>
+          <p className="mt-3 hidden text-center text-xs text-white/70 sm:block">
+            Group 26 - In collaboration with Toast
+          </p>
+        </div>
       </div>
     </div>
   );
