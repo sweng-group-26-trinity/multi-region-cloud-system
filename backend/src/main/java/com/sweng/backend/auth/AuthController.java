@@ -19,6 +19,7 @@ public class AuthController {
   private final AuthenticationManager authenticationManager;
   private final UserService userService;
   private final JwtUtil jwtUtil;
+  private final RestTemplate restTemplate;
 
   /**
    * Constructs an AuthController with required dependencies.
@@ -26,12 +27,17 @@ public class AuthController {
    * @param authenticationManager the authentication manager
    * @param userService the user service
    * @param jwtUtil the JWT utility
+   * @param restTemplate the REST template for external HTTP requests
    */
   public AuthController(
-      AuthenticationManager authenticationManager, UserService userService, JwtUtil jwtUtil) {
+      AuthenticationManager authenticationManager,
+      UserService userService,
+      JwtUtil jwtUtil,
+      RestTemplate restTemplate) {
     this.authenticationManager = authenticationManager;
     this.userService = userService;
     this.jwtUtil = jwtUtil;
+    this.restTemplate = restTemplate;
   }
 
   /**
@@ -156,9 +162,8 @@ public class AuthController {
   @PostMapping("/google")
   public ResponseEntity<?> googleAuth(@Valid @RequestBody GoogleAuthRequest request) {
     try {
-      RestTemplate rest = new RestTemplate();
       Map<?, ?> info =
-          rest.getForObject(
+          restTemplate.getForObject(
               "https://oauth2.googleapis.com/tokeninfo?id_token=" + request.getIdToken(),
               Map.class);
       if (info == null || info.get("email") == null) {
