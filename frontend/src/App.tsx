@@ -133,6 +133,7 @@ function Header({
 
   const pathname = location.pathname;
 
+  const isHomePage = pathname === "/";
   const isSimpleHeaderPage =
     pathname === "/" ||
     pathname === "/login" ||
@@ -149,6 +150,36 @@ function Header({
     logout();
     navigate("/login");
   };
+
+  if (isHomePage) {
+    return (
+      <div className="pointer-events-none absolute left-0 right-0 top-0 z-50">
+        <div className="pointer-events-auto flex items-center justify-between px-4 py-4 sm:px-6 sm:py-5">
+          <button
+            type="button"
+            onClick={() => navigate("/")}
+            className="flex items-center gap-2 rounded-xl px-2 py-2 transition-all duration-200 hover:scale-[1.02]"
+          >
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500 text-white shadow-md">
+              <UtensilsCrossed size={18} strokeWidth={2.5} />
+            </div>
+            <span className="text-lg font-semibold text-white drop-shadow">
+              DineHub
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={toggleDarkMode}
+            title={darkMode ? "Light Mode" : "Dark Mode"}
+            className="flex items-center justify-center rounded-xl bg-white/85 p-2 text-slate-900 shadow-md backdrop-blur transition-all duration-200 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98] dark:bg-slate-900/85 dark:text-slate-100 dark:shadow-black/30"
+          >
+            {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur transition-colors duration-300 dark:border-slate-800 dark:bg-slate-950/90">
@@ -221,6 +252,11 @@ function Header({
 }
 
 function Footer() {
+  const location = useLocation();
+  const isHomePage = location.pathname === "/";
+
+  if (isHomePage) return null;
+
   return (
     <footer className="border-t border-slate-200 bg-white px-6 py-4 text-center text-sm text-slate-600 transition-colors duration-300 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400">
       © {new Date().getFullYear()} DineHub
@@ -235,6 +271,7 @@ function AppShell() {
     const savedMode = localStorage.getItem("darkMode");
     const isDark = savedMode === "true";
     setDarkMode(isDark);
+
     if (isDark) {
       document.documentElement.classList.add("dark");
     } else {
@@ -246,6 +283,7 @@ function AppShell() {
     const newMode = !darkMode;
     setDarkMode(newMode);
     localStorage.setItem("darkMode", String(newMode));
+
     if (newMode) {
       document.documentElement.classList.add("dark");
     } else {
@@ -254,7 +292,7 @@ function AppShell() {
   }
 
   return (
-    <div className="min-h-screen w-screen bg-white transition-colors duration-300 dark:bg-slate-950">
+    <div className="relative min-h-screen w-screen bg-white transition-colors duration-300 dark:bg-slate-950">
       <div className="flex min-h-screen flex-col">
         <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
         <main className="flex-1">
@@ -269,7 +307,8 @@ function AppShell() {
 /**
  * Main application component that orchestrates the entire DineHub application.
  * Provides the app shell with dark mode support, navigation, and routing structure.
- * @returns The rendered AppShell component
+ *
+ * @returns The rendered AppShell component.
  */
 export function App() {
   return <AppShell />;
