@@ -405,6 +405,18 @@ paths:
           description: Server successfully initiated the shutdown
         "401":
           description: Unauthorized - authentication required
+  /server-info:
+    get:
+      summary: Read information about the server
+      description: Returns data like the hostname, time online, etc
+      security: []
+      responses:
+        "200":
+          description: Read the server info successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServerInfo"
 components:
   securitySchemes:
     BearerAuth:
@@ -823,3 +835,20 @@ components:
           type: string
           description: Special requests or dietary requirements (optional)
           maxLength: 500
+    ServerInfo:
+      type: object
+      description: Information about the server
+      properties:
+        startTime:
+          type: string
+          format: date-time
+          description: The time the server started at
+        hostName:
+          type: string
+          description: The server's hostname identifier
+        user:
+          type: string
+          description: The user the server is running under
+        os:
+          type: string
+          description: The /etc/os-release `PRETTY_NAME` for the server os
