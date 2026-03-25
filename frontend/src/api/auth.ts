@@ -27,6 +27,17 @@ export interface SignupRequest {
 }
 
 /**
+ * Request payload for Google OAuth login.
+ */
+export interface GoogleLoginRequest {
+  /**
+   * Google ID token returned from Google Identity Services.
+   * This is a JWT issued by Google after successful authentication.
+   */
+  idToken: string;
+}
+
+/**
  * Response returned after successful authentication.
  */
 export interface AuthResponse {
@@ -67,6 +78,22 @@ export const login = (data: LoginRequest) =>
  */
 export const signup = (data: SignupRequest) =>
   apiFetch<AuthResponse>("/auth/register", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+
+/**
+ * Sends a Google OAuth login request to the backend.
+ *
+ * This endpoint exchanges a Google-issued ID token for a JWT issued
+ * by your backend. The backend validates the token with Google and
+ * returns the same AuthResponse as a normal login.
+ *
+ * @param data - Object containing the Google ID token
+ * @returns AuthResponse containing the JWT access token and user data
+ */
+export const loginWithGoogle = (data: GoogleLoginRequest) =>
+  apiFetch<AuthResponse>("/auth/google", {
     method: "POST",
     body: JSON.stringify(data),
   });
