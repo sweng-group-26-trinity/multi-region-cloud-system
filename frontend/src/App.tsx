@@ -134,6 +134,7 @@ function Header({
   const pathname = location.pathname;
 
   const isHomePage = pathname === "/";
+  const isHealthPage = pathname === "/health";
   const isSimpleHeaderPage =
     pathname === "/" ||
     pathname === "/login" ||
@@ -141,7 +142,6 @@ function Header({
     pathname === "/forgot-password";
 
   const isDashboardPage = pathname === "/dashboard";
-  const isHealthPage = pathname === "/health";
 
   const showPrivateButtons = !isSimpleHeaderPage && !!token;
 
@@ -176,6 +176,63 @@ function Header({
           >
             {darkMode ? <Sun size={18} /> : <Moon size={18} />}
           </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (isHealthPage) {
+    return (
+      <div className="pointer-events-none absolute left-0 right-0 top-0 z-50">
+        <div className="pointer-events-auto flex flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6 sm:py-5">
+          <button
+            type="button"
+            onClick={() => navigate("/")}
+            className="flex shrink-0 items-center gap-2 rounded-xl bg-white/85 px-3 py-2 text-slate-900 shadow-md backdrop-blur transition-all duration-200 hover:scale-[1.02] dark:bg-slate-950/85 dark:text-slate-100 dark:shadow-black/30"
+          >
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500 text-white">
+              <UtensilsCrossed size={18} strokeWidth={2.5} />
+            </div>
+            <span className="text-lg font-semibold">DineHub</span>
+          </button>
+
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={toggleDarkMode}
+              title={darkMode ? "Light Mode" : "Dark Mode"}
+              className="flex items-center gap-2 rounded-xl bg-white/85 px-3 py-2 text-slate-900 shadow-md backdrop-blur transition-all duration-200 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98] dark:bg-slate-950/85 dark:text-slate-100 dark:shadow-black/30"
+            >
+              {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+              <span className="hidden font-medium sm:inline">
+                {darkMode ? "Light Mode" : "Dark Mode"}
+              </span>
+            </button>
+
+            {showPrivateButtons && !isDashboardPage && (
+              <button
+                type="button"
+                onClick={() => navigate("/dashboard")}
+                title="Dashboard"
+                className="flex items-center gap-2 rounded-xl bg-white/85 px-3 py-2 text-slate-900 shadow-md backdrop-blur transition-all duration-200 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98] dark:bg-slate-950/85 dark:text-slate-100 dark:shadow-black/30"
+              >
+                <LayoutDashboard size={18} />
+                <span className="hidden font-medium sm:inline">Dashboard</span>
+              </button>
+            )}
+
+            {showPrivateButtons && (
+              <button
+                type="button"
+                onClick={handleLogout}
+                title="Logout"
+                className="flex items-center gap-2 rounded-xl bg-white/85 px-3 py-2 text-slate-900 shadow-md backdrop-blur transition-all duration-200 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98] dark:bg-slate-950/85 dark:text-slate-100 dark:shadow-black/30"
+              >
+                <LogOut size={18} />
+                <span className="hidden font-medium sm:inline">Logout</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -253,9 +310,10 @@ function Header({
 
 function Footer() {
   const location = useLocation();
-  const isHomePage = location.pathname === "/";
+  const hideFooter =
+    location.pathname === "/" || location.pathname === "/health";
 
-  if (isHomePage) return null;
+  if (hideFooter) return null;
 
   return (
     <footer className="border-t border-slate-200 bg-white px-6 py-4 text-center text-sm text-slate-600 transition-colors duration-300 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400">
