@@ -240,7 +240,8 @@ export class Node {
       descEl.style.fontSize = mobile ? "10px" : "12px";
       descEl.style.color = "#64748b";
       descEl.style.lineHeight = "1.35";
-      descEl.style.marginBottom = buttons.length > 0 ? (mobile ? "8px" : "10px") : "0";
+      descEl.style.marginBottom =
+        buttons.length > 0 ? (mobile ? "8px" : "10px") : "0";
       descEl.style.wordBreak = "break-word";
       descEl.textContent = description;
       div.appendChild(descEl);
