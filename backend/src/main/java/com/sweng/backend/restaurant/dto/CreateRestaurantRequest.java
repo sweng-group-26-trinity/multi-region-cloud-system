@@ -31,7 +31,6 @@ public class CreateRestaurantRequest {
 
   @NotBlank
   @Size(max = 100)
-  @JsonDeserialize(using = StrictStringDeserializer.class)
   private String openingHours;
 
   /** Default constructor for deserialization. */

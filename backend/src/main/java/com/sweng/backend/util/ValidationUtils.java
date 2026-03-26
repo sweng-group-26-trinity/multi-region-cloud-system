@@ -20,7 +20,8 @@ public final class ValidationUtils {
   public static void rejectNullBytes(String value, String fieldName) {
     if (value != null && value.indexOf('\0') >= 0) {
       throw new ResponseStatusException(
-          HttpStatus.BAD_REQUEST, "Invalid characters in " + fieldName + ": null bytes not allowed");
+          HttpStatus.BAD_REQUEST,
+          "Invalid characters in " + fieldName + ": null bytes not allowed");
     }
   }
 
