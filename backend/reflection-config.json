@@ -1,5 +1,23 @@
 [
   {
+    "name": "com.sweng.backend.auth.LoginResponse",
+    "allDeclaredConstructors": true,
+    "allPublicConstructors": true,
+    "allDeclaredMethods": true,
+    "allPublicMethods": true,
+    "allDeclaredFields": true,
+    "allPublicFields": true
+  },
+  {
+    "name": "com.sweng.backend.auth.LoginResponse$UserDto",
+    "allDeclaredConstructors": true,
+    "allPublicConstructors": true,
+    "allDeclaredMethods": true,
+    "allPublicMethods": true,
+    "allDeclaredFields": true,
+    "allPublicFields": true
+  },
+  {
     "name": "ch.qos.logback.classic.AsyncAppender",
     "allDeclaredConstructors": true,
     "allPublicConstructors": true,
