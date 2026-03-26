@@ -181,9 +181,7 @@ export function SignupPage() {
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t dark:border-slate-700" />
             </div>
-            <span className="relative bg-white dark:bg-slate-900 px-2">
-              OR
-            </span>
+            <span className="relative bg-white dark:bg-slate-900 px-2">OR</span>
           </div>
 
           {/* Google button */}
