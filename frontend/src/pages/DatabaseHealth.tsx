@@ -399,15 +399,7 @@ export default function ThreeScene() {
  * @returns Responsive terminal overlay.
  */
 function MobileTerminalSheet() {
-  const [mobileHeightVh, setMobileHeightVh] = useState(18);
-  const [dragging, setDragging] = useState(false);
-
-  const startYRef = useRef<number | null>(null);
-  const startHeightRef = useRef<number>(18);
-
-  const COLLAPSED = 18;
-  const MID = 42;
-  const EXPANDED = 72;
+  const [expanded, setExpanded] = useState(false);
 
   const terminalProps = {
     title: "dinehub-terminal",
@@ -423,96 +415,30 @@ function MobileTerminalSheet() {
     ],
   };
 
-  const clampHeight = (value: number) =>
-    Math.max(COLLAPSED, Math.min(EXPANDED, value));
-
-  const snapHeight = (value: number) => {
-    const snapPoints = [COLLAPSED, MID, EXPANDED];
-    return snapPoints.reduce((closest, point) =>
-      Math.abs(point - value) < Math.abs(closest - value) ? point : closest,
-    );
-  };
-
-  const beginDrag = (clientY: number) => {
-    startYRef.current = clientY;
-    startHeightRef.current = mobileHeightVh;
-    setDragging(true);
-  };
-
-  const updateDrag = (clientY: number) => {
-    if (startYRef.current === null) return;
-
-    const deltaY = startYRef.current - clientY;
-    const deltaVh = (deltaY / window.innerHeight) * 100;
-    setMobileHeightVh(clampHeight(startHeightRef.current + deltaVh));
-  };
-
-  const endDrag = () => {
-    setDragging(false);
-    startYRef.current = null;
-    setMobileHeightVh((prev) => snapHeight(prev));
-  };
-
-  useEffect(() => {
-    const onMouseMove = (e: MouseEvent) => updateDrag(e.clientY);
-    const onMouseUp = () => endDrag();
-    const onTouchMove = (e: TouchEvent) => {
-      const touch = e.touches[0];
-      if (!touch) return;
-      updateDrag(touch.clientY);
-    };
-    const onTouchEnd = () => endDrag();
-
-    if (dragging) {
-      window.addEventListener("mousemove", onMouseMove);
-      window.addEventListener("mouseup", onMouseUp);
-      window.addEventListener("touchmove", onTouchMove, { passive: true });
-      window.addEventListener("touchend", onTouchEnd);
-    }
-
-    return () => {
-      window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("mouseup", onMouseUp);
-      window.removeEventListener("touchmove", onTouchMove);
-      window.removeEventListener("touchend", onTouchEnd);
-    };
-  }, [dragging]);
-
   return (
     <>
-      {/* Mobile draggable bottom sheet */}
+      {/* Mobile terminal */}
       <div
-        className="absolute bottom-0 left-0 right-0 z-40 rounded-t-3xl bg-slate-950/82 shadow-2xl backdrop-blur transition-[height] duration-200 sm:hidden"
-        style={{ height: `${mobileHeightVh}vh` }}
+        className={`absolute bottom-0 left-0 right-0 z-40 rounded-t-3xl bg-slate-950/90 shadow-2xl backdrop-blur transition-all duration-300 sm:hidden ${
+          expanded ? "h-[62vh]" : "h-[14vh]"
+        }`}
       >
-        <div
-          role="button"
-          tabIndex={0}
-          aria-label="Drag terminal"
-          onMouseDown={(e) => beginDrag(e.clientY)}
-          onTouchStart={(e) => {
-            const touch = e.touches[0];
-            if (!touch) return;
-            beginDrag(touch.clientY);
-          }}
-          onDoubleClick={() =>
-            setMobileHeightVh((prev) => (prev < MID ? EXPANDED : COLLAPSED))
-          }
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              setMobileHeightVh((prev) => (prev < MID ? EXPANDED : COLLAPSED));
-            }
-          }}
-          className="flex w-full cursor-row-resize flex-col items-center gap-2 px-4 pb-2 pt-3"
+        {/* Toggle bar */}
+        <button
+          type="button"
+          onClick={() => setExpanded((prev) => !prev)}
+          className="flex w-full flex-col items-center gap-2 px-4 pb-2 pt-3"
+          aria-label={expanded ? "Collapse terminal" : "Expand terminal"}
         >
           <div className="h-1.5 w-14 rounded-full bg-slate-500" />
-          <span className="text-xs text-slate-300">
-            Swipe or drag terminal
+          <span className="text-xs font-medium text-slate-300">
+            {expanded ? "Hide terminal" : "Show terminal"}
           </span>
-        </div>
+        </button>
 
-        <div className="h-[calc(100%-44px)] overflow-hidden px-2 pb-2">
-          <div className="h-full overflow-hidden rounded-2xl">
+        {/* Terminal wrapper */}
+        <div className="h-[calc(100%-44px)] px-2 pb-2">
+          <div className="h-full overflow-hidden rounded-2xl border border-slate-800">
             <Terminal {...terminalProps} />
           </div>
         </div>
