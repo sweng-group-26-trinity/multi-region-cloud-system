@@ -18,7 +18,7 @@ public class CreateOrderRequest {
   @NotNull private String restaurantId;
 
   /** Customer name (for guest or display). */
-  @NotBlank
+  @NotNull
   @Size(min = 1, max = 100)
   private String customerName;
 

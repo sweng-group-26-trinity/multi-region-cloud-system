@@ -62,6 +62,9 @@ class OrderSecurityIT {
     r.setId(UUID.randomUUID());
     r.setName("Test Resto");
     r.setAddress("1 Test Street");
+    r.setPhone("+123456789");
+    r.setCuisineType("Test Cuisine");
+    r.setOpeningHours("Mon-Fri 09:00-17:00");
     r.setActive(true);
     r.setOwnerId(ownerUid);
     restaurantId = restaurantRepository.save(r).getId();
@@ -69,6 +72,8 @@ class OrderSecurityIT {
     // Create order as customerA
     CreateOrderRequest a = new CreateOrderRequest();
     a.setRestaurantId(restaurantId.toString());
+    a.setCustomerName("Customer A");
+    a.setCustomerEmail("customerA@test.com");
     a.setItems(List.of(buildItem("item-a", 1)));
 
     String aResp =
@@ -90,6 +95,8 @@ class OrderSecurityIT {
     // Create order as customerB
     CreateOrderRequest b = new CreateOrderRequest();
     b.setRestaurantId(restaurantId.toString());
+    b.setCustomerName("Customer B");
+    b.setCustomerEmail("customerB@test.com");
     b.setItems(List.of(buildItem("item-b", 1)));
 
     String bResp =

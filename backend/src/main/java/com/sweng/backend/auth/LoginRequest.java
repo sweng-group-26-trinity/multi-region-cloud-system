@@ -1,6 +1,8 @@
 package com.sweng.backend.auth;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 /** Request object for user login. */
 public class LoginRequest {
@@ -9,10 +11,19 @@ public class LoginRequest {
   public LoginRequest() {}
 
   /** Username or email address of the user attempting to log in. */
-  @NotBlank private String identifier;
+  @NotBlank
+  @Size(min = 1, max = 120)
+  @Pattern(
+      regexp = "^(?!\\s*$).+",
+      message = "Identifier must contain at least one non-whitespace character")
+  private String identifier;
 
   /** Password of the user attempting to log in. */
-  @NotBlank private String password;
+  @NotBlank
+  @Pattern(
+      regexp = "^[\\x21-\\x7E][\\x20-\\x7E]*$",
+      message = "Password must be ASCII printable and start with a non-space character")
+  private String password;
 
   /**
    * Gets the identifier.

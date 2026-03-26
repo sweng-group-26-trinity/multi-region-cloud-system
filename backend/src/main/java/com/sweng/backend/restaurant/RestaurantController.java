@@ -132,11 +132,10 @@ public class RestaurantController {
     ValidationUtils.rejectNullBytes(body.getCuisineType(), "cuisineType");
     ValidationUtils.rejectNullBytes(body.getOpeningHours(), "openingHours");
     ValidationUtils.rejectNullBytes(body.getEmail(), "email");
-    ValidationUtils.rejectNullBytes(body.getDescription(), "description");
 
     RestaurantEntity e = new RestaurantEntity();
     e.setName(body.getName());
-    e.setDescription(body.getDescription());
+    e.setDescription(ValidationUtils.stripNullBytes(body.getDescription()));
     e.setAddress(body.getAddress());
     e.setPhone(body.getPhone());
     e.setEmail(body.getEmail());
@@ -211,8 +210,7 @@ public class RestaurantController {
       found.setName(body.getName());
     }
     if (body.getDescription() != null) {
-      ValidationUtils.rejectNullBytes(body.getDescription(), "description");
-      found.setDescription(body.getDescription());
+      found.setDescription(ValidationUtils.stripNullBytes(body.getDescription()));
     }
     if (body.getAddress() != null) {
       ValidationUtils.rejectNullBytes(body.getAddress(), "address");

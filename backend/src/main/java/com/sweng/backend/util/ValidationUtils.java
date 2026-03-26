@@ -37,4 +37,17 @@ public final class ValidationUtils {
       rejectNullBytes(value, fieldName);
     }
   }
+
+  /**
+   * Removes null bytes from a string value.
+   *
+   * @param value the input string
+   * @return string without null bytes, or null when input is null
+   */
+  public static String stripNullBytes(String value) {
+    if (value == null) {
+      return null;
+    }
+    return value.replace("\0", "");
+  }
 }

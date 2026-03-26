@@ -132,18 +132,16 @@ paths:
           in: query
           description: Page number (0-indexed) for pagination
           schema:
-            type: integer
-            default: 0
-            minimum: 0
-            maximum: 10000
+            type: string
+            default: "0"
+            pattern: "^(?:0|[1-9][0-9]{0,3}|10000)$"
         - name: size
           in: query
           description: Number of items per page
           schema:
-            type: integer
-            default: 20
-            minimum: 1
-            maximum: 100
+            type: string
+            default: "20"
+            pattern: "^(?:[1-9][0-9]?|100)$"
       responses:
         "200":
           description: List of restaurants
@@ -334,6 +332,8 @@ paths:
           description: Invalid request
         "401":
           description: Unauthorized - authentication required
+        "404":
+          description: Restaurant not found
         "500":
           description: Internal server error
   /orders/{orderId}:
@@ -550,8 +550,8 @@ components:
       properties:
         identifier:
           type: string
-          description: Username or email address (must contain at least one non-space character)
-          pattern: "^(?!\\s*$).+"
+          description: Username or email address (must contain at least one non-space character, no null bytes)
+          pattern: "^(?=.*\\S)[\\x20-\\x7E]+$"
           minLength: 1
           maxLength: 120
         password:
@@ -597,21 +597,27 @@ components:
         name:
           type: string
           description: Restaurant business name
+          minLength: 1
+          maxLength: 100
+          pattern: "^[^\\x00]*$"
         description:
-          type:
-            - "null"
-            - string
+          type: string
+          nullable: true
           description: Brief description of the restaurant
+          maxLength: 500
+          pattern: "^[^\\x00]*$"
         address:
           type: string
           description: Physical address of the restaurant
+          minLength: 1
+          maxLength: 200
+          pattern: "^[^\\x00]*$"
         phone:
           type: string
           description: Contact phone number
         email:
-          type:
-            - "null"
-            - string
+          type: string
+          nullable: true
           description: Contact email address
         cuisineType:
           type: string
@@ -650,10 +656,10 @@ components:
           description: Restaurant business name
           minLength: 1
           maxLength: 100
+          pattern: "^[^\\u0000]*$"
         description:
-          type:
-            - "null"
-            - string
+          type: string
+          nullable: true
           description: Brief description of the restaurant
           maxLength: 500
         address:
@@ -661,27 +667,27 @@ components:
           description: Physical address of the restaurant
           minLength: 1
           maxLength: 200
+          pattern: "^[^\\x00]*$"
         phone:
           type: string
           description: Contact phone number
           maxLength: 20
-          pattern: "^\\S.*\\S$|^\\S$"
+          pattern: "^[\\x20-\\x7E]{1,20}$"
         email:
-          type:
-            - "null"
-            - string
+          type: string
+          nullable: true
           description: Contact email address
           pattern: "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
         cuisineType:
           type: string
           description: Type of cuisine served
           maxLength: 50
-          pattern: "^\\S.*\\S$|^\\S$"
+          pattern: "^[\\x20-\\x7E]{1,50}$"
         openingHours:
           type: string
           description: Operating hours
           maxLength: 100
-          pattern: "^\\S.*\\S$|^\\S$"
+          pattern: "^[\\x20-\\x7E]{1,100}$"
     UpdateRestaurantRequest:
       type: object
       description: Request body for updating an existing restaurant
@@ -692,30 +698,37 @@ components:
           description: Restaurant business name (optional)
           minLength: 1
           maxLength: 100
+          pattern: "^[^\\u0000]*$"
         description:
           type: string
           description: Brief description of the restaurant (optional)
           maxLength: 500
+          pattern: "^[^\\u0000]*$"
         address:
           type: string
           description: Physical address of the restaurant (optional)
+          minLength: 1
           maxLength: 200
+          pattern: "^[^\\x00]*$"
         phone:
           type: string
           description: Contact phone number (optional)
           maxLength: 20
+          pattern: "^[^\\u0000]*$"
         email:
           type: string
-          format: email
           description: Contact email address (optional)
+          pattern: "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
         cuisineType:
           type: string
           description: Type of cuisine served (optional)
           maxLength: 50
+          pattern: "^[^\\u0000]*$"
         openingHours:
           type: string
           description: Operating hours (optional)
           maxLength: 100
+          pattern: "^[^\\u0000]*$"
         isActive:
           type: boolean
           description: Whether the restaurant is active (optional)
@@ -786,9 +799,8 @@ components:
           type: number
           description: Total order amount in dollars
         specialInstructions:
-          type:
-            - "null"
-            - string
+          type: string
+          nullable: true
           description: Special requests or dietary requirements
         createdAt:
           type: string
@@ -837,7 +849,7 @@ components:
           description: Name of the customer
           minLength: 1
           maxLength: 100
-          pattern: "^\\S.*\\S$|^\\S$"
+          pattern: "^[^\\x00]{1,100}$"
         customerEmail:
           type: string
           description: Email for order notifications
@@ -856,14 +868,19 @@ components:
               itemId:
                 type: string
                 description: ID of the menu item
+                minLength: 1
+                pattern: "^[^\\u0000]+$"
               quantity:
                 type: integer
                 description: Number of this item to order
                 minimum: 1
+                maximum: 2147483647
         specialInstructions:
           type: string
+          nullable: true
           description: Special requests or dietary requirements (optional)
           maxLength: 500
+          pattern: "^[\\x20-\\x7E]{0,500}$"
     UpdateOrderRequest:
       type: object
       description: Request body for updating an existing order
@@ -874,6 +891,7 @@ components:
           description: Name of the customer (optional)
           minLength: 1
           maxLength: 100
+          pattern: "^[^\\x00]{1,100}$"
         customerEmail:
           type: string
           format: email
@@ -892,18 +910,23 @@ components:
               itemId:
                 type: string
                 description: ID of the menu item
+                minLength: 1
+                pattern: "^[^\\u0000]+$"
               quantity:
                 type: integer
                 description: Number of this item to order
                 minimum: 1
+                maximum: 2147483647
         status:
           type: string
           description: New order status (optional, restricted based on current status)
           enum: [pending, preparing, ready, completed, cancelled]
         specialInstructions:
           type: string
+          nullable: true
           description: Special requests or dietary requirements (optional)
           maxLength: 500
+          pattern: "^[\\x20-\\x7E]{0,500}$"
     ServerInfo:
       type: object
       description: Information about the server

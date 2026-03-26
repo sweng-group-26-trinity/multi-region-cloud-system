@@ -1,5 +1,6 @@
 package com.sweng.backend.order.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.List;
  *
  * <p>Matches the OpenAPI {@code UpdateOrderRequest} schema.
  */
+@JsonIgnoreProperties(ignoreUnknown = false)
 public class UpdateOrderRequest {
 
   /** Optional updated customer name. */

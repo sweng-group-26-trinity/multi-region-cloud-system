@@ -33,6 +33,16 @@ class RestaurantApiIT {
   private MockMvc mockMvc;
   private final ObjectMapper objectMapper = new ObjectMapper();
 
+  private CreateRestaurantRequest validCreateRequest(String name, String address) {
+    CreateRestaurantRequest req = new CreateRestaurantRequest();
+    req.setName(name);
+    req.setAddress(address);
+    req.setPhone("+123456789");
+    req.setCuisineType("Test Cuisine");
+    req.setOpeningHours("Mon-Fri 09:00-17:00");
+    return req;
+  }
+
   @BeforeEach
   void setup() {
     this.mockMvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
@@ -75,9 +85,7 @@ class RestaurantApiIT {
     // Get expected UID from DB
     UUID expectedUid = userRepository.findByUsername("admin").orElseThrow().getUid();
 
-    CreateRestaurantRequest req = new CreateRestaurantRequest();
-    req.setName("Owned Place");
-    req.setAddress("1 Owner Street");
+    CreateRestaurantRequest req = validCreateRequest("Owned Place", "1 Owner Street");
 
     String response =
         mockMvc
@@ -103,9 +111,7 @@ class RestaurantApiIT {
   @Test
   @WithMockUser(username = "admin", roles = "ADMIN")
   void createRestaurant_returns201_andCanFetchById() throws Exception {
-    CreateRestaurantRequest req = new CreateRestaurantRequest();
-    req.setName("New Place");
-    req.setAddress("1 Test Street");
+    CreateRestaurantRequest req = validCreateRequest("New Place", "1 Test Street");
 
     String response =
         mockMvc
@@ -129,9 +135,7 @@ class RestaurantApiIT {
   @Test
   @WithMockUser(username = "admin", roles = "ADMIN")
   void updateRestaurant_changesFields() throws Exception {
-    CreateRestaurantRequest create = new CreateRestaurantRequest();
-    create.setName("Before");
-    create.setAddress("Addr");
+    CreateRestaurantRequest create = validCreateRequest("Before", "Addr");
 
     String createResponse =
         mockMvc
@@ -160,9 +164,7 @@ class RestaurantApiIT {
   @Test
   @WithMockUser(username = "admin", roles = "ADMIN")
   void deleteRestaurant_thenGetReturns404() throws Exception {
-    CreateRestaurantRequest create = new CreateRestaurantRequest();
-    create.setName("To Delete");
-    create.setAddress("Addr");
+    CreateRestaurantRequest create = validCreateRequest("To Delete", "Addr");
 
     String createResponse =
         mockMvc

@@ -12,7 +12,7 @@ public class UpdateRestaurantRequest {
   @Size(max = 500)
   private String description;
 
-  @Size(max = 200)
+  @Size(min = 1, max = 200)
   private String address;
 
   @Size(max = 20)
