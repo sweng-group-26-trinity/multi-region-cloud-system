@@ -190,6 +190,13 @@ export default function HomePage() {
               >
                 <Link to="/health">Health</Link>
               </Button>
+              <Button
+                asChild
+                variant="outline"
+                className="rounded-xl px-6 bg-white"
+              >
+                <Link to="/faq">FAQ</Link>
+              </Button>
             </div>
           </CardHeader>
 
