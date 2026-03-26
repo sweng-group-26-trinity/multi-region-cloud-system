@@ -672,7 +672,7 @@ components:
           type: string
           description: Contact phone number
           maxLength: 20
-          pattern: "^[\\x20-\\x7E]{1,20}$"
+          pattern: "^(?=.*\\S)[\\x20-\\x7E]{1,20}$"
         email:
           type: string
           nullable: true
@@ -682,12 +682,12 @@ components:
           type: string
           description: Type of cuisine served
           maxLength: 50
-          pattern: "^[\\x20-\\x7E]{1,50}$"
+          pattern: "^(?=.*\\S)[\\x20-\\x7E]{1,50}$"
         openingHours:
           type: string
           description: Operating hours
           maxLength: 100
-          pattern: "^[\\x20-\\x7E]{1,100}$"
+          pattern: "^(?=.*\\S)[\\x20-\\x7E]{1,100}$"
     UpdateRestaurantRequest:
       type: object
       description: Request body for updating an existing restaurant
