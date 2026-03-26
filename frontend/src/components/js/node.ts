@@ -96,6 +96,7 @@ export interface NodeOptions {
 
   /**
    * Distance from Earth surface to floating label in world units.
+   * Reduced automatically on mobile for better screen fit.
    * @default 6
    */
   floatDistance?: number;
@@ -120,6 +121,9 @@ export interface NodeOptions {
  * The label floats outward from the Earth's surface
  * and animates smoothly over time.
  *
+ * On mobile viewports, the label is kept closer to the globe and
+ * given a smaller floating animation so it stays on screen.
+ *
  * @example
  * const node = new Node(scene, earth, {
  *   title: "Europe",
@@ -141,6 +145,7 @@ export class Node {
   private basePosition: THREE.Vector3;
   private floatOffset: number;
   private floatDistance: number;
+  private mobile: boolean;
 
   /**
    * Creates a new floating geographic node.
@@ -162,8 +167,11 @@ export class Node {
 
     this.scene = scene;
     this.earth = earth;
+    this.mobile = isMobileViewport();
     this.floatOffset = Math.random() * 10;
-    this.floatDistance = floatDistance;
+    this.floatDistance = this.mobile
+      ? Math.min(floatDistance, 3.5)
+      : floatDistance;
 
     this.marker = this.createMarker(lat, lon);
 
@@ -176,7 +184,7 @@ export class Node {
 
     this.basePosition = markerWorld
       .clone()
-      .add(direction.multiplyScalar(floatDistance));
+      .add(direction.multiplyScalar(this.floatDistance));
 
     this.labelObject = this.createLabel(title, description, buttons, side);
     this.line = this.createDottedLine();
@@ -189,6 +197,7 @@ export class Node {
    * Creates the floating HTML label used for the node UI.
    *
    * Styling is responsive so the label remains usable on smaller screens.
+   * Mobile layouts use a smaller width and reduced sideways offset.
    *
    * @param title - Primary title text.
    * @param description - Secondary description text.
@@ -218,12 +227,18 @@ export class Node {
     div.style.maxWidth = mobile ? "42vw" : "190px";
     div.style.minWidth = mobile ? "148px" : "170px";
     div.style.border = "1px solid rgba(15,23,42,0.06)";
-    div.style.transform =
-      mobile && side === "left"
-        ? "translateX(-8px)"
-        : mobile && side === "right"
-          ? "translateX(8px)"
-          : "translateX(0)";
+
+    const sideOffset = mobile
+      ? side === "left"
+        ? -6
+        : 0
+      : side === "left"
+        ? -18
+        : 18;
+
+        const globalShift = mobile ? -50 : 0;
+
+        div.style.transform = `translateX(${sideOffset + globalShift}px)`;
 
     const titleEl = document.createElement("div");
     titleEl.style.fontWeight = "700";
@@ -301,7 +316,9 @@ export class Node {
 
     const label = new CSS2DObject(div);
     label.position.copy(this.basePosition);
-
+    if (mobile && side === "right") {
+      label.position.x -= 5.0;
+    }
     return label;
   }
 
@@ -355,9 +372,14 @@ export class Node {
    * - Applies floating animation along radial direction
    * - Updates dashed connection line geometry
    *
+   * Mobile viewports use a smaller float amount so labels do not drift
+   * too far in and out of the visible screen area.
+   *
    * @param _time - Time value (typically based on elapsed time or Date.now()).
    */
   public update(_time: number) {
+    const mobile = isMobileViewport();
+
     const markerWorld = new THREE.Vector3();
     this.marker.getWorldPosition(markerWorld);
 
@@ -365,11 +387,17 @@ export class Node {
     this.earth.getWorldPosition(earthWorld);
     const direction = markerWorld.clone().sub(earthWorld).normalize();
 
+    const effectiveFloatDistance = mobile
+      ? Math.min(this.floatDistance, 3.5)
+      : this.floatDistance;
+
     this.basePosition = markerWorld
       .clone()
-      .add(direction.multiplyScalar(this.floatDistance));
+      .add(direction.multiplyScalar(effectiveFloatDistance));
 
-    const floatY = Math.sin(_time + this.floatOffset) * 0.8;
+    const floatAmount = mobile ? 0.22 : 0.8;
+    const floatY = Math.sin(_time + this.floatOffset) * floatAmount;
+
     const newPos = this.basePosition.clone();
     newPos.add(direction.multiplyScalar(floatY));
     this.labelObject.position.copy(newPos);
