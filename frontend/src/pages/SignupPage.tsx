@@ -1,22 +1,49 @@
+/**
+ * @file SignupPage.tsx
+ * @description Renders the user signup page with support for both
+ * standard account creation and Google-based signup/login.
+ */
+
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useGoogleLogin, useSignup } from "../api/authhooks";
 import { useAuth } from "../context/AuthContext";
 
+/**
+ * Response returned by Google Identity Services after a successful
+ * credential selection.
+ */
 interface GoogleCredentialResponse {
+  /** Google ID token credential. */
   credential: string;
 }
 
 declare global {
+  /**
+   * Extends the browser window object with the Google Identity Services API.
+   */
   interface Window {
     google?: {
       accounts: {
         id: {
+          /**
+           * Initialises the Google sign-in client.
+           *
+           * @param config - Google client configuration including client ID
+           * and callback handler.
+           */
           initialize: (config: {
             client_id: string;
             callback: (response: GoogleCredentialResponse) => void;
           }) => void;
+
+          /**
+           * Renders the Google sign-in button into a target DOM element.
+           *
+           * @param parent - The DOM element that will contain the button.
+           * @param options - Button display and layout options.
+           */
           renderButton: (
             parent: HTMLElement,
             options: {
@@ -34,6 +61,15 @@ declare global {
   }
 }
 
+/**
+ * Signup page component.
+ *
+ * Displays a registration form for creating a new account and provides
+ * an alternative Google signup flow. On successful authentication,
+ * the user is logged in and redirected to the dashboard.
+ *
+ * @returns The rendered signup page.
+ */
 export function SignupPage() {
   const { mutate, isPending, error } = useSignup();
   const {
@@ -46,12 +82,30 @@ export function SignupPage() {
   const { login } = useAuth();
   const googleButtonRef = useRef<HTMLDivElement | null>(null);
 
+  /** Username entered by the user. */
   const [username, setUsername] = useState("");
+
+  /** First name entered by the user. */
   const [firstName, setFirstName] = useState("");
+
+  /** Last name entered by the user. */
   const [lastName, setLastName] = useState("");
+
+  /** Email address entered by the user. */
   const [email, setEmail] = useState("");
+
+  /** Password entered by the user. */
   const [password, setPassword] = useState("");
 
+  /**
+   * Handles form submission for standard account creation.
+   *
+   * Prevents the default browser form submission behaviour, sends the
+   * entered signup data to the signup mutation, and logs the user in
+   * on success before redirecting to the dashboard.
+   *
+   * @param e - The submitted React form event.
+   */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     mutate(
@@ -65,6 +119,14 @@ export function SignupPage() {
     );
   };
 
+  /**
+   * Initialises and renders the Google signup button once the Google
+   * Identity Services API and target container are available.
+   *
+   * On successful Google authentication, the returned credential is sent
+   * to the backend Google login handler, after which the user is logged in
+   * and redirected to the dashboard.
+   */
   useEffect(() => {
     if (!googleButtonRef.current || !window.google) return;
 
@@ -94,7 +156,7 @@ export function SignupPage() {
       size: "large",
       text: "signup_with",
       shape: "rectangular",
-      width: "100%", // ✅ FIX: responsive width
+      width: "100%",
       logo_alignment: "left",
     });
   }, [googleLogin, login, navigate]);
