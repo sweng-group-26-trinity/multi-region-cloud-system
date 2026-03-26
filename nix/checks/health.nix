@@ -15,6 +15,7 @@ in
           ];
           environment.systemPackages = [
             self'.packages.schemathesis
+            self'.packages.schemathesis-health-check
           ];
           services.postgresql = {
             enable = true;
@@ -93,12 +94,9 @@ in
             curl http://localhost:8080/actuator/health | grep -o \"UP\"
           """)
 
-          # Property testing - cd to source dir so schemathesis.toml is auto-discovered
-          # Run all test phases: examples, coverage, fuzzing, stateful
+          # Run schemathesis with authentication via the helper script
           machine.succeed("""
-            cd "${sourceDir}" && schemathesis run \
-              --url http://localhost:8080/api \
-              "${openapiSpec}"
+            cd "${sourceDir}" && schemathesis-health-check http://localhost:8080/api "${openapiSpec}"
           """)
 
           print("Yippie Backend works!")

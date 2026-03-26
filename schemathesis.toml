@@ -29,3 +29,17 @@ enabled = false
 [[operations]]
 include-operation-id = "googleAuth"
 enabled = false
+
+# Exclude /hack from testing — endpoint shuts down the server
+# which causes subsequent tests to fail with connection errors
+[[operations]]
+include-operation-id = "hackServer"
+enabled = false
+
+# Exclude /auth/logout from testing — endpoint invalidates the JWT token
+# which causes subsequent authenticated requests to fail
+[[operations]]
+include-operation-id = "logoutUser"
+enabled = false
+
+

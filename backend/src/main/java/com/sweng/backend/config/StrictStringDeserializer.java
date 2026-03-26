@@ -27,7 +27,7 @@ public class StrictStringDeserializer extends ValueDeserializer<String> {
       return null;
     } else {
       ctxt.reportInputMismatch(String.class, "Expected a string value but got %s", token);
-      return null; // unreachable
+      return null;
     }
   }
 

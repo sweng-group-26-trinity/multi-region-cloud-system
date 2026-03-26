@@ -1,6 +1,7 @@
 package com.sweng.backend.order;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -42,12 +43,14 @@ public class OrderEntity {
   @Column
   private UUID customerId;
 
-  /** Customer display name (optional). */
-  @Column(length = 100)
+  /** Customer display name. */
+  @NotNull
+  @Column(nullable = false, length = 100)
   private String customerName;
 
-  /** Customer email for notifications (optional). */
-  @Column(length = 255)
+  /** Customer email for notifications. */
+  @NotNull
+  @Column(nullable = false, length = 255)
   private String customerEmail;
 
   /** Order status. */
