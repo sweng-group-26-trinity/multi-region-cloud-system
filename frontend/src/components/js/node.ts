@@ -236,9 +236,9 @@ export class Node {
         ? -18
         : 18;
 
-        const globalShift = mobile ? -50 : 0;
+    const globalShift = mobile ? -50 : 0;
 
-        div.style.transform = `translateX(${sideOffset + globalShift}px)`;
+    div.style.transform = `translateX(${sideOffset + globalShift}px)`;
 
     const titleEl = document.createElement("div");
     titleEl.style.fontWeight = "700";
