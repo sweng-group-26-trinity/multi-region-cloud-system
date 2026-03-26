@@ -5,8 +5,6 @@ import { Label } from "@/components/ui/label";
 import { useLogin, useGoogleLogin } from "../api/authhooks";
 import { useAuth } from "../context/AuthContext";
 
-console.log("env object:", import.meta.env);
-console.log("google client id:", import.meta.env?.VITE_GOOGLE_CLIENT_ID);
 /**
  * Minimal type definition for the Google Identity Services object
  * injected onto the global window after loading the Google script.
@@ -144,13 +142,8 @@ export function LoginPage() {
   }, [googleLogin, login, navigate]);
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center px-4 bg-transparent">
-      {/* 
-        Main login card.
-        Dark mode support is added here so the card remains readable
-        against the darker global page background.
-      */}
-      <div className="w-full max-w-md space-y-6 rounded-xl bg-white p-8 shadow-lg transition-all duration-300 hover:shadow-xl dark:bg-slate-900 dark:shadow-black/30">
+    <div className="min-h-screen w-full flex items-center justify-center px-4 py-8 overflow-y-auto bg-transparent">
+      <div className="w-full max-w-md space-y-6 rounded-xl bg-white p-6 pb-8 shadow-lg transition-all duration-300 hover:shadow-xl dark:bg-slate-900 dark:shadow-black/30">
         <div className="space-y-2 text-center">
           <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">
             Sign in to your account
@@ -194,6 +187,7 @@ export function LoginPage() {
                 Forgot password?
               </Link>
             </div>
+
             <input
               id="password"
               type="password"
@@ -216,10 +210,6 @@ export function LoginPage() {
           </Button>
         </form>
 
-        {/* 
-          Divider between standard login and Google sign-in.
-          Background text chip is dark-mode aware so it blends with the card correctly.
-        */}
         <div className="relative mt-6 text-center text-sm">
           <div className="absolute inset-0 flex items-center">
             <span className="w-full border-t border-slate-300 dark:border-slate-700" />
@@ -229,34 +219,21 @@ export function LoginPage() {
           </span>
         </div>
 
-        <Button
-          variant="outline"
-          className="mt-6 flex h-11 w-full items-center justify-center gap-3 border-slate-300 bg-white text-slate-900 transition-all duration-200 hover:scale-[1.02] hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 48 48"
-            className="h-5 w-5"
-          >
-            <path
-              fill="#EA4335"
-              d="M24 9.5c3.15 0 5.97 1.08 8.2 3.2l6.1-6.1C34.2 2.5 29.5 0 24 0 14.6 0 6.5 5.5 2.6 13.5l7.5 5.8C12 13.2 17.5 9.5 24 9.5z"
-            />
-            <path
-              fill="#4285F4"
-              d="M46.1 24.5c0-1.7-.15-3.3-.45-4.9H24v9.3h12.4c-.5 2.7-2 5-4.3 6.6l6.6 5.1c3.9-3.6 6.4-9 6.4-15.1z"
-            />
-            <path
-              fill="#FBBC05"
-              d="M10.1 28.3c-.6-1.7-.9-3.5-.9-5.3s.3-3.6.9-5.3l-7.5-5.8C1 15.4 0 19.6 0 24s1 8.6 2.6 12.1l7.5-5.8z"
-            />
-            <path
-              fill="#34A853"
-              d="M24 48c6.5 0 12-2.1 16-5.7l-6.6-5.1c-2 1.4-4.6 2.3-9.4 2.3-6.5 0-12-3.7-14.9-9l-7.5 5.8C6.5 42.5 14.6 48 24 48z"
-            />
-          </svg>
-          Sign in with Google
-        </Button>
+        <div className="w-full flex justify-center">
+          <div className="w-full max-w-[320px]" ref={googleButtonRef} />
+        </div>
+
+        {googleError && (
+          <p className="text-sm text-center text-red-500">
+            {googleError.message}
+          </p>
+        )}
+
+        {isGooglePending && (
+          <p className="text-sm text-center text-slate-500 dark:text-slate-400">
+            Signing in with Google…
+          </p>
+        )}
 
         <p className="mt-6 text-center text-sm text-muted-foreground dark:text-slate-400">
           Don't have an account?{" "}
