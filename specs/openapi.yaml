@@ -894,8 +894,8 @@ components:
           pattern: "^[^\\x00]{1,100}$"
         customerEmail:
           type: string
-          format: email
           description: Email for order notifications (optional)
+          pattern: "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
         items:
           type: array
           description: Updated list of items (optional)

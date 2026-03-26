@@ -2,6 +2,7 @@ package com.sweng.backend.order.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.util.List;
 
@@ -18,7 +19,9 @@ public class UpdateOrderRequest {
   private String customerName;
 
   /** Optional updated customer email. */
-  @Email private String customerEmail;
+  @Email
+  @Pattern(regexp = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
+  private String customerEmail;
 
   /**
    * Optional updated list of items.
