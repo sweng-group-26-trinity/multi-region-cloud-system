@@ -1,25 +1,16 @@
 package com.sweng.backend.config;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import lombok.SneakyThrows;
+import net.jqwik.api.*;
 import org.springframework.boot.json.JsonParseException;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-
-import lombok.SneakyThrows;
 import tools.jackson.core.JsonParser;
 import tools.jackson.databind.DeserializationContext;
 import tools.jackson.databind.ObjectMapper;
-
-import net.jqwik.api.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -40,7 +31,7 @@ public class StrictStringDeserializerTest {
     return deserialiseString(json).equals(input);
   }
 
-  @SneakyThrows({ JsonParseException.class, IOException.class })
+  @SneakyThrows({JsonParseException.class, IOException.class})
   private String deserialiseString(String input) {
     JsonParser parser = mapper.createParser(input);
     DeserializationContext ctxt = mapper._deserializationContext();

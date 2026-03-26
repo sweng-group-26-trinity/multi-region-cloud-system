@@ -1,25 +1,19 @@
 package com.sweng.backend.config;
 
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.json.JsonMapper;
-import tools.jackson.databind.module.SimpleModule;
-
 import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import tools.jackson.databind.module.SimpleModule;
 
-/**
- * Jackson configuration to customize JSON serialization/deserialization
- * behavior.
- */
+/** Jackson configuration to customize JSON serialization/deserialization behavior. */
 @Configuration
 public class JacksonConfig {
+  /** Constructs the default instance. */
+  public JacksonConfig() {}
 
   /**
-   * Configures the ObjectMapper to use StrictStringDeserializer for all String
-   * fields. This rejects
-   * boolean, number, or other non-string values that would normally be coerced to
-   * strings.
+   * Configures the ObjectMapper to use StrictStringDeserializer for all String fields. This rejects
+   * boolean, number, or other non-string values that would normally be coerced to strings.
    *
    * @return the configured ObjectMapper
    */

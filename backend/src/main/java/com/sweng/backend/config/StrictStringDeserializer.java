@@ -7,8 +7,7 @@ import tools.jackson.databind.DeserializationContext;
 import tools.jackson.databind.ValueDeserializer;
 
 /**
- * Custom deserializer that only accepts actual string values or null. Rejects
- * boolean, number, or
+ * Custom deserializer that only accepts actual string values or null. Rejects boolean, number, or
  * other types that would normally be coerced to strings.
  */
 public class StrictStringDeserializer extends ValueDeserializer<String> {
