@@ -1,3 +1,9 @@
+/**
+ * @file SignupPage.tsx
+ * @description Renders the user signup page with support for both
+ * standard account creation and Google-based signup/login.
+ */
+
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -5,26 +11,39 @@ import { useGoogleLogin, useSignup } from "../api/authhooks";
 import { useAuth } from "../context/AuthContext";
 
 /**
- * Response returned by Google Identity Services after a successful sign-in.
+ * Response returned by Google Identity Services after a successful
+ * credential selection.
  */
 interface GoogleCredentialResponse {
-  /** Google-issued ID token JWT */
+  /** Google ID token credential. */
   credential: string;
 }
 
-/**
- * Minimal type definition for the Google Identity Services object
- * injected onto the global window after loading the Google script.
- */
 declare global {
+  /**
+   * Extends the browser window object with the Google Identity Services API.
+   */
   interface Window {
     google?: {
       accounts: {
         id: {
+          /**
+           * Initialises the Google sign-in client.
+           *
+           * @param config - Google client configuration including client ID
+           * and callback handler.
+           */
           initialize: (config: {
             client_id: string;
             callback: (response: GoogleCredentialResponse) => void;
           }) => void;
+
+          /**
+           * Renders the Google sign-in button into a target DOM element.
+           *
+           * @param parent - The DOM element that will contain the button.
+           * @param options - Button display and layout options.
+           */
           renderButton: (
             parent: HTMLElement,
             options: {
@@ -43,22 +62,13 @@ declare global {
 }
 
 /**
- * SignupPage component.
+ * Signup page component.
  *
- * Provides user registration functionality. Collects a username, first name,
- * last name, email address, and password. On successful registration the user
- * is redirected to `/dashboard`.
+ * Displays a registration form for creating a new account and provides
+ * an alternative Google signup flow. On successful authentication,
+ * the user is logged in and redirected to the dashboard.
  *
- * Also provides Google sign-up/sign-in using Google Identity Services.
- *
- * Uses:
- * - {@link useSignup} for standard registration
- * - {@link useGoogleLogin} for Google OAuth registration/login via backend token exchange
- *
- * @returns The signup page JSX element.
- *
- * @example
- * <SignupPage />
+ * @returns The rendered signup page.
  */
 export function SignupPage() {
   const { mutate, isPending, error } = useSignup();
@@ -72,19 +82,29 @@ export function SignupPage() {
   const { login } = useAuth();
   const googleButtonRef = useRef<HTMLDivElement | null>(null);
 
+  /** Username entered by the user. */
   const [username, setUsername] = useState("");
+
+  /** First name entered by the user. */
   const [firstName, setFirstName] = useState("");
+
+  /** Last name entered by the user. */
   const [lastName, setLastName] = useState("");
+
+  /** Email address entered by the user. */
   const [email, setEmail] = useState("");
+
+  /** Password entered by the user. */
   const [password, setPassword] = useState("");
 
   /**
-   * Handles the signup form submission.
+   * Handles form submission for standard account creation.
    *
-   * Prevents the default browser form submission and calls the signup mutation
-   * with the collected user details. Navigates to `/dashboard` on success.
+   * Prevents the default browser form submission behaviour, sends the
+   * entered signup data to the signup mutation, and logs the user in
+   * on success before redirecting to the dashboard.
    *
-   * @param e - The React form submission event.
+   * @param e - The submitted React form event.
    */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,15 +112,7 @@ export function SignupPage() {
       { username, firstName, lastName, email, password },
       {
         onSuccess: (data) => {
-          /**
-           * Automatically authenticates the user after account creation
-           * so protected routes can be accessed immediately.
-           */
           login(data.accessToken);
-
-          /**
-           * Redirects the newly created user straight to the dashboard.
-           */
           navigate("/dashboard");
         },
       },
@@ -108,11 +120,12 @@ export function SignupPage() {
   };
 
   /**
-   * Initializes the Google Identity Services sign-up/sign-in button once
-   * the component mounts and the Google script is available on `window`.
+   * Initialises and renders the Google signup button once the Google
+   * Identity Services API and target container are available.
    *
-   * On successful Google authentication, the returned ID token is exchanged
-   * with the backend for a normal application JWT.
+   * On successful Google authentication, the returned credential is sent
+   * to the backend Google login handler, after which the user is logged in
+   * and redirected to the dashboard.
    */
   useEffect(() => {
     if (!googleButtonRef.current || !window.google) return;
@@ -143,21 +156,14 @@ export function SignupPage() {
       size: "large",
       text: "signup_with",
       shape: "rectangular",
-      width: 398,
+      width: "100%",
       logo_alignment: "left",
     });
   }, [googleLogin, login, navigate]);
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center px-4 bg-transparent">
-      {/* 
-        Signup form card.
-
-        Dark mode support is added so the form remains readable when the global
-        application theme switches to dark mode. The background and text colours
-        adapt automatically using Tailwind's `dark:` variants.
-      */}
-      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl transition-all duration-300 hover:shadow-xl dark:bg-slate-900">
+    <div className="min-h-screen w-full flex items-center justify-center px-4 py-8 overflow-y-auto">
+      <div className="w-full max-w-md rounded-2xl bg-white p-6 pb-8 shadow-2xl transition-all duration-300 dark:bg-slate-900">
         <h1 className="text-2xl font-bold text-center mb-2 text-slate-900 dark:text-white">
           Create your account
         </h1>
@@ -167,135 +173,82 @@ export function SignupPage() {
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Username */}
           <div>
-            <label
-              htmlFor="username"
-              className="block text-sm font-medium mb-1 text-slate-900 dark:text-slate-200"
-            >
+            <label className="block text-sm font-medium mb-1 text-slate-900 dark:text-slate-200">
               Username
             </label>
-
             <input
-              id="username"
               type="text"
               placeholder="johndoe"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
-              className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-slate-900 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+              className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-slate-900 focus:ring-2 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
             />
           </div>
 
+          {/* Names */}
           <div className="flex gap-3">
-            <div className="flex-1">
-              <label
-                htmlFor="firstName"
-                className="block text-sm font-medium mb-1 text-slate-900 dark:text-slate-200"
-              >
-                First name
-              </label>
-
-              <input
-                id="firstName"
-                type="text"
-                placeholder="John"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                required
-                className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-slate-900 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-              />
-            </div>
-
-            <div className="flex-1">
-              <label
-                htmlFor="lastName"
-                className="block text-sm font-medium mb-1 text-slate-900 dark:text-slate-200"
-              >
-                Last name
-              </label>
-
-              <input
-                id="lastName"
-                type="text"
-                placeholder="Doe"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                required
-                className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-slate-900 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium mb-1 text-slate-900 dark:text-slate-200"
-            >
-              Email
-            </label>
-
             <input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              placeholder="First name"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
               required
-              className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-slate-900 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+              className="w-full rounded-xl border border-gray-300 px-4 py-2 dark:bg-slate-800 dark:border-slate-700"
+            />
+            <input
+              type="text"
+              placeholder="Last name"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              required
+              className="w-full rounded-xl border border-gray-300 px-4 py-2 dark:bg-slate-800 dark:border-slate-700"
             />
           </div>
 
-          <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium mb-1 text-slate-900 dark:text-slate-200"
-            >
-              Password
-            </label>
+          {/* Email */}
+          <input
+            type="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="w-full rounded-xl border border-gray-300 px-4 py-2 dark:bg-slate-800 dark:border-slate-700"
+          />
 
-            <input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
+          {/* Password */}
+          <input
+            type="password"
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className="w-full rounded-xl border border-gray-300 px-4 py-2 dark:bg-slate-800 dark:border-slate-700"
+          />
 
           {error && <p className="text-red-500 text-sm">{error.message}</p>}
 
           <Button
             type="submit"
             disabled={isPending}
-            className="h-11 w-full bg-indigo-600 transition-all duration-200 hover:scale-[1.02] hover:bg-indigo-700 hover:shadow-md"
+            className="h-11 w-full bg-indigo-600 hover:bg-indigo-700"
           >
             {isPending ? "Creating account…" : "Create account"}
           </Button>
 
-          {/* 
-            Divider between standard signup and Google signup.
-
-            The background colour switches between white and dark mode card
-            colour to ensure the divider text remains visible.
-          */}
-          <div className="relative text-center text-sm">
+          {/* Divider */}
+          <div className="relative text-center text-sm my-4">
             <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-gray-300 dark:border-slate-700" />
+              <span className="w-full border-t dark:border-slate-700" />
             </div>
-
-            <span className="relative bg-white dark:bg-slate-900 px-2 text-muted-foreground dark:text-slate-400">
-              OR
-            </span>
+            <span className="relative bg-white dark:bg-slate-900 px-2">OR</span>
           </div>
 
-          {/*
-            Container for the official Google-rendered sign-up button.
-            Google injects the actual button UI into this div.
-          */}
-          <div className="flex justify-center">
-            <div ref={googleButtonRef} />
+          {/* Google button */}
+          <div className="w-full flex justify-center">
+            <div className="w-full max-w-[320px]" ref={googleButtonRef} />
           </div>
 
           {googleError && (
@@ -305,18 +258,15 @@ export function SignupPage() {
           )}
 
           {isGooglePending && (
-            <p className="text-sm text-center text-slate-500 dark:text-slate-400">
+            <p className="text-sm text-center text-slate-500">
               Signing up with Google…
             </p>
           )}
         </form>
 
-        <p className="text-center text-sm text-gray-500 dark:text-slate-400 mt-6">
+        <p className="text-center text-sm text-gray-500 mt-6">
           Already have an account?{" "}
-          <Link
-            to="/login"
-            className="text-indigo-600 transition-colors duration-200 hover:underline dark:text-indigo-400"
-          >
+          <Link to="/login" className="text-indigo-600 hover:underline">
             Sign in
           </Link>
         </p>

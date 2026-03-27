@@ -131,11 +131,17 @@ function Header({
   const { logout } = useAuth();
   const token = localStorage.getItem("token");
 
+  const pathname = location.pathname;
+
+  const isHomePage = pathname === "/";
+  const isHealthPage = pathname === "/health";
   const isSimpleHeaderPage =
-    location.pathname === "/" ||
-    location.pathname === "/login" ||
-    location.pathname === "/signup" ||
-    location.pathname === "/forgot-password";
+    pathname === "/" ||
+    pathname === "/login" ||
+    pathname === "/signup" ||
+    pathname === "/forgot-password";
+
+  const isDashboardPage = pathname === "/dashboard";
 
   const showPrivateButtons = !isSimpleHeaderPage && !!token;
 
@@ -145,71 +151,175 @@ function Header({
     navigate("/login");
   };
 
-  return (
-    <header className="sticky top-0 z-50 flex items-center justify-between border-b border-slate-200 bg-white/90 px-6 py-4 backdrop-blur transition-colors duration-300 dark:border-slate-800 dark:bg-slate-950/90">
-      <button
-        type="button"
-        onClick={() => navigate("/")}
-        className="flex items-center gap-2 rounded-xl px-3 py-2 transition-all duration-200 hover:scale-[1.02] hover:bg-slate-100 dark:hover:bg-slate-900"
-      >
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500 text-white">
-          <UtensilsCrossed size={18} strokeWidth={2.5} />
-        </div>
-        <span className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-          DineHub
-        </span>
-      </button>
+  const navIconClass =
+    "h-[42px] w-[42px] rounded-full flex items-center justify-center text-slate-700 transition-all duration-200 hover:bg-slate-100 hover:text-orange-500 active:scale-[0.97] dark:text-slate-200 dark:hover:bg-slate-900";
 
-      <div className="flex items-center gap-3">
+  const navTextClass =
+    "flex items-center gap-2 rounded-full px-3 py-2 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-slate-100 hover:text-orange-500 active:scale-[0.97] dark:text-slate-200 dark:hover:bg-slate-900";
+
+  const logoutClass =
+    "flex items-center gap-2 rounded-full bg-orange-500 px-3 py-2 text-sm font-medium text-white transition-all duration-200 hover:bg-orange-600 active:scale-[0.97]";
+
+  if (isHomePage) {
+    return (
+      <div className="pointer-events-none absolute left-0 right-0 top-0 z-50">
+        <div className="pointer-events-auto flex items-center justify-between px-4 py-4 sm:px-6 sm:py-5">
+          <button
+            type="button"
+            onClick={() => navigate("/")}
+            className="flex items-center gap-2 rounded-xl px-2 py-2 transition-all duration-200 hover:scale-[1.02]"
+          >
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500 text-white">
+              <UtensilsCrossed size={18} strokeWidth={2.5} />
+            </div>
+            <span className="text-lg font-semibold text-white drop-shadow">
+              DineHub
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={toggleDarkMode}
+            title={darkMode ? "Light Mode" : "Dark Mode"}
+            className="flex h-[42px] w-[42px] items-center justify-center rounded-full text-white transition-all duration-200 hover:bg-white/10 active:scale-[0.97]"
+          >
+            {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (isHealthPage) {
+    return (
+      <div className="pointer-events-none absolute left-0 right-0 top-0 z-50">
+        <div className="pointer-events-auto flex flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6 sm:py-5">
+          <button
+            type="button"
+            onClick={() => navigate("/")}
+            className="flex shrink-0 items-center gap-2 rounded-xl px-2 py-2 transition-all duration-200 hover:scale-[1.02]"
+          >
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500 text-white">
+              <UtensilsCrossed size={18} strokeWidth={2.5} />
+            </div>
+            <span className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+              DineHub
+            </span>
+          </button>
+
+          <div className="flex flex-wrap items-center justify-end gap-1 sm:gap-2">
+            <button
+              type="button"
+              onClick={toggleDarkMode}
+              title={darkMode ? "Light Mode" : "Dark Mode"}
+              className={navIconClass}
+            >
+              {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
+
+            {showPrivateButtons && !isDashboardPage && (
+              <button
+                type="button"
+                onClick={() => navigate("/dashboard")}
+                title="Dashboard"
+                className={`${navTextClass} px-2 sm:px-3`}
+              >
+                <LayoutDashboard size={18} />
+                <span className="hidden sm:inline">Dashboard</span>
+              </button>
+            )}
+
+            {showPrivateButtons && (
+              <button
+                type="button"
+                onClick={handleLogout}
+                title="Logout"
+                className={`${logoutClass} px-2 sm:px-3`}
+              >
+                <LogOut size={18} />
+                <span className="hidden sm:inline">Logout</span>
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur transition-colors duration-300 dark:border-slate-800 dark:bg-slate-950/90">
+      <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
         <button
           type="button"
-          onClick={toggleDarkMode}
-          title={darkMode ? "Light Mode" : "Dark Mode"}
-          className="flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-slate-900 shadow-md transition-all duration-200 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98] dark:bg-slate-900 dark:text-slate-100 dark:shadow-black/30"
+          onClick={() => navigate("/")}
+          className="flex shrink-0 items-center gap-2 rounded-xl px-2 py-2 transition-all duration-200 hover:scale-[1.02]"
         >
-          {darkMode ? <Sun size={18} /> : <Moon size={18} />}
-          <span className="hidden font-medium sm:inline">
-            {darkMode ? "Light Mode" : "Dark Mode"}
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500 text-white">
+            <UtensilsCrossed size={18} strokeWidth={2.5} />
+          </div>
+          <span className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+            DineHub
           </span>
         </button>
 
-        {showPrivateButtons && (
-          <>
+        <div className="flex flex-wrap items-center justify-end gap-1 sm:gap-2">
+          <button
+            type="button"
+            onClick={toggleDarkMode}
+            title={darkMode ? "Light Mode" : "Dark Mode"}
+            className={navIconClass}
+          >
+            {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
+
+          {showPrivateButtons && !isDashboardPage && (
             <button
               type="button"
               onClick={() => navigate("/dashboard")}
               title="Dashboard"
-              className="flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-slate-900 shadow-md transition-all duration-200 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98] dark:bg-slate-900 dark:text-slate-100 dark:shadow-black/30"
+              className={navTextClass}
             >
               <LayoutDashboard size={18} />
-              <span className="hidden font-medium sm:inline">Dashboard</span>
+              <span className="hidden sm:inline">Dashboard</span>
             </button>
+          )}
+
+          {showPrivateButtons && !isHealthPage && (
             <button
               type="button"
               onClick={() => navigate("/health")}
               title="Health"
-              className="flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-slate-900 shadow-md transition-all duration-200 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98] dark:bg-slate-900 dark:text-slate-100 dark:shadow-black/30"
+              className={navTextClass}
             >
               <HeartPulse size={18} />
-              <span className="hidden font-medium sm:inline">Health</span>
+              <span className="hidden sm:inline">Health</span>
             </button>
+          )}
+
+          {showPrivateButtons && (
             <button
               type="button"
               onClick={handleLogout}
               title="Logout"
-              className="flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-slate-900 shadow-md transition-all duration-200 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98] dark:bg-slate-900 dark:text-slate-100 dark:shadow-black/30"
+              className={logoutClass}
             >
               <LogOut size={18} />
-              <span className="hidden font-medium sm:inline">Logout</span>
+              <span className="hidden sm:inline">Logout</span>
             </button>
-          </>
-        )}
+          )}
+        </div>
       </div>
     </header>
   );
 }
 
 function Footer() {
+  const location = useLocation();
+  const hideFooter =
+    location.pathname === "/" || location.pathname === "/health";
+
+  if (hideFooter) return null;
+
   return (
     <footer className="border-t border-slate-200 bg-white px-6 py-4 text-center text-sm text-slate-600 transition-colors duration-300 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400">
       © {new Date().getFullYear()} DineHub
@@ -224,6 +334,7 @@ function AppShell() {
     const savedMode = localStorage.getItem("darkMode");
     const isDark = savedMode === "true";
     setDarkMode(isDark);
+
     if (isDark) {
       document.documentElement.classList.add("dark");
     } else {
@@ -235,6 +346,7 @@ function AppShell() {
     const newMode = !darkMode;
     setDarkMode(newMode);
     localStorage.setItem("darkMode", String(newMode));
+
     if (newMode) {
       document.documentElement.classList.add("dark");
     } else {
@@ -243,7 +355,7 @@ function AppShell() {
   }
 
   return (
-    <div className="min-h-screen w-screen bg-white transition-colors duration-300 dark:bg-slate-950">
+    <div className="relative min-h-screen w-screen bg-white transition-colors duration-300 dark:bg-slate-950">
       <div className="flex min-h-screen flex-col">
         <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
         <main className="flex-1">
@@ -258,7 +370,8 @@ function AppShell() {
 /**
  * Main application component that orchestrates the entire DineHub application.
  * Provides the app shell with dark mode support, navigation, and routing structure.
- * @returns The rendered AppShell component
+ *
+ * @returns The rendered AppShell component.
  */
 export function App() {
   return <AppShell />;

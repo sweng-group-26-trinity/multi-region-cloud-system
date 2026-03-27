@@ -29,15 +29,6 @@ type TerminalLine =
 
 /**
  * Defines a custom command that can be registered with the {@link Terminal} component.
- *
- * @example
- * ```tsx
- * const cmd: TerminalCommand = {
- *   command: "/kill",
- *   description: "terminate all active nodes",
- *   onExecute: () => fetch("/api/kill", { method: "POST" }),
- * };
- * ```
  */
 export interface TerminalCommand {
   /**
@@ -94,20 +85,24 @@ export interface TerminalProps {
 /**
  * Terminal
  * --------
- * An interactive in-browser terminal widget rendered as a floating overlay.
+ * An interactive in-browser terminal widget.
  *
  * Features:
  * - Accepts typed commands and echoes them in yellow
  * - Built-in `/help` and `/clear` commands
  * - Supports custom commands via the {@link TerminalProps.commands} prop
  * - Runs a green hacker-movie scramble animation before executing commands
- *   (can be skipped per-command with {@link TerminalCommand.noHacker})
  * - Auto-scrolls to the latest output
  * - Focuses the input on click anywhere in the terminal
  *
  * Built-in commands:
  * - `/help`  — lists all available commands
  * - `/clear` — clears all terminal output
+ *
+ * This version is container-based:
+ * - it fills the width and height of its parent
+ * - it works inside responsive wrappers like bottom sheets on mobile
+ * - it no longer hard-codes absolute positioning or fixed dimensions
  *
  * @example
  * ```tsx
@@ -135,6 +130,7 @@ export function Terminal({
   ]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
+
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -143,9 +139,7 @@ export function Terminal({
   }, [lines]);
 
   /**
-   * Runs the hacker scramble animation — displays `lineCount` rows of
-   * randomised characters that update every 60 ms for `totalFrames` frames,
-   * then replaces them with completion messages and calls `onDone`.
+   * Runs the hacker scramble animation and then invokes the supplied callback.
    *
    * @param onDone - Callback invoked once the animation finishes.
    */
@@ -167,8 +161,10 @@ export function Terminal({
 
     const interval = setInterval(() => {
       frame++;
+
       setLines((prev) => {
         const next = [...prev];
+
         for (let i = next.length - lineCount; i < next.length; i++) {
           const line = next[i];
           if (line?.type === "hacker") {
@@ -178,15 +174,18 @@ export function Terminal({
             };
           }
         }
+
         return next;
       });
 
       if (frame >= totalFrames) {
         clearInterval(interval);
+
         setLines((prev) => {
           const next = [...prev];
           const start = next.length - lineCount;
           next.splice(start, lineCount);
+
           return [
             ...next,
             { type: "output", text: ">> INITIATING SEQUENCE..." },
@@ -194,6 +193,7 @@ export function Terminal({
             { type: "output", text: ">> DONE." },
           ];
         });
+
         onDone();
       }
     }, 60);
@@ -201,9 +201,6 @@ export function Terminal({
 
   /**
    * Parses and dispatches a raw command string entered by the user.
-   *
-   * Handles built-in commands (`/help`, `/clear`) first, then checks
-   * registered {@link TerminalCommand} entries for a match.
    *
    * @param cmd - The raw string typed by the user.
    */
@@ -233,6 +230,7 @@ export function Terminal({
     }
 
     const match = commands.find((c) => c.command.toLowerCase() === trimmed);
+
     if (match) {
       if (match.noHacker) {
         setLines((prev) => [
@@ -246,6 +244,7 @@ export function Terminal({
           ...prev,
           { type: "output", text: `Executing ${match.command}...` },
         ]);
+
         runHackerEffect(() => {
           match.onExecute();
           setBusy(false);
@@ -264,8 +263,7 @@ export function Terminal({
   }
 
   /**
-   * Handles `Enter` key press on the input field.
-   * Submits the current input as a command if the terminal is not busy.
+   * Handles Enter key submission from the input.
    *
    * @param e - React keyboard event from the input element.
    */
@@ -278,29 +276,27 @@ export function Terminal({
 
   return (
     <div
-      className="absolute bottom-8 right-8 z-20 w-[480px] h-64 rounded-xl overflow-hidden shadow-2xl border border-white/10"
-      style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)" }}
+      className="flex h-full w-full flex-col overflow-hidden rounded-xl border border-white/10 bg-black/75 shadow-2xl backdrop-blur-md"
       onClick={() => inputRef.current?.focus()}
     >
       {/* Title bar */}
-      <div
-        className="flex items-center gap-2 px-4 py-2 border-b border-white/10"
-        style={{ background: "rgba(255,255,255,0.05)" }}
-      >
-        <span className="w-3 h-3 rounded-full bg-red-500" />
-        <span className="w-3 h-3 rounded-full bg-yellow-500" />
-        <span className="w-3 h-3 rounded-full bg-green-500" />
-        <span className="ml-2 text-xs text-white/50 font-mono">{title}</span>
+      <div className="flex shrink-0 items-center gap-2 border-b border-white/10 bg-white/5 px-4 py-2">
+        <span className="h-3 w-3 rounded-full bg-red-500" />
+        <span className="h-3 w-3 rounded-full bg-yellow-500" />
+        <span className="h-3 w-3 rounded-full bg-green-500" />
+        <span className="ml-2 truncate font-mono text-[11px] text-white/50 sm:text-xs">
+          {title}
+        </span>
       </div>
 
       {/* Output */}
-      <div className="h-44 overflow-y-auto px-4 py-2 font-mono text-xs space-y-0.5">
+      <div className="flex-1 overflow-y-auto px-4 py-2 font-mono text-[11px] sm:text-xs space-y-0.5">
         {lines.map((line, i) => (
           <div
             key={i}
             className={
               line.type === "hacker"
-                ? "text-green-400 opacity-80 tracking-widest"
+                ? "tracking-widest text-green-400 opacity-80"
                 : line.type === "input"
                   ? "text-yellow-300"
                   : "text-white/80"
@@ -313,8 +309,11 @@ export function Terminal({
       </div>
 
       {/* Input */}
-      <div className="flex items-center gap-2 px-4 py-2 border-t border-white/10">
-        <span className="text-green-400 font-mono text-xs">$</span>
+      <div className="flex shrink-0 items-center gap-2 border-t border-white/10 px-4 py-2">
+        <span className="font-mono text-[11px] text-green-400 sm:text-xs">
+          $
+        </span>
+
         <input
           ref={inputRef}
           type="text"
@@ -323,10 +322,11 @@ export function Terminal({
           onKeyDown={handleKeyDown}
           disabled={busy}
           placeholder={busy ? "executing..." : "type a command..."}
-          className="flex-1 bg-transparent text-white font-mono text-xs outline-none placeholder-white/30"
+          className="flex-1 bg-transparent font-mono text-[11px] text-white outline-none placeholder:text-white/30 sm:text-xs"
         />
+
         {busy && (
-          <span className="text-green-400 font-mono text-xs animate-pulse">
+          <span className="animate-pulse font-mono text-[11px] text-green-400 sm:text-xs">
             ▋
           </span>
         )}
