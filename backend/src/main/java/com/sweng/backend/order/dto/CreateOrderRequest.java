@@ -24,6 +24,7 @@ public class CreateOrderRequest {
 
   /** Customer email. */
   @NotBlank
+  @Size(max = 255)
   @Pattern(
       regexp =
           "^[a-zA-Z0-9_%+-]+(?:\\.[a-zA-Z0-9_%+-]+)*@[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)*\\.[a-zA-Z]{2,63}$")

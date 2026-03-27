@@ -18,6 +18,7 @@ public class UpdateOrderRequest {
   private String customerName;
 
   /** Optional updated customer email. */
+  @Size(max = 255)
   @Pattern(
       regexp =
           "^[a-zA-Z0-9_%+-]+(?:\\.[a-zA-Z0-9_%+-]+)*@[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)*\\.[a-zA-Z]{2,63}$")
