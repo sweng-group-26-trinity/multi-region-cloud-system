@@ -24,7 +24,9 @@ public class CreateOrderRequest {
 
   /** Customer email. */
   @NotBlank
-  @Pattern(regexp = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
+  @Pattern(
+      regexp =
+          "^[a-zA-Z0-9_%+-]+(?:\\.[a-zA-Z0-9_%+-]+)*@[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)*\\.[a-zA-Z]{2,63}$")
   private String customerEmail;
 
   /** List of items to order (must contain at least one item). */
