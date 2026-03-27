@@ -121,7 +121,9 @@ function FAQAccordion({ item }: { item: FAQItem }) {
       </button>
       {open && (
         <div className="px-6 py-4 bg-white/50 border-t border-white/40 backdrop-blur-sm">
-          <p className="text-sm leading-relaxed text-slate-700">{item.answer}</p>
+          <p className="text-sm leading-relaxed text-slate-700">
+            {item.answer}
+          </p>
         </div>
       )}
     </div>
@@ -153,11 +155,26 @@ export default function FAQPage() {
 
       {/* Decorative background clouds */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-        <CloudShape className="absolute top-8 left-[8%] opacity-80" size={1.4} />
-        <CloudShape className="absolute top-16 left-[35%] opacity-60" size={1.0} />
-        <CloudShape className="absolute top-6 right-[12%] opacity-75" size={1.6} />
-        <CloudShape className="absolute top-32 right-[30%] opacity-50" size={0.8} />
-        <CloudShape className="absolute top-48 left-[60%] opacity-40" size={1.1} />
+        <CloudShape
+          className="absolute top-8 left-[8%] opacity-80"
+          size={1.4}
+        />
+        <CloudShape
+          className="absolute top-16 left-[35%] opacity-60"
+          size={1.0}
+        />
+        <CloudShape
+          className="absolute top-6 right-[12%] opacity-75"
+          size={1.6}
+        />
+        <CloudShape
+          className="absolute top-32 right-[30%] opacity-50"
+          size={0.8}
+        />
+        <CloudShape
+          className="absolute top-48 left-[60%] opacity-40"
+          size={1.1}
+        />
       </div>
 
       {/* Sticky header */}
@@ -213,7 +230,9 @@ export default function FAQPage() {
                     <p className="text-2xl font-bold text-green-800 leading-none">
                       {stat.value}
                     </p>
-                    <p className="text-xs text-slate-600 mt-0.5">{stat.label}</p>
+                    <p className="text-xs text-slate-600 mt-0.5">
+                      {stat.label}
+                    </p>
                   </div>
                 </div>
                 <p className="text-sm leading-relaxed text-slate-700">
