@@ -4,6 +4,7 @@ plugins {
     java
     id("org.springframework.boot") version "4.0.1"
     id("io.spring.dependency-management") version "1.1.7"
+    id("org.graalvm.buildtools.native") version "0.11.2"
 }
 
 group = "com.sweng"
@@ -56,7 +57,23 @@ tasks.withType<Javadoc> {
 
 tasks.named<BootJar>("bootJar") { archiveFileName.set("backend.jar") }
 
-tasks.named<org.springframework.boot.gradle.tasks.run.BootRun>("bootRun") {
-    // Enable auto-restart with DevTools
-    jvmArgs = listOf("-Dspring.devtools.restart.enabled=true")
+graalvmNative {
+    binaries {
+        named("main") {
+            imageName.set("backend")
+            sharedLibrary.set(false)
+            buildArgs.add("--initialize-at-build-time=ch.qos.logback.classic.Logger")
+            buildArgs.add("--verbose")
+            buildArgs.add("--add-opens=java.base/java.nio=ALL-UNNAMED")
+            buildArgs.add("--add-opens=java.base/jdk.internal.misc=ALL-UNNAMED")
+            buildArgs.add("--add-opens=java.base/jdk.internal.ref=ALL-UNNAMED")
+            buildArgs.add("--trace-class-initialization=ch.qos.logback.classic.Logger")
+            buildArgs.add(
+                "--initialize-at-build-time=org.slf4j.LoggerFactory,ch.qos.logback,org.slf4j.helpers",
+            )
+            buildArgs.add("--initialize-at-run-time=io.netty")
+            buildArgs.add("-H:ReflectionConfigurationFiles=../../../reflection-config.json")
+        }
+    }
+    metadataRepository { enabled.set(true) }
 }

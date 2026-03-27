@@ -74,4 +74,34 @@ public class UserService {
         .findByEmail(email)
         .orElseThrow(() -> new RuntimeException("User not found"));
   }
+
+  /**
+   * Finds a user by email, or creates a new one if they don't exist. Used for Google OAuth2
+   * sign-in.
+   *
+   * @param email the Google account email
+   * @return the existing or newly created user
+   */
+  public User findOrCreateGoogleUser(String email) {
+    return userRepository
+        .findByEmail(email)
+        .orElseGet(
+            () -> {
+              String base = email.split("@")[0].replaceAll("[^a-zA-Z0-9]", "");
+              String username = base;
+              int i = 1;
+              while (userRepository.existsByUsername(username)) {
+                username = base + i++;
+              }
+              User user =
+                  new User(
+                      java.util.UUID.randomUUID(),
+                      username,
+                      email,
+                      passwordEncoder.encode(java.util.UUID.randomUUID().toString()),
+                      java.time.OffsetDateTime.now());
+              user.getRoles().add(Role.CUSTOMER);
+              return userRepository.save(user);
+            });
+  }
 }

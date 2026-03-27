@@ -23,8 +23,8 @@ function latLonToVector3(
   lon: number,
   radius: number,
 ): THREE.Vector3 {
-  const phi = (90 - lat) * (Math.PI / 180); // polar angle from +Y
-  const theta = (lon + 180) * (Math.PI / 180); // azimuthal angle
+  const phi = (90 - lat) * (Math.PI / 180);
+  const theta = (lon + 180) * (Math.PI / 180);
 
   return new THREE.Vector3(
     -radius * Math.sin(phi) * Math.cos(theta),
@@ -32,6 +32,16 @@ function latLonToVector3(
     radius * Math.sin(phi) * Math.sin(theta),
   );
 }
+
+/**
+ * Returns whether the current viewport should be treated as mobile-sized.
+ *
+ * @returns True when viewport width is below 640px.
+ */
+function isMobileViewport() {
+  return window.innerWidth < 640;
+}
+
 /**
  * Represents an interactive button displayed inside a Node label.
  */
@@ -86,6 +96,7 @@ export interface NodeOptions {
 
   /**
    * Distance from Earth surface to floating label in world units.
+   * Reduced automatically on mobile for better screen fit.
    * @default 6
    */
   floatDistance?: number;
@@ -110,6 +121,9 @@ export interface NodeOptions {
  * The label floats outward from the Earth's surface
  * and animates smoothly over time.
  *
+ * On mobile viewports, the label is kept closer to the globe and
+ * given a smaller floating animation so it stays on screen.
+ *
  * @example
  * const node = new Node(scene, earth, {
  *   title: "Europe",
@@ -131,6 +145,8 @@ export class Node {
   private basePosition: THREE.Vector3;
   private floatOffset: number;
   private floatDistance: number;
+  private mobile: boolean;
+
   /**
    * Creates a new floating geographic node.
    *
@@ -138,7 +154,6 @@ export class Node {
    * @param earth - The Earth object used as positional reference.
    * @param options - Configuration for geographic location and UI content.
    */
-
   constructor(scene: THREE.Scene, earth: THREE.Object3D, options: NodeOptions) {
     const {
       side = "right",
@@ -152,90 +167,142 @@ export class Node {
 
     this.scene = scene;
     this.earth = earth;
+    this.mobile = isMobileViewport();
     this.floatOffset = Math.random() * 10;
-    this.floatDistance = floatDistance;
+    this.floatDistance = this.mobile
+      ? Math.min(floatDistance, 3.5)
+      : floatDistance;
 
-    // Create marker first
     this.marker = this.createMarker(lat, lon);
 
-    // Position label near marker, offset outward from Earth center
     const markerWorld = new THREE.Vector3();
     this.marker.getWorldPosition(markerWorld);
 
-    // Direction from Earth center to marker (normalized)
     const earthWorld = new THREE.Vector3();
     this.earth.getWorldPosition(earthWorld);
     const direction = markerWorld.clone().sub(earthWorld).normalize();
 
-    // Base position: marker + offset outward
     this.basePosition = markerWorld
       .clone()
-      .add(direction.multiplyScalar(floatDistance));
+      .add(direction.multiplyScalar(this.floatDistance));
 
-    this.labelObject = this.createLabel(title, description, buttons);
+    this.labelObject = this.createLabel(title, description, buttons, side);
     this.line = this.createDottedLine();
 
     this.scene.add(this.labelObject);
     this.scene.add(this.line);
   }
 
+  /**
+   * Creates the floating HTML label used for the node UI.
+   *
+   * Styling is responsive so the label remains usable on smaller screens.
+   * Mobile layouts use a smaller width and reduced sideways offset.
+   *
+   * @param title - Primary title text.
+   * @param description - Secondary description text.
+   * @param buttons - Interactive buttons shown inside the label.
+   * @param side - Optional side alignment hint.
+   * @returns The constructed CSS2D label object.
+   */
   private createLabel(
     title: string,
     description: string,
     buttons: NodeButton[],
+    side: NodeSide,
   ) {
-    const div = document.createElement("div");
-    div.style.background = "white";
-    div.style.padding = "12px 16px";
-    div.style.borderRadius = "8px";
-    div.style.fontSize = "14px";
-    div.style.color = "black";
-    div.style.boxShadow = "0 6px 20px rgba(0,0,0,0.3)";
-    div.style.pointerEvents = "auto";
-    div.style.minWidth = "150px";
+    const mobile = isMobileViewport();
 
-    // Title
+    const div = document.createElement("div");
+    div.style.background = "rgba(255,255,255,0.96)";
+    div.style.backdropFilter = "blur(8px)";
+    (div.style as any).webkitBackdropFilter = "blur(8px)";
+    div.style.padding = mobile ? "10px 12px" : "12px 16px";
+    div.style.borderRadius = mobile ? "14px" : "12px";
+    div.style.fontSize = mobile ? "12px" : "14px";
+    div.style.color = "black";
+    div.style.boxShadow = "0 10px 28px rgba(0,0,0,0.22)";
+    div.style.pointerEvents = "auto";
+    div.style.width = mobile ? "148px" : "190px";
+    div.style.maxWidth = mobile ? "42vw" : "190px";
+    div.style.minWidth = mobile ? "148px" : "170px";
+    div.style.border = "1px solid rgba(15,23,42,0.06)";
+
+    const sideOffset = mobile
+      ? side === "left"
+        ? -6
+        : 0
+      : side === "left"
+        ? -18
+        : 18;
+
+    const globalShift = mobile ? -50 : 0;
+
+    div.style.transform = `translateX(${sideOffset + globalShift}px)`;
+
     const titleEl = document.createElement("div");
-    titleEl.style.fontWeight = "bold";
+    titleEl.style.fontWeight = "700";
+    titleEl.style.fontSize = mobile ? "11px" : "15px";
+    titleEl.style.lineHeight = "1.2";
     titleEl.style.marginBottom = description ? "4px" : "0";
+    titleEl.style.color = "#0f172a";
+    titleEl.style.wordBreak = "break-word";
     titleEl.textContent = title;
     div.appendChild(titleEl);
 
-    // Description
     if (description) {
       const descEl = document.createElement("div");
-      descEl.style.fontSize = "12px";
-      descEl.style.color = "#666";
-      descEl.style.marginBottom = buttons.length > 0 ? "8px" : "0";
+      descEl.style.fontSize = mobile ? "10px" : "12px";
+      descEl.style.color = "#64748b";
+      descEl.style.lineHeight = "1.35";
+      descEl.style.marginBottom =
+        buttons.length > 0 ? (mobile ? "8px" : "10px") : "0";
+      descEl.style.wordBreak = "break-word";
       descEl.textContent = description;
       div.appendChild(descEl);
     }
 
-    // Buttons
     if (buttons.length > 0) {
       const buttonContainer = document.createElement("div");
       buttonContainer.style.display = "flex";
-      buttonContainer.style.gap = "8px";
-      buttonContainer.style.marginTop = "8px";
+      buttonContainer.style.gap = mobile ? "6px" : "8px";
+      buttonContainer.style.marginTop = mobile ? "6px" : "8px";
+      buttonContainer.style.flexWrap = "wrap";
 
       buttons.forEach((btn) => {
         const button = document.createElement("button");
         button.textContent = btn.label;
-        button.style.padding = "6px 12px";
+        button.style.padding = mobile ? "6px 10px" : "7px 12px";
         button.style.border = "none";
-        button.style.borderRadius = "4px";
+        button.style.borderRadius = mobile ? "8px" : "6px";
         button.style.background = "#1e293b";
         button.style.color = "white";
         button.style.cursor = "pointer";
-        button.style.fontSize = "12px";
-        button.style.fontWeight = "500";
+        button.style.fontSize = mobile ? "10px" : "12px";
+        button.style.fontWeight = "600";
+        button.style.lineHeight = "1";
+        button.style.flex = mobile ? "1 1 auto" : "0 0 auto";
+        button.style.minWidth = mobile ? "0" : "auto";
+        button.style.whiteSpace = "nowrap";
+        button.style.transition = "background 0.2s ease, transform 0.2s ease";
 
         button.onmouseover = () => {
           button.style.background = "#334155";
         };
+
         button.onmouseout = () => {
           button.style.background = "#1e293b";
+          button.style.transform = "scale(1)";
         };
+
+        button.onmousedown = () => {
+          button.style.transform = "scale(0.98)";
+        };
+
+        button.onmouseup = () => {
+          button.style.transform = "scale(1)";
+        };
+
         button.onclick = (e) => {
           e.stopPropagation();
           btn.onClick();
@@ -249,10 +316,19 @@ export class Node {
 
     const label = new CSS2DObject(div);
     label.position.copy(this.basePosition);
-
+    if (mobile && side === "right") {
+      label.position.x -= 5.0;
+    }
     return label;
   }
 
+  /**
+   * Creates a glowing marker attached to the Earth surface.
+   *
+   * @param lat - Geographic latitude.
+   * @param lon - Geographic longitude.
+   * @returns The marker mesh.
+   */
   private createMarker(lat: number, lon: number) {
     const geometry = new THREE.SphereGeometry(0.04, 16, 16);
     const material = new THREE.MeshStandardMaterial({
@@ -260,26 +336,31 @@ export class Node {
       emissive: 0xffaa00,
       emissiveIntensity: 1.5,
     });
-    const marker = new THREE.Mesh(geometry, material);
 
-    // Place marker at lat/lon on Earth's surface (local space, radius = 1.0)
+    const marker = new THREE.Mesh(geometry, material);
     const localPos = latLonToVector3(lat, lon, 1.0);
     marker.position.copy(localPos);
 
-    this.earth.add(marker); // child of Earth so it rotates with it
+    this.earth.add(marker);
     return marker;
   }
 
+  /**
+   * Creates the dashed line connecting marker and label.
+   *
+   * @returns The dashed line object.
+   */
   private createDottedLine() {
     const material = new THREE.LineDashedMaterial({
       color: 0xffffff,
       dashSize: 0.5,
       gapSize: 0.3,
     });
+
     const geometry = new THREE.BufferGeometry();
-    const line = new THREE.Line(geometry, material);
-    return line;
+    return new THREE.Line(geometry, material);
   }
+
   /**
    * Updates node position and animation.
    *
@@ -291,28 +372,36 @@ export class Node {
    * - Applies floating animation along radial direction
    * - Updates dashed connection line geometry
    *
+   * Mobile viewports use a smaller float amount so labels do not drift
+   * too far in and out of the visible screen area.
+   *
    * @param _time - Time value (typically based on elapsed time or Date.now()).
    */
   public update(_time: number) {
-    // Get current marker world position (it rotates with Earth)
+    const mobile = isMobileViewport();
+
     const markerWorld = new THREE.Vector3();
     this.marker.getWorldPosition(markerWorld);
 
-    // Update base position to follow marker
     const earthWorld = new THREE.Vector3();
     this.earth.getWorldPosition(earthWorld);
     const direction = markerWorld.clone().sub(earthWorld).normalize();
+
+    const effectiveFloatDistance = mobile
+      ? Math.min(this.floatDistance, 3.5)
+      : this.floatDistance;
+
     this.basePosition = markerWorld
       .clone()
-      .add(direction.multiplyScalar(this.floatDistance));
+      .add(direction.multiplyScalar(effectiveFloatDistance));
 
-    // Float animation
-    const floatY = Math.sin(_time + this.floatOffset) * 0.8;
+    const floatAmount = mobile ? 0.22 : 0.8;
+    const floatY = Math.sin(_time + this.floatOffset) * floatAmount;
+
     const newPos = this.basePosition.clone();
-    newPos.add(direction.multiplyScalar(floatY)); // float along radial direction
+    newPos.add(direction.multiplyScalar(floatY));
     this.labelObject.position.copy(newPos);
 
-    // Update line
     const labelWorld = new THREE.Vector3();
     this.labelObject.getWorldPosition(labelWorld);
 

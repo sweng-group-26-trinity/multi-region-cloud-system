@@ -1,189 +1,269 @@
-import { useState } from "react";
+/**
+ * @file SignupPage.tsx
+ * @description Renders the user signup page with support for both
+ * standard account creation and Google-based signup/login.
+ */
+
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { useSignup } from "../api/authhooks";
+import { useGoogleLogin, useSignup } from "../api/authhooks";
+import { useAuth } from "../context/AuthContext";
 
 /**
- * SignupPage component.
+ * Response returned by Google Identity Services after a successful
+ * credential selection.
+ */
+interface GoogleCredentialResponse {
+  /** Google ID token credential. */
+  credential: string;
+}
+
+declare global {
+  /**
+   * Extends the browser window object with the Google Identity Services API.
+   */
+  interface Window {
+    google?: {
+      accounts: {
+        id: {
+          /**
+           * Initialises the Google sign-in client.
+           *
+           * @param config - Google client configuration including client ID
+           * and callback handler.
+           */
+          initialize: (config: {
+            client_id: string;
+            callback: (response: GoogleCredentialResponse) => void;
+          }) => void;
+
+          /**
+           * Renders the Google sign-in button into a target DOM element.
+           *
+           * @param parent - The DOM element that will contain the button.
+           * @param options - Button display and layout options.
+           */
+          renderButton: (
+            parent: HTMLElement,
+            options: {
+              theme?: "outline" | "filled_blue" | "filled_black";
+              size?: "large" | "medium" | "small";
+              text?: "signin_with" | "signup_with" | "continue_with" | "signin";
+              shape?: "rectangular" | "pill" | "circle" | "square";
+              width?: string | number;
+              logo_alignment?: "left" | "center";
+            },
+          ) => void;
+        };
+      };
+    };
+  }
+}
+
+/**
+ * Signup page component.
  *
- * Provides user registration functionality. Collects a username, first name,
- * last name, email address, and password. On successful registration the user
- * is redirected to `/restaurants`.
+ * Displays a registration form for creating a new account and provides
+ * an alternative Google signup flow. On successful authentication,
+ * the user is logged in and redirected to the dashboard.
  *
- * Uses the {@link useSignup} hook to communicate with the backend authentication service.
- *
- * @returns The signup page JSX element.
- *
- * @example
- * // Typically mounted by the router, no props required.
- * <SignupPage />
+ * @returns The rendered signup page.
  */
 export function SignupPage() {
   const { mutate, isPending, error } = useSignup();
-  const navigate = useNavigate();
+  const {
+    mutate: googleLogin,
+    isPending: isGooglePending,
+    error: googleError,
+  } = useGoogleLogin();
 
+  const navigate = useNavigate();
+  const { login } = useAuth();
+  const googleButtonRef = useRef<HTMLDivElement | null>(null);
+
+  /** Username entered by the user. */
   const [username, setUsername] = useState("");
+
+  /** First name entered by the user. */
   const [firstName, setFirstName] = useState("");
+
+  /** Last name entered by the user. */
   const [lastName, setLastName] = useState("");
+
+  /** Email address entered by the user. */
   const [email, setEmail] = useState("");
+
+  /** Password entered by the user. */
   const [password, setPassword] = useState("");
 
   /**
-   * Handles the signup form submission.
+   * Handles form submission for standard account creation.
    *
-   * Prevents the default browser form submission and calls the signup mutation
-   * with the collected user details. Navigates to `/restaurants` on success.
+   * Prevents the default browser form submission behaviour, sends the
+   * entered signup data to the signup mutation, and logs the user in
+   * on success before redirecting to the dashboard.
    *
-   * @param e - The React form submission event.
+   * @param e - The submitted React form event.
    */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     mutate(
       { username, firstName, lastName, email, password },
-      { onSuccess: () => navigate("/dashboard") },
+      {
+        onSuccess: (data) => {
+          login(data.accessToken);
+          navigate("/dashboard");
+        },
+      },
     );
   };
 
+  /**
+   * Initialises and renders the Google signup button once the Google
+   * Identity Services API and target container are available.
+   *
+   * On successful Google authentication, the returned credential is sent
+   * to the backend Google login handler, after which the user is logged in
+   * and redirected to the dashboard.
+   */
+  useEffect(() => {
+    if (!googleButtonRef.current || !window.google) return;
+
+    const clientId =
+      import.meta.env?.VITE_GOOGLE_CLIENT_ID ??
+      "625744063797-sg9hkugo999aqivfpgjai87418662n0e.apps.googleusercontent.com";
+
+    window.google.accounts.id.initialize({
+      client_id: clientId,
+      callback: (response: GoogleCredentialResponse) => {
+        googleLogin(
+          { idToken: response.credential },
+          {
+            onSuccess: (data) => {
+              login(data.accessToken);
+              navigate("/dashboard");
+            },
+          },
+        );
+      },
+    });
+
+    googleButtonRef.current.innerHTML = "";
+
+    window.google.accounts.id.renderButton(googleButtonRef.current, {
+      theme: "outline",
+      size: "large",
+      text: "signup_with",
+      shape: "rectangular",
+      width: "100%",
+      logo_alignment: "left",
+    });
+  }, [googleLogin, login, navigate]);
+
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-indigo-600 via-purple-600 to-blue-600 flex items-center justify-center px-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8">
-        <h1 className="text-2xl font-bold text-center mb-2">
+    <div className="min-h-screen w-full flex items-center justify-center px-4 py-8 overflow-y-auto">
+      <div className="w-full max-w-md rounded-2xl bg-white p-6 pb-8 shadow-2xl transition-all duration-300 dark:bg-slate-900">
+        <h1 className="text-2xl font-bold text-center mb-2 text-slate-900 dark:text-white">
           Create your account
         </h1>
-        <p className="text-gray-500 text-center mb-6">
+
+        <p className="text-gray-500 dark:text-slate-400 text-center mb-6">
           Join us and get started
         </p>
+
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Username */}
           <div>
-            <label
-              htmlFor="username"
-              className="block text-sm font-medium mb-1"
-            >
+            <label className="block text-sm font-medium mb-1 text-slate-900 dark:text-slate-200">
               Username
             </label>
             <input
-              id="username"
               type="text"
               placeholder="johndoe"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
-              className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-slate-900 focus:ring-2 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
             />
           </div>
+
+          {/* Names */}
           <div className="flex gap-3">
-            <div className="flex-1">
-              <label
-                htmlFor="firstName"
-                className="block text-sm font-medium mb-1"
-              >
-                First name
-              </label>
-              <input
-                id="firstName"
-                type="text"
-                placeholder="John"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                required
-                className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
-            <div className="flex-1">
-              <label
-                htmlFor="lastName"
-                className="block text-sm font-medium mb-1"
-              >
-                Last name
-              </label>
-              <input
-                id="lastName"
-                type="text"
-                placeholder="Doe"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                required
-                className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
-          </div>
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium mb-1">
-              Email
-            </label>
             <input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              placeholder="First name"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
               required
-              className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full rounded-xl border border-gray-300 px-4 py-2 dark:bg-slate-800 dark:border-slate-700"
+            />
+            <input
+              type="text"
+              placeholder="Last name"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              required
+              className="w-full rounded-xl border border-gray-300 px-4 py-2 dark:bg-slate-800 dark:border-slate-700"
             />
           </div>
-          <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium mb-1"
-            >
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
+
+          {/* Email */}
+          <input
+            type="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="w-full rounded-xl border border-gray-300 px-4 py-2 dark:bg-slate-800 dark:border-slate-700"
+          />
+
+          {/* Password */}
+          <input
+            type="password"
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className="w-full rounded-xl border border-gray-300 px-4 py-2 dark:bg-slate-800 dark:border-slate-700"
+          />
+
           {error && <p className="text-red-500 text-sm">{error.message}</p>}
+
           <Button
             type="submit"
             disabled={isPending}
-            className="w-full h-11 bg-indigo-600 hover:bg-indigo-700"
+            className="h-11 w-full bg-indigo-600 hover:bg-indigo-700"
           >
             {isPending ? "Creating account…" : "Create account"}
           </Button>
-          <div className="relative text-center text-sm">
+
+          {/* Divider */}
+          <div className="relative text-center text-sm my-4">
             <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
+              <span className="w-full border-t dark:border-slate-700" />
             </div>
-            <span className="relative bg-white px-2 text-muted-foreground">
-              OR
-            </span>
+            <span className="relative bg-white dark:bg-slate-900 px-2">OR</span>
           </div>
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full flex items-center justify-center gap-3 h-11"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 48 48"
-              className="w-5 h-5"
-            >
-              <path
-                fill="#EA4335"
-                d="M24 9.5c3.15 0 5.97 1.08 8.2 3.2l6.1-6.1C34.2 2.5 29.5 0 24 0 14.6 0 6.5 5.5 2.6 13.5l7.5 5.8C12 13.2 17.5 9.5 24 9.5z"
-              />
-              <path
-                fill="#4285F4"
-                d="M46.1 24.5c0-1.7-.15-3.3-.45-4.9H24v9.3h12.4c-.5 2.7-2 5-4.3 6.6l6.6 5.1c3.9-3.6 6.4-9 6.4-15.1z"
-              />
-              <path
-                fill="#FBBC05"
-                d="M10.1 28.3c-.6-1.7-.9-3.5-.9-5.3s.3-3.6.9-5.3l-7.5-5.8C1 15.4 0 19.6 0 24s1 8.6 2.6 12.1l7.5-5.8z"
-              />
-              <path
-                fill="#34A853"
-                d="M24 48c6.5 0 12-2.1 16-5.7l-6.6-5.1c-2 1.4-4.6 2.3-9.4 2.3-6.5 0-12-3.7-14.9-9l-7.5 5.8C6.5 42.5 14.6 48 24 48z"
-              />
-            </svg>
-            Sign up with Google
-          </Button>
+
+          {/* Google button */}
+          <div className="w-full flex justify-center">
+            <div className="w-full max-w-[320px]" ref={googleButtonRef} />
+          </div>
+
+          {googleError && (
+            <p className="text-red-500 text-sm text-center">
+              {googleError.message}
+            </p>
+          )}
+
+          {isGooglePending && (
+            <p className="text-sm text-center text-slate-500">
+              Signing up with Google…
+            </p>
+          )}
         </form>
+
         <p className="text-center text-sm text-gray-500 mt-6">
           Already have an account?{" "}
           <Link to="/login" className="text-indigo-600 hover:underline">

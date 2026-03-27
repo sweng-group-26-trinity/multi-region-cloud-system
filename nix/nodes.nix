@@ -1,4 +1,4 @@
-# NixOS configurations for our EC2 instances
+# NixOS configurations for our GCP VMs
 { self, inputs, ... }:
 let
   # helper to create a nixos system config
@@ -8,6 +8,7 @@ let
       system = "x86_64-linux";
       modules = modules ++ [
         self.nixosModules.base
+        self.nixosModules.diskConfig
         self.nixosModules.backend
         self.nixosModules.postgres
       ];
@@ -48,6 +49,7 @@ in
       system = "x86_64-linux";
       modules = [
         self.nixosModules.base
+        self.nixosModules.diskConfig
         self.nixosModules.prometheus
         self.nixosModules.grafana
         self.nixosModules.loki

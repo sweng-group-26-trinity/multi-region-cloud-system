@@ -6,25 +6,15 @@ import { Star, Clock, X } from "lucide-react";
  * Represents a restaurant card shown on the Restaurants page.
  */
 type Restaurant = {
-  /** Stable identifier used for routing/selection. */
   id: string;
-  /** Display name of the restaurant. */
   name: string;
-  /** Cuisine category (e.g. Italian, Indian). */
   cuisine: string;
-  /** Area/neighbourhood label (e.g. Dublin 2). */
   area: string;
-  /** Estimated delivery time in minutes. */
   etaMins: number;
-  /** Rough price tier indicator. */
   price: "€" | "€€" | "€€€";
-  /** Rating in the range 0–5. */
   rating: number;
-  /** Short marketing description shown on the card. */
   blurb: string;
-  /** Tag chips used for display and search matching. */
   tags: string[];
-  /** Image URL used in the restaurant card header. */
   image: string;
 };
 
@@ -147,32 +137,31 @@ export function RestaurantsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
       <div className="max-w-6xl mx-auto px-6 py-10">
-        {/* Header + Controls */}
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <h1 className="text-3xl md:text-4xl font-bold text-slate-900">
+            <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-slate-100">
               Choose a restaurant
             </h1>
-            <p className="text-slate-600 mt-2">
+            <p className="mt-2 text-slate-600 dark:text-slate-400">
               Pick one to view the menu and start your order.
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+          <div className="flex flex-col gap-3 w-full md:w-auto sm:flex-row">
             <div className="relative w-full sm:w-80">
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search by name, area, or tag…"
-                className="w-full rounded-2xl bg-white px-4 py-3 shadow-md outline-none border border-slate-200 focus:ring-2 focus:ring-slate-300"
+                className="w-full rounded-full px-4 py-2 shadow-sm border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
               />
               {query && (
                 <button
                   type="button"
                   onClick={() => setQuery("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-900"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
                   aria-label="Clear search"
                 >
                   <X size={16} />
@@ -183,7 +172,7 @@ export function RestaurantsPage() {
             <select
               value={cuisine}
               onChange={(e) => setCuisine(e.target.value)}
-              className="rounded-2xl bg-white px-4 py-3 shadow-md outline-none border border-slate-200 focus:ring-2 focus:ring-slate-300"
+              className="rounded-full px-4 py-2 shadow-sm border border-slate-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
             >
               {cuisines.map((c) => (
                 <option key={c} value={c}>
@@ -194,20 +183,19 @@ export function RestaurantsPage() {
           </div>
         </div>
 
-        {/* Cards */}
-        <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((r) => (
             <button
               key={r.id}
               type="button"
               onClick={() => goToMenu(r)}
-              className="group text-left rounded-3xl bg-white shadow-md hover:shadow-xl transition hover:-translate-y-0.5 active:translate-y-0 border border-slate-100 overflow-hidden"
+              className="group overflow-hidden rounded-3xl border border-slate-100 bg-white text-left shadow-md transition hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0 dark:border-slate-800 dark:bg-slate-900"
             >
-              <div className="h-40 w-full overflow-hidden bg-slate-100">
+              <div className="h-40 w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
                 <img
                   src={r.image}
                   alt={r.name}
-                  className="h-full w-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
+                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
                   loading="lazy"
                 />
               </div>
@@ -215,36 +203,38 @@ export function RestaurantsPage() {
               <div className="p-6">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <h2 className="text-xl font-semibold text-slate-900">
+                    <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
                       {r.name}
                     </h2>
-                    <p className="text-sm text-slate-600 mt-1">
+                    <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
                       {r.cuisine} • {r.area}
                     </p>
                   </div>
-                  <span className="shrink-0 rounded-full bg-slate-900 text-white text-xs px-3 py-1">
+                  <span className="shrink-0 rounded-full bg-slate-900 px-3 py-1 text-xs text-white dark:bg-slate-100 dark:text-slate-900">
                     {r.price}
                   </span>
                 </div>
 
                 <div className="mt-4 flex flex-wrap gap-2">
-                  <span className="rounded-full bg-slate-100 text-slate-700 text-xs px-3 py-1 flex items-center gap-1">
-                    <Star size={11} className="text-amber-400 fill-amber-400" />
+                  <span className="flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                    <Star size={11} className="fill-amber-400 text-amber-400" />
                     {r.rating.toFixed(1)}
                   </span>
-                  <span className="rounded-full bg-slate-100 text-slate-700 text-xs px-3 py-1 flex items-center gap-1">
+                  <span className="flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-700 dark:bg-slate-800 dark:text-slate-300">
                     <Clock size={11} />
                     {r.etaMins} mins
                   </span>
                 </div>
 
-                <p className="text-slate-700 mt-4 leading-relaxed">{r.blurb}</p>
+                <p className="mt-4 leading-relaxed text-slate-700 dark:text-slate-300">
+                  {r.blurb}
+                </p>
 
                 <div className="mt-4 flex flex-wrap gap-2">
                   {r.tags.slice(0, 3).map((t) => (
                     <span
                       key={t}
-                      className="rounded-full bg-slate-100 text-slate-700 text-xs px-3 py-1"
+                      className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-700 dark:bg-slate-800 dark:text-slate-300"
                     >
                       {t}
                     </span>
@@ -252,10 +242,10 @@ export function RestaurantsPage() {
                 </div>
 
                 <div className="mt-6 flex items-center justify-between">
-                  <span className="text-sm font-medium text-slate-900">
+                  <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
                     View menu →
                   </span>
-                  <span className="text-sm text-slate-500 group-hover:text-slate-700">
+                  <span className="text-sm text-slate-500 transition-colors group-hover:text-slate-700 dark:text-slate-400 dark:group-hover:text-slate-200">
                     Tap to continue
                   </span>
                 </div>
@@ -264,11 +254,12 @@ export function RestaurantsPage() {
           ))}
         </div>
 
-        {/* Empty state */}
         {filtered.length === 0 && (
-          <div className="mt-10 rounded-3xl bg-white p-6 shadow-md border border-slate-100">
-            <p className="text-slate-900 font-semibold">No results</p>
-            <p className="text-slate-600 mt-1">
+          <div className="mt-10 rounded-3xl border border-slate-100 bg-white p-6 shadow-md dark:border-slate-800 dark:bg-slate-900">
+            <p className="font-semibold text-slate-900 dark:text-slate-100">
+              No results
+            </p>
+            <p className="mt-1 text-slate-600 dark:text-slate-400">
               Try a different search term or reset filters.
             </p>
             <button
@@ -277,7 +268,7 @@ export function RestaurantsPage() {
                 setQuery("");
                 setCuisine("All");
               }}
-              className="mt-4 rounded-xl bg-slate-900 text-white px-4 py-2 hover:bg-slate-800"
+              className="mt-4 rounded-xl bg-slate-900 px-4 py-2 text-white transition hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200"
             >
               Reset
             </button>

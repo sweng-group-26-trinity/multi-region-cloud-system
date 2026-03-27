@@ -12,10 +12,13 @@ mirror_to_github:
     - bash scripts/ubuntu-setup.sh
   script:
     - git remote add github "https://oauth2:${GITHUB_TOKEN}@github.com/${GITHUB_REPO}.git" 2>/dev/null || git remote set-url github "https://oauth2:${GITHUB_TOKEN}@github.com/${GITHUB_REPO}.git"
-    - git push github "HEAD:${CI_COMMIT_BRANCH}" --force
+    - git push github "HEAD:refs/heads/${CI_COMMIT_BRANCH}" --force
   rules:
     - if: $CI_COMMIT_BRANCH
 garnix_checks:
+  before_script:
+    - bash scripts/ubuntu-setup.sh
+    - export PATH="$HOME/.local/bin:$PATH"
   stage: verify
   needs:
     - mirror_to_github
@@ -25,8 +28,6 @@ garnix_checks:
     GITHUB_CHECK_TIMEOUT: "900"
     GITHUB_CHECK_INTERVAL: "15"
     OK_CONCLUSIONS: "success,neutral,skipped"
-  before_script:
-    - bash scripts/ubuntu-setup.sh
   script:
     - bash scripts/check-garnix.sh
   rules:

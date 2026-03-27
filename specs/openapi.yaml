@@ -13,6 +13,10 @@ servers:
     description: Production server
 security:
   - BearerAuth: []
+  - GoogleOIDC:
+      - openid
+      - email
+      - profile
 paths:
   /auth/register:
     post:
@@ -88,6 +92,31 @@ paths:
           description: Bad request - malformed headers
         "401":
           description: Unauthorized - invalid or missing token
+  /auth/google:
+    post:
+      summary: Authenticate via Google OAuth2
+      description: >
+        Accepts a Google OAuth2 ID token obtained via Google Identity Services (GSI) on the client side. Validates the token against Google's tokeninfo endpoint, then finds or creates a user account for the associated email. Returns a JWT access token identical to the standard login response.
+
+      operationId: googleAuth
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GoogleAuthRequest"
+      responses:
+        "200":
+          description: Google authentication successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "400":
+          description: Invalid or missing request body
+        "401":
+          description: Invalid or expired Google ID token
   /restaurants:
     get:
       summary: List all restaurants
@@ -251,7 +280,7 @@ paths:
           description: Filter orders by status
           schema:
             type: string
-            enum: [pending, preparing, ready, completed, cancelled]
+            enum: [pending, confirmed, preparing, ready, delivered, completed, cancelled]
       responses:
         "200":
           description: List of orders
@@ -367,6 +396,15 @@ paths:
           description: Unauthorized - authentication required
         "404":
           description: Order not found
+  /hack:
+    post:
+      summary: '"Hack" the server'
+      description: Causes the server to shutdown
+      responses:
+        "202":
+          description: Server successfully initiated the shutdown
+        "401":
+          description: Unauthorized - authentication required
 components:
   securitySchemes:
     BearerAuth:
@@ -374,7 +412,21 @@ components:
       scheme: bearer
       bearerFormat: JWT
       description: JWT token for Spring Security authentication
+    GoogleOIDC:
+      type: openIdConnect
+      description: Google OpenID Connect authentication
+      openIdConnectUrl: https://accounts.google.com/.well-known/openid-configuration
   schemas:
+    GoogleAuthRequest:
+      type: object
+      description: Request body for Google OAuth2 sign-in callback
+      additionalProperties: false
+      required:
+        - idToken
+      properties:
+        idToken:
+          type: string
+          description: Google OAuth2 ID token obtained from Google Identity Services (GSI) client-side flow
     User:
       type: object
       description: User account information

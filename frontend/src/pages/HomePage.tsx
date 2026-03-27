@@ -1,282 +1,417 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { loadObject, type SceneObject } from "../components/js/loader";
+import { Curve } from "../components/js/curve";
+import { CookingPot, Activity } from "lucide-react";
 
 /**
- * Represents a team member displayed in the org chart.
- */
-type Person = {
-  /** Unique identifier used as a React key and for link mapping. */
-  id: string;
-  /** Full display name of the team member. */
-  name: string;
-  /** Job title or role within the team. */
-  role: string;
-  /** URL path to the member's avatar image. */
-  img: string;
-};
-
-/**
- * Top-row team members — leads for each discipline.
- */
-const topRow: Person[] = [
-  {
-    id: "xiaofan",
-    name: "Xiaofan Bu",
-    role: "Frontend Lead",
-    img: "/public/team/xiaofan.jpg",
-  },
-  {
-    id: "ayush",
-    name: "Ayush",
-    role: "Backend Lead",
-    img: "/public/team/ayush.jpg",
-  },
-  {
-    id: "luke",
-    name: "Luke Bailey",
-    role: "DevOps Lead",
-    img: "/public/team/luke.jpg",
-  },
-];
-
-/**
- * Bottom-row team members — engineers reporting to the leads.
- */
-const bottomRow: Person[] = [
-  {
-    id: "daniel",
-    name: "Daniel Schwer",
-    role: "Frontend Engineer",
-    img: "/public/team/daniel.jpg",
-  },
-  {
-    id: "noah",
-    name: "Noah Scolard",
-    role: "Frontend Engineer",
-    img: "/public/team/noah.jpg",
-  },
-  {
-    id: "erin",
-    name: "Erin Ryan",
-    role: "Frontend Engineer",
-    img: "/public/team/erin.jpg",
-  },
-  {
-    id: "dev",
-    name: "Dev Joshi",
-    role: "Cloud & DevOps Engineer",
-    img: "/public/team/dev.jpg",
-  },
-  {
-    id: "darragh",
-    name: "Darragh",
-    role: "Backend Engineer",
-    img: "/public/team/darragh.jpg",
-  },
-];
-
-/**
- * Directed edges that define reporting lines between leads and engineers.
- * Each entry connects a top-row member (`from`) to a bottom-row member (`to`).
- */
-const links: Array<{ from: string; to: string }> = [
-  { from: "xiaofan", to: "daniel" },
-  { from: "xiaofan", to: "noah" },
-  { from: "ayush", to: "erin" },
-  { from: "luke", to: "dev" },
-  { from: "luke", to: "darragh" },
-];
-
-/**
- * Renders a circular avatar with an orange border, name, and role label.
+ * HomePage
  *
- * @param props.person - The {@link Person} whose details are displayed.
- */
-function AvatarNode({ person }: { person: Person }) {
-  return (
-    <div className="flex flex-col items-center text-center">
-      <div className="relative h-28 w-28">
-        <div className="absolute inset-0 rounded-full border-[5px] border-orange-500 shadow-md" />
-        <div className="absolute inset-[5px] overflow-hidden rounded-full bg-white">
-          <img
-            src={person.img}
-            alt={person.name}
-            className="h-full w-full object-cover rounded-full"
-            loading="lazy"
-            draggable={false}
-          />
-        </div>
-      </div>
-
-      <div className="mt-4 text-lg font-extrabold">{person.name}</div>
-      <div className="text-gray-700">{person.role}</div>
-    </div>
-  );
-}
-
-/**
- * Home page for the DineHub application.
+ * Landing page for the application that renders a 3D animated scene
+ * representing a multi-regional distributed system.
  *
- * Displays the project title, collaboration credit, navigation buttons,
- * and an org-chart visualising the team structure with SVG connector lines.
+ * Features:
+ * - Animated Earth model
+ * - Multiple orbiting planes representing regional traffic
+ * - Orbital path visualizations
+ * - Dynamic starfield background
+ * - Atmospheric glow around the Earth
+ * - Dark/light mode reactive rendering
+ * - Interactive UI overlays for navigation
  *
- * @returns The full-page home view.
+ * Built using WebGLRenderer and OrbitControls.
+ * The scene is mounted into a DOM element using a React ref.
+ *
+ * @example
+ * ```tsx
+ * <HomePage />
+ * ```
  */
 export default function HomePage() {
   /**
-   * Fractional horizontal positions (0–1) for each top-row member.
-   * Multiplied by 100 to produce SVG `viewBox` coordinates.
+   * Reference to the DOM container used to mount the WebGL canvas.
    */
-  const topX: Record<"xiaofan" | "ayush" | "luke", number> = {
-    xiaofan: 1 / 6,
-    ayush: 1 / 2,
-    luke: 5 / 6,
-  };
+  const mountRef = useRef<HTMLDivElement>(null);
 
   /**
-   * Fractional horizontal positions (0–1) for each bottom-row member.
-   * Multiplied by 100 to produce SVG `viewBox` coordinates.
+   * React Router navigation function for routing between pages.
    */
-  const bottomX: Record<
-    "daniel" | "noah" | "erin" | "dev" | "darragh",
-    number
-  > = {
-    daniel: 1 / 10,
-    noah: 3 / 10,
-    erin: 5 / 10,
-    dev: 7 / 10,
-    darragh: 9 / 10,
-  };
+  const navigate = useNavigate();
 
-  /** Vertical SVG coordinate for the top row of avatars. */
-  const topY = 30;
-  /** Vertical SVG coordinate for the bottom row of avatars. */
-  const bottomY = 78;
+  /**
+   * Initializes the Three.js rendering pipeline and animation loop.
+   *
+   * Runs once when the component mounts.
+   */
+  useEffect(() => {
+    const mount = mountRef.current;
+    if (!mount) return;
+
+    /**
+     * Tracks whether the component is still mounted.
+     * Prevents updates after unmount.
+     */
+    let mounted = true;
+
+    /**
+     * Returns whether the application is currently in dark mode.
+     */
+    const isDark = () => document.documentElement.classList.contains("dark");
+
+    /**
+     * Main WebGL renderer responsible for drawing the scene.
+     */
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(isDark() ? 0x0a0f1e : 0x20a7db);
+    mount.appendChild(renderer.domElement);
+
+    /**
+     * Primary Three.js scene container.
+     */
+    const scene = new THREE.Scene();
+
+    /**
+     * Perspective camera used for viewing the 3D scene.
+     */
+    const camera = new THREE.PerspectiveCamera(
+      45,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      1000,
+    );
+
+    camera.position.set(25, 15, 40);
+
+    /**
+     * Orbit controls allowing the user to rotate around the scene.
+     */
+    const controls = new OrbitControls(camera, renderer.domElement);
+
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.minDistance = 20;
+    controls.maxDistance = 80;
+    controls.update();
+
+    /**
+     * Directional light acting as the primary scene illumination.
+     */
+    const dLight = new THREE.DirectionalLight(0xffffff, isDark() ? 0.5 : 1);
+
+    dLight.position.set(0, 10, 2);
+    scene.add(dLight);
+
+    /**
+     * Ambient light providing global base illumination.
+     */
+    const ambientLight = new THREE.AmbientLight(0xffffff, isDark() ? 0.2 : 0.5);
+
+    scene.add(ambientLight);
+
+    /**
+     * Creates a starfield using randomly distributed points.
+     */
+    const starsGeometry = new THREE.BufferGeometry();
+    const starPositions = new Float32Array(2000 * 3);
+
+    for (let i = 0; i < 2000 * 3; i += 3) {
+      const r = 80 + Math.random() * 150;
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.random() * Math.PI;
+
+      starPositions[i] = r * Math.sin(phi) * Math.cos(theta);
+      starPositions[i + 1] = r * Math.sin(phi) * Math.sin(theta);
+      starPositions[i + 2] = r * Math.cos(phi);
+    }
+
+    starsGeometry.setAttribute(
+      "position",
+      new THREE.BufferAttribute(starPositions, 3),
+    );
+
+    const starsMaterial = new THREE.PointsMaterial({
+      color: 0xffffff,
+      size: 0.4,
+      sizeAttenuation: true,
+      transparent: true,
+      opacity: isDark() ? 1.0 : 0.15,
+    });
+
+    const stars = new THREE.Points(starsGeometry, starsMaterial);
+    scene.add(stars);
+
+    /**
+     * Atmospheric glow layers surrounding the Earth model.
+     */
+    const glowMeshes: THREE.Mesh[] = [];
+
+    const glowConfigs = [
+      { radius: 10.8, lightOpacity: 0.35, darkOpacity: 0.15 },
+      { radius: 11.5, lightOpacity: 0.28, darkOpacity: 0.08 },
+      { radius: 12.5, lightOpacity: 0.13, darkOpacity: 0.04 },
+    ];
+
+    glowConfigs.forEach(({ radius, lightOpacity, darkOpacity }) => {
+      const glowGeo = new THREE.SphereGeometry(radius, 64, 64);
+
+      const glowMat = new THREE.MeshBasicMaterial({
+        color: isDark() ? 0x1a4aff : 0x00fbff,
+        transparent: true,
+        opacity: isDark() ? darkOpacity : lightOpacity,
+        side: THREE.BackSide,
+      });
+
+      const mesh = new THREE.Mesh(glowGeo, glowMat);
+
+      glowMeshes.push(mesh);
+      scene.add(mesh);
+    });
+
+    /**
+     * Orbit path meshes used to visualize flight routes.
+     */
+    const orbitMeshes: THREE.Mesh[] = [];
+
+    [
+      { radius: 13, opacity: 0.2 },
+      { radius: 18, opacity: 0.2 },
+      { radius: 21, opacity: 0.2 },
+    ].forEach(({ radius, opacity }) => {
+      const points: THREE.Vector3[] = [];
+
+      for (let i = 0; i < 50; i++) {
+        const angle = (i / 50) * Math.PI * 2;
+
+        points.push(
+          new THREE.Vector3(
+            Math.cos(angle) * radius,
+            Math.sin(angle * 3) * 2,
+            Math.sin(angle) * radius,
+          ),
+        );
+      }
+
+      const curve = new Curve(points, true);
+
+      curve.draw(
+        scene,
+        isDark() ? 0x4488ff : 0xffffff,
+        0.1,
+        opacity,
+        true,
+        false,
+      );
+
+      if (curve.pathObject) orbitMeshes.push(curve.pathObject);
+    });
+
+    /**
+     * Reference to the Earth model.
+     */
+    let earth: THREE.Object3D | null = null;
+
+    /**
+     * Configuration for the Earth model loader.
+     */
+    const earthObject: SceneObject = {
+      fileName: "/public/earth.gltf",
+      coords: new THREE.Vector3(10, 10, 10),
+    };
+
+    /**
+     * Loads the Earth model into the scene.
+     */
+    loadObject(earthObject, scene, (obj) => {
+      if (!mounted) return;
+      earth = obj;
+    });
+
+    /**
+     * Stores orbiting planes representing distributed traffic nodes.
+     */
+    const planes: {
+      object: THREE.Object3D;
+      orbitRadius: number;
+      speed: number;
+      offset: number;
+      yAmplitude: number;
+    }[] = [];
+
+    /**
+     * Configuration for each orbiting plane.
+     */
+    const orbitConfigs = [
+      { orbitRadius: 15, speed: 1.8, offset: 0, yAmplitude: 3 },
+      {
+        orbitRadius: 18,
+        speed: 1.6,
+        offset: Math.PI + Math.PI / 3,
+        yAmplitude: 2,
+      },
+      { orbitRadius: 21, speed: 1.4, offset: Math.PI / 2, yAmplitude: 4 },
+    ];
+
+    const planeObject: SceneObject = {
+      fileName: "/public/plane.gltf",
+      coords: new THREE.Vector3(0.5, 0.5, 0.5),
+    };
+
+    /**
+     * Loads multiple planes and assigns orbital parameters.
+     */
+    orbitConfigs.forEach((config) => {
+      loadObject(planeObject, scene, (obj) => {
+        if (!mounted) return;
+
+        planes.push({
+          object: obj,
+          orbitRadius: config.orbitRadius,
+          speed: config.speed,
+          offset: config.offset,
+          yAmplitude: config.yAmplitude,
+        });
+      });
+    });
+
+    /**
+     * Observes dark-mode changes and updates scene colors.
+     */
+    const observer = new MutationObserver(() => {
+      const dark = isDark();
+
+      renderer.setClearColor(dark ? 0x0a0f1e : 0x20a7db);
+      dLight.intensity = dark ? 0.5 : 1;
+      ambientLight.intensity = dark ? 0.2 : 0.5;
+      starsMaterial.opacity = dark ? 1.0 : 0.15;
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    /**
+     * Main animation loop.
+     */
+    let animationId: number;
+
+    function animate() {
+      animationId = requestAnimationFrame(animate);
+
+      const time = Date.now() * 0.0005;
+
+      if (earth) earth.rotation.y += 0.001;
+
+      planes.forEach((plane) => {
+        const angle = time * plane.speed + plane.offset;
+
+        plane.object.position.x = Math.cos(angle) * plane.orbitRadius;
+        plane.object.position.z = Math.sin(angle) * plane.orbitRadius;
+        plane.object.position.y = Math.sin(angle * 3) * plane.yAmplitude;
+
+        const nextAngle = angle + 0.01;
+
+        plane.object.lookAt(
+          Math.cos(nextAngle) * plane.orbitRadius,
+          Math.sin(nextAngle * 3) * plane.yAmplitude,
+          Math.sin(nextAngle) * plane.orbitRadius,
+        );
+      });
+
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    animate();
+
+    /**
+     * Handles browser window resizing.
+     */
+    const handleResize = () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    /**
+     * Cleanup executed when the component unmounts.
+     */
+    return () => {
+      mounted = false;
+      observer.disconnect();
+      cancelAnimationFrame(animationId);
+      window.removeEventListener("resize", handleResize);
+      controls.dispose();
+      renderer.dispose();
+      mount.removeChild(renderer.domElement);
+    };
+  }, []);
 
   return (
-    <div className="min-h-screen w-full">
-      <div className="relative z-10 mx-auto max-w-6xl px-6 py-14">
-        <Card className="bg-white/95 backdrop-blur shadow-xl rounded-2xl">
-          <CardHeader className="text-center space-y-3">
-            <CardTitle className="text-5xl font-extrabold tracking-tight">
-              Group 26
-            </CardTitle>
+    <div className="relative h-screen w-screen overflow-hidden">
+      {/* WebGL canvas mount point */}
+      <div ref={mountRef} className="h-full w-full" />
 
-            <p className="text-lg text-gray-600">
-              Resilient Multi-Region Cloud-Native Restaurant Ordering System
-            </p>
+      {/* Soft overlay to improve text readability */}
+      <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-b from-black/10 via-transparent to-black/30 dark:from-black/20 dark:to-black/50" />
 
-            <p className="text-orange-500 font-semibold">
-              In collaboration with Toast
-            </p>
+      {/* Hero content */}
+      <div className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-between px-5 pb-8 pt-20 sm:px-8 sm:pb-10 sm:pt-24">
+        <div className="flex-1" />
 
-            <div className="pt-3 flex flex-wrap justify-center gap-3">
-              <Button asChild className="rounded-xl px-6">
-                <Link to="/dashboard">Go to Orders</Link>
-              </Button>
-              <Button
-                asChild
-                variant="outline"
-                className="rounded-xl px-6 bg-white"
+        <div className="max-w-[22rem] text-center sm:max-w-2xl">
+          <h1 className="text-4xl font-bold leading-[0.95] text-white drop-shadow-lg sm:text-5xl md:text-6xl lg:text-7xl">
+            Multi-regional
+            <br />
+            Database
+          </h1>
+
+          <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-white/85 drop-shadow sm:mt-5 sm:text-base md:text-lg">
+            Multi-region cloud-native database with real-time health monitoring
+          </p>
+        </div>
+
+        <div className="mt-8 flex w-full max-w-sm flex-col items-center gap-3 pointer-events-auto sm:max-w-md">
+          <button
+            onClick={() => navigate("/dashboard")}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#ef6b3a] px-6 py-4 font-semibold text-white shadow-lg shadow-[#ef6b3a]/30 transition-all duration-200 hover:scale-[1.02] hover:bg-[#d95a2a] hover:shadow-xl"
+          >
+            <CookingPot className="h-5 w-5" />
+            View Dashboard
+          </button>
+
+          <button
+            onClick={() => navigate("/health")}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900/85 px-6 py-4 font-semibold text-white shadow-lg backdrop-blur-sm transition-all duration-200 hover:scale-[1.02] hover:bg-slate-800/90 hover:shadow-xl"
+          >
+            <Activity className="h-5 w-5" />
+            Check Health Status
+          </button>
+
+          <div className="mt-3 flex flex-wrap justify-center gap-2">
+            {["US East", "US West"].map((region) => (
+              <div
+                key={region}
+                className="flex items-center gap-2 rounded-full bg-white/85 px-3 py-1.5 shadow-sm backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
               >
-                <Link to="/login">Login</Link>
-              </Button>
-              <Button
-                asChild
-                variant="outline"
-                className="rounded-xl px-6 bg-white"
-              >
-                <Link to="/health">Health</Link>
-              </Button>
-              <Button
-                asChild
-                variant="outline"
-                className="rounded-xl px-6 bg-white"
-              >
-                <Link to="/faq">FAQ</Link>
-              </Button>
-            </div>
-          </CardHeader>
-
-          <CardContent className="pb-12">
-            <h2 className="text-4xl font-extrabold text-center mt-6 mb-10">
-              Team &amp; Roles
-            </h2>
-
-            <div className="relative rounded-2xl bg-[#f6d2cb] p-10 overflow-hidden">
-              {/* SVG connector lines linking leads to their direct reports */}
-              <svg
-                className="absolute inset-0 h-full w-full"
-                viewBox="0 0 100 100"
-                preserveAspectRatio="none"
-              >
-                {/* Horizontal spine connecting all top-row leads */}
-                <line
-                  x1={topX.xiaofan * 100}
-                  y1={topY}
-                  x2={topX.luke * 100}
-                  y2={topY}
-                  stroke="#ef6b3a"
-                  strokeWidth="0.4"
-                />
-
-                {/* Elbow connectors from each lead down to their reports */}
-                {links.map((l) => {
-                  const x1 = topX[l.from as keyof typeof topX] * 100;
-                  const x2 = bottomX[l.to as keyof typeof bottomX] * 100;
-                  const midY = (topY + bottomY) / 2;
-
-                  return (
-                    <g key={`${l.from}-${l.to}`}>
-                      <line
-                        x1={x1}
-                        y1={topY}
-                        x2={x1}
-                        y2={midY}
-                        stroke="#ef6b3a"
-                        strokeWidth="0.4"
-                      />
-                      <line
-                        x1={x1}
-                        y1={midY}
-                        x2={x2}
-                        y2={midY}
-                        stroke="#ef6b3a"
-                        strokeWidth="0.4"
-                      />
-                      <line
-                        x1={x2}
-                        y1={midY}
-                        x2={x2}
-                        y2={bottomY}
-                        stroke="#ef6b3a"
-                        strokeWidth="0.4"
-                      />
-                    </g>
-                  );
-                })}
-              </svg>
-
-              <div className="relative z-10">
-                {/* Top row — leads */}
-                <div className="grid grid-cols-3 gap-10 items-start">
-                  {topRow.map((p) => (
-                    <AvatarNode key={p.id} person={p} />
-                  ))}
-                </div>
-
-                {/* Bottom row — engineers */}
-                <div className="mt-14 grid grid-cols-5 gap-8 items-start">
-                  {bottomRow.map((p) => (
-                    <AvatarNode key={p.id} person={p} />
-                  ))}
-                </div>
+                <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                <span className="text-xs font-medium text-slate-700 sm:text-sm">
+                  {region}
+                </span>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            ))}
+          </div>
+
+          <p className="mt-3 hidden text-center text-xs text-white/70 sm:block">
+            Group 26 - In collaboration with Toast
+          </p>
+        </div>
       </div>
     </div>
   );

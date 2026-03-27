@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { restaurantsApi } from "./restaurants";
-import { ordersApi } from "./orders";
-import type { Restaurant, Order } from "./types";
+import type { Restaurant } from "./types";
 
 /**
  * Parameters for fetching restaurants via useRestaurants hook.
@@ -74,47 +73,6 @@ export const useCreateRestaurant = () => {
       restaurantsApi.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["restaurants"] });
-    },
-  });
-};
-
-/**
- * Fetches a paginated and filterable list of orders.
- * @param params - Pagination and filter options
- * @returns React Query result containing orders data
- */
-export const useOrders = (params: UseOrdersParams = {}) => {
-  return useQuery({
-    queryKey: ["orders", params],
-    queryFn: () => ordersApi.getAll(params),
-  });
-};
-
-/**
- * Fetches a single order by its ID.
- * @param id - Order ID
- * @returns React Query result containing the order data
- */
-export const useOrder = (id: string) => {
-  return useQuery({
-    queryKey: ["orders", id],
-    queryFn: () => ordersApi.getById(id),
-    enabled: !!id,
-  });
-};
-
-/**
- * Creates a new order.
- * @returns React Query mutation for creating an order
- */
-export const useCreateOrder = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (data: Omit<Order, "id" | "createdAt" | "updatedAt">) =>
-      ordersApi.create(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["orders"] });
     },
   });
 };
