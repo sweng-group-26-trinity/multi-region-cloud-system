@@ -9,7 +9,6 @@ import { RestaurantsPage } from "./pages/RestaurantPage";
 import OrdersPage from "./pages/OrdersPage";
 import OrderSummaryPage from "./pages/OrderSummaryPage";
 import DatabaseHealth from "./pages/DatabaseHealth";
-import FAQPage from "./pages/FAQPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
 import FAQPage from "./pages/FAQPage";
