@@ -151,6 +151,15 @@ function Header({
     navigate("/login");
   };
 
+  const navIconClass =
+    "h-[42px] w-[42px] rounded-full flex items-center justify-center text-slate-700 transition-all duration-200 hover:bg-slate-100 hover:text-orange-500 active:scale-[0.97] dark:text-slate-200 dark:hover:bg-slate-900";
+
+  const navTextClass =
+    "flex items-center gap-2 rounded-full px-3 py-2 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-slate-100 hover:text-orange-500 active:scale-[0.97] dark:text-slate-200 dark:hover:bg-slate-900";
+
+  const logoutClass =
+    "flex items-center gap-2 rounded-full bg-orange-500 px-3 py-2 text-sm font-medium text-white transition-all duration-200 hover:bg-orange-600 active:scale-[0.97]";
+
   if (isHomePage) {
     return (
       <div className="pointer-events-none absolute left-0 right-0 top-0 z-50">
@@ -160,7 +169,7 @@ function Header({
             onClick={() => navigate("/")}
             className="flex items-center gap-2 rounded-xl px-2 py-2 transition-all duration-200 hover:scale-[1.02]"
           >
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500 text-white shadow-md">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500 text-white">
               <UtensilsCrossed size={18} strokeWidth={2.5} />
             </div>
             <span className="text-lg font-semibold text-white drop-shadow">
@@ -172,7 +181,7 @@ function Header({
             type="button"
             onClick={toggleDarkMode}
             title={darkMode ? "Light Mode" : "Dark Mode"}
-            className="flex items-center justify-center rounded-xl bg-white/85 p-2 text-slate-900 shadow-md backdrop-blur transition-all duration-200 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98] dark:bg-slate-900/85 dark:text-slate-100 dark:shadow-black/30"
+            className="flex h-[42px] w-[42px] items-center justify-center rounded-full text-white transition-all duration-200 hover:bg-white/10 active:scale-[0.97]"
           >
             {darkMode ? <Sun size={18} /> : <Moon size={18} />}
           </button>
@@ -188,25 +197,24 @@ function Header({
           <button
             type="button"
             onClick={() => navigate("/")}
-            className="flex shrink-0 items-center gap-2 rounded-xl bg-white/85 px-3 py-2 text-slate-900 shadow-md backdrop-blur transition-all duration-200 hover:scale-[1.02] dark:bg-slate-950/85 dark:text-slate-100 dark:shadow-black/30"
+            className="flex shrink-0 items-center gap-2 rounded-xl px-2 py-2 transition-all duration-200 hover:scale-[1.02]"
           >
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500 text-white">
               <UtensilsCrossed size={18} strokeWidth={2.5} />
             </div>
-            <span className="text-lg font-semibold">DineHub</span>
+            <span className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+              DineHub
+            </span>
           </button>
 
-          <div className="flex flex-wrap items-center justify-end gap-2">
+          <div className="flex flex-wrap items-center justify-end gap-1 sm:gap-2">
             <button
               type="button"
               onClick={toggleDarkMode}
               title={darkMode ? "Light Mode" : "Dark Mode"}
-              className="flex items-center gap-2 rounded-xl bg-white/85 px-3 py-2 text-slate-900 shadow-md backdrop-blur transition-all duration-200 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98] dark:bg-slate-950/85 dark:text-slate-100 dark:shadow-black/30"
+              className={navIconClass}
             >
               {darkMode ? <Sun size={18} /> : <Moon size={18} />}
-              <span className="hidden font-medium sm:inline">
-                {darkMode ? "Light Mode" : "Dark Mode"}
-              </span>
             </button>
 
             {showPrivateButtons && !isDashboardPage && (
@@ -214,10 +222,10 @@ function Header({
                 type="button"
                 onClick={() => navigate("/dashboard")}
                 title="Dashboard"
-                className="flex items-center gap-2 rounded-xl bg-white/85 px-3 py-2 text-slate-900 shadow-md backdrop-blur transition-all duration-200 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98] dark:bg-slate-950/85 dark:text-slate-100 dark:shadow-black/30"
+                className={`${navTextClass} px-2 sm:px-3`}
               >
                 <LayoutDashboard size={18} />
-                <span className="hidden font-medium sm:inline">Dashboard</span>
+                <span className="hidden sm:inline">Dashboard</span>
               </button>
             )}
 
@@ -226,10 +234,10 @@ function Header({
                 type="button"
                 onClick={handleLogout}
                 title="Logout"
-                className="flex items-center gap-2 rounded-xl bg-white/85 px-3 py-2 text-slate-900 shadow-md backdrop-blur transition-all duration-200 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98] dark:bg-slate-950/85 dark:text-slate-100 dark:shadow-black/30"
+                className={`${logoutClass} px-2 sm:px-3`}
               >
                 <LogOut size={18} />
-                <span className="hidden font-medium sm:inline">Logout</span>
+                <span className="hidden sm:inline">Logout</span>
               </button>
             )}
           </div>
@@ -244,7 +252,7 @@ function Header({
         <button
           type="button"
           onClick={() => navigate("/")}
-          className="flex shrink-0 items-center gap-2 rounded-xl px-2 py-2 transition-all duration-200 hover:scale-[1.02] hover:bg-slate-100 dark:hover:bg-slate-900"
+          className="flex shrink-0 items-center gap-2 rounded-xl px-2 py-2 transition-all duration-200 hover:scale-[1.02]"
         >
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500 text-white">
             <UtensilsCrossed size={18} strokeWidth={2.5} />
@@ -254,17 +262,14 @@ function Header({
           </span>
         </button>
 
-        <div className="flex flex-wrap items-center justify-end gap-2">
+        <div className="flex flex-wrap items-center justify-end gap-1 sm:gap-2">
           <button
             type="button"
             onClick={toggleDarkMode}
             title={darkMode ? "Light Mode" : "Dark Mode"}
-            className="flex items-center gap-2 rounded-xl bg-white px-3 py-2 text-slate-900 shadow-md transition-all duration-200 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98] dark:bg-slate-900 dark:text-slate-100 dark:shadow-black/30"
+            className={navIconClass}
           >
             {darkMode ? <Sun size={18} /> : <Moon size={18} />}
-            <span className="hidden font-medium sm:inline">
-              {darkMode ? "Light Mode" : "Dark Mode"}
-            </span>
           </button>
 
           {showPrivateButtons && !isDashboardPage && (
@@ -272,10 +277,10 @@ function Header({
               type="button"
               onClick={() => navigate("/dashboard")}
               title="Dashboard"
-              className="flex items-center gap-2 rounded-xl bg-white px-3 py-2 text-slate-900 shadow-md transition-all duration-200 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98] dark:bg-slate-900 dark:text-slate-100 dark:shadow-black/30"
+              className={navTextClass}
             >
               <LayoutDashboard size={18} />
-              <span className="hidden font-medium sm:inline">Dashboard</span>
+              <span className="hidden sm:inline">Dashboard</span>
             </button>
           )}
 
@@ -284,10 +289,10 @@ function Header({
               type="button"
               onClick={() => navigate("/health")}
               title="Health"
-              className="flex items-center gap-2 rounded-xl bg-white px-3 py-2 text-slate-900 shadow-md transition-all duration-200 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98] dark:bg-slate-900 dark:text-slate-100 dark:shadow-black/30"
+              className={navTextClass}
             >
               <HeartPulse size={18} />
-              <span className="hidden font-medium sm:inline">Health</span>
+              <span className="hidden sm:inline">Health</span>
             </button>
           )}
 
@@ -296,10 +301,10 @@ function Header({
               type="button"
               onClick={handleLogout}
               title="Logout"
-              className="flex items-center gap-2 rounded-xl bg-white px-3 py-2 text-slate-900 shadow-md transition-all duration-200 hover:scale-[1.03] hover:shadow-lg active:scale-[0.98] dark:bg-slate-900 dark:text-slate-100 dark:shadow-black/30"
+              className={logoutClass}
             >
               <LogOut size={18} />
-              <span className="hidden font-medium sm:inline">Logout</span>
+              <span className="hidden sm:inline">Logout</span>
             </button>
           )}
         </div>
