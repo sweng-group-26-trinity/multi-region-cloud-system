@@ -373,12 +373,6 @@ export default function ThreeScene() {
     <div className="relative h-screen w-screen overflow-hidden">
       {/* Desktop-only dashboard shortcut */}
       <div className="absolute left-1/2 top-6 z-50 hidden -translate-x-1/2 sm:block">
-        <button
-          onClick={() => navigate("/dashboard")}
-          className="rounded-full bg-indigo-600 px-6 py-2 font-semibold text-white shadow-md transition-all duration-200 hover:scale-[1.03] hover:bg-indigo-700 hover:shadow-lg active:scale-[0.98]"
-        >
-          Dashboard
-        </button>
       </div>
 
       {/* 3D scene */}
