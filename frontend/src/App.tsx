@@ -11,6 +11,7 @@ import OrderSummaryPage from "./pages/OrderSummaryPage";
 import DatabaseHealth from "./pages/DatabaseHealth";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
+import FAQPage from "./pages/FAQPage";
 import {
   Moon,
   Sun,
@@ -18,6 +19,7 @@ import {
   HeartPulse,
   LayoutDashboard,
   LogOut,
+  HelpCircle,
 } from "lucide-react";
 import { useAuth } from "./context/AuthContext";
 import "./index.css";
@@ -69,6 +71,14 @@ function AnimatedRoutes() {
           element={
             <Page>
               <DatabaseHealth />
+            </Page>
+          }
+        />
+        <Route
+          path="/faq"
+          element={
+            <Page>
+              <FAQPage />
             </Page>
           }
         />
@@ -293,6 +303,18 @@ function Header({
             >
               <HeartPulse size={18} />
               <span className="hidden sm:inline">Health</span>
+            </button>
+          )}
+
+          {pathname !== "/faq" && (
+            <button
+              type="button"
+              onClick={() => navigate("/faq")}
+              title="FAQ"
+              className={navTextClass}
+            >
+              <HelpCircle size={18} />
+              <span className="hidden sm:inline">FAQ</span>
             </button>
           )}
 
