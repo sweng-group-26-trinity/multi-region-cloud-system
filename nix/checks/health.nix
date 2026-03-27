@@ -9,14 +9,17 @@ in
     {
       checks.healthCheck = pkgs.testers.runNixOSTest {
         name = "health-check";
-        nodes.machine = {
-          imports = [
-            self.nixosModules.backend
-          ];
+        nodes.client = {
+          imports = [ self.nixosModules.backend ];
+          networking.hostName = "client";
           environment.systemPackages = [
             self'.packages.schemathesis
             self'.packages.schemathesis-health-check
           ];
+        };
+        nodes.server = {
+          imports = [ self.nixosModules.backend ];
+          networking.hostName = "server";
           services.postgresql = {
             enable = true;
             ensureDatabases = [ "sweng" ];
@@ -85,18 +88,26 @@ in
             "postgresql.service"
           ];
           systemd.services.backend.requires = [ "postgresql.service" ];
+          # Make server accessible to client
+          networking.firewall.allowedTCPPorts = [ 8080 ];
         };
         testScript = ''
-          machine.wait_for_unit("postgresql.service")
-          machine.wait_for_unit("backend.target")
-          machine.wait_for_open_port(8080)
-          machine.succeed("""
-            curl http://localhost:8080/actuator/health | grep -o \"UP\"
+          # Wait for server's PostgreSQL to be ready
+          server.wait_for_unit("postgresql.service")
+          server.wait_for_unit("backend.target")
+          server.wait_for_open_port(8080)
+
+          # Verify basic health endpoint from server
+          server.succeed("""
+            curl http://localhost:8080/actuator/health | grep -o "UP"
           """)
 
+          # Verify client can reach server via network
+          client.wait_until_succeeds("ping -c 1 server")
+
           # Run schemathesis with authentication via the helper script
-          machine.succeed("""
-            cd "${sourceDir}" && schemathesis-health-check http://localhost:8080/api "${openapiSpec}"
+          client.succeed("""
+            cd "${sourceDir}" && schemathesis-health-check http://server:8080/api "${openapiSpec}"
           """)
 
           print("Yippie Backend works!")

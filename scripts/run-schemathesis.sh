@@ -12,6 +12,10 @@
 
 set -euo pipefail
 
+gum log --level info "Setting up hypothesis with writable cache dir"
+export HYPOTHESIS_DATABASE="file:${TMPDIR:-/tmp}/hypothesis-cache"
+gum log --level info "Succesfully created hypothesis cache at $HYPOTHESIS_DATABASE"
+
 BASE_URL="${1:-http://localhost:8080/api}"
 SPEC_PATH="${2:-specs/openapi.yaml}"
 
