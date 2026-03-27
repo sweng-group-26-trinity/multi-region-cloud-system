@@ -372,8 +372,7 @@ export default function ThreeScene() {
   return (
     <div className="relative h-screen w-screen overflow-hidden">
       {/* Desktop-only dashboard shortcut */}
-      <div className="absolute left-1/2 top-6 z-50 hidden -translate-x-1/2 sm:block">
-      </div>
+      <div className="absolute left-1/2 top-6 z-50 hidden -translate-x-1/2 sm:block"></div>
 
       {/* 3D scene */}
       <div ref={mountRef} className="h-full w-full" />
