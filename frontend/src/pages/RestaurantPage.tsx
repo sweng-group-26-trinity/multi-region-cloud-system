@@ -155,7 +155,7 @@ export function RestaurantsPage() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search by name, area, or tag…"
-                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-md outline-none transition-colors focus:ring-2 focus:ring-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:ring-slate-700"
+                className="w-full rounded-full px-4 py-2 shadow-sm border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
               />
               {query && (
                 <button
@@ -172,7 +172,7 @@ export function RestaurantsPage() {
             <select
               value={cuisine}
               onChange={(e) => setCuisine(e.target.value)}
-              className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-md outline-none transition-colors focus:ring-2 focus:ring-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:ring-slate-700"
+              className="rounded-full px-4 py-2 shadow-sm border border-slate-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
             >
               {cuisines.map((c) => (
                 <option key={c} value={c}>
