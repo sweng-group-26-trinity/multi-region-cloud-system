@@ -40,7 +40,7 @@ type GreenStat = {
 const greenStats: GreenStat[] = [
   {
     icon: <Cloud size={22} />,
-    value: "3",
+    value: "2",
     label: "Cloud regions",
     detail:
       "Traffic is routed to the nearest available region, cutting unnecessary data travel and reducing latency-driven energy waste.",
@@ -179,14 +179,8 @@ export default function FAQPage() {
 
       {/* Sticky header */}
       <div className="sticky top-0 z-20 bg-white/30 backdrop-blur-md border-b border-white/30">
-        <div className="max-w-3xl mx-auto px-6 py-4 flex items-center gap-3">
-          <button
-            onClick={() => navigate("/")}
-            className="flex items-center gap-1 text-sm font-medium text-white/90 transition hover:text-white drop-shadow"
-          >
-            <ArrowLeft size={16} /> Back
-          </button>
-          <h1 className="text-xl font-bold text-white drop-shadow">
+        <div className="max-w-3xl mx-auto px-6 py-4 flex justify-center">
+          <h1 className="text-xl font-semibold tracking-tight text-white drop-shadow">
             FAQ & About
           </h1>
         </div>

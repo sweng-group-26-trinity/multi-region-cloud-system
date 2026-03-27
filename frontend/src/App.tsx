@@ -11,6 +11,7 @@ import OrderSummaryPage from "./pages/OrderSummaryPage";
 import DatabaseHealth from "./pages/DatabaseHealth";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
+import FAQPage from "./pages/FAQPage";
 import {
   Moon,
   Sun,
@@ -68,6 +69,14 @@ function AnimatedRoutes() {
           element={
             <Page>
               <DatabaseHealth />
+            </Page>
+          }
+        />
+        <Route
+          path="/faq"
+          element={
+            <Page>
+              <FAQPage />
             </Page>
           }
         />
@@ -294,6 +303,15 @@ function Header({
               <span className="hidden sm:inline">Health</span>
             </button>
           )}
+
+          <button
+            type="button"
+            onClick={() => navigate("/faq")}
+            title="FAQ"
+            className={navTextClass}
+          >
+            <span className="hidden sm:inline">FAQ</span>
+          </button>
 
           {showPrivateButtons && (
             <button
