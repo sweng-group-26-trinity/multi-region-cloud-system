@@ -20,6 +20,7 @@ import {
   HeartPulse,
   LayoutDashboard,
   LogOut,
+  HelpCircle,
 } from "lucide-react";
 import { useAuth } from "./context/AuthContext";
 import "./index.css";
@@ -306,14 +307,17 @@ function Header({
             </button>
           )}
 
-          <button
-            type="button"
-            onClick={() => navigate("/faq")}
-            title="FAQ"
-            className={navTextClass}
-          >
-            <span className="hidden sm:inline">FAQ</span>
-          </button>
+          {pathname !== "/faq" && (
+            <button
+              type="button"
+              onClick={() => navigate("/faq")}
+              title="FAQ"
+              className={navTextClass}
+            >
+              <HelpCircle size={18} />
+              <span className="hidden sm:inline">FAQ</span>
+            </button>
+          )}
 
           {showPrivateButtons && (
             <button
