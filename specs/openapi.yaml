@@ -511,7 +511,6 @@ components:
           pattern: "^(?!\\s*$).+"
           minLength: 1
           maxLength: 120
-          pattern: "^(?!\\s*$).+"
         password:
           type: string
           description: User's password (ASCII printable, at least one non-space)
