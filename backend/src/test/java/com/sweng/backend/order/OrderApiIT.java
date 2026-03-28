@@ -59,6 +59,9 @@ class OrderApiIT {
     r.setId(UUID.randomUUID());
     r.setName("Test Resto");
     r.setAddress("1 Test Street");
+    r.setPhone("+123456789");
+    r.setCuisineType("Test Cuisine");
+    r.setOpeningHours("Mon-Fri 09:00-17:00");
     r.setActive(true);
     r.setOwnerId(ownerUid);
 
@@ -93,6 +96,8 @@ class OrderApiIT {
   void createOrder_withoutAuth_isRejected() throws Exception {
     CreateOrderRequest req = new CreateOrderRequest();
     req.setRestaurantId(restaurantId.toString());
+    req.setCustomerName("Customer A");
+    req.setCustomerEmail("customerA@test.com");
     req.setItems(List.of(buildItem("item-1", 1)));
 
     mockMvc
@@ -110,6 +115,8 @@ class OrderApiIT {
 
     CreateOrderRequest req = new CreateOrderRequest();
     req.setRestaurantId(restaurantId.toString());
+    req.setCustomerName("Customer A");
+    req.setCustomerEmail("customerA@test.com");
     req.setItems(List.of(buildItem("item-1", 2)));
 
     mockMvc
@@ -130,6 +137,8 @@ class OrderApiIT {
   void createOrder_withEmptyItems_returns400() throws Exception {
     CreateOrderRequest req = new CreateOrderRequest();
     req.setRestaurantId(restaurantId.toString());
+    req.setCustomerName("Customer A");
+    req.setCustomerEmail("customerA@test.com");
     req.setItems(List.of());
 
     mockMvc
@@ -145,6 +154,8 @@ class OrderApiIT {
   void getOrders_returnsWrappedDataArray() throws Exception {
     CreateOrderRequest req = new CreateOrderRequest();
     req.setRestaurantId(restaurantId.toString());
+    req.setCustomerName("Customer A");
+    req.setCustomerEmail("customerA@test.com");
     req.setItems(List.of(buildItem("item-1", 1)));
 
     mockMvc
@@ -165,6 +176,8 @@ class OrderApiIT {
   void updateOrder_ownerCanUpdateWhenPending() throws Exception {
     CreateOrderRequest create = new CreateOrderRequest();
     create.setRestaurantId(restaurantId.toString());
+    create.setCustomerName("Customer A");
+    create.setCustomerEmail("customerA@test.com");
     create.setItems(List.of(buildItem("item-1", 1)));
 
     String response =

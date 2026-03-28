@@ -1,6 +1,7 @@
 package com.sweng.backend.restaurant;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
 import java.util.UUID;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -37,8 +38,9 @@ public class RestaurantEntity {
   @Column(nullable = false, length = 200)
   private String address;
 
-  /** Optional contact phone number. */
-  @Column(length = 20)
+  /** Contact phone number. */
+  @NotNull
+  @Column(nullable = false, length = 20)
   private String phone;
 
   /** Optional contact email address. */
@@ -46,11 +48,13 @@ public class RestaurantEntity {
   private String email;
 
   /** Type of cuisine served by the restaurant. */
-  @Column(length = 50)
+  @NotNull
+  @Column(nullable = false, length = 50)
   private String cuisineType;
 
   /** Opening hours of the restaurant. */
-  @Column(length = 100)
+  @NotNull
+  @Column(nullable = false, length = 100)
   private String openingHours;
 
   /** UUID of the user who owns the restaurant. */

@@ -7,10 +7,12 @@ import com.sweng.backend.order.dto.OrderItemDto;
 import com.sweng.backend.order.dto.UpdateOrderRequest;
 import com.sweng.backend.restaurant.RestaurantRepository;
 import com.sweng.backend.user.UserRepository;
+import com.sweng.backend.util.ValidationUtils;
 import jakarta.validation.Valid;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
@@ -128,12 +130,19 @@ public class OrderController {
 
     // Validate restaurant exists
     if (!restaurantRepository.existsById(restaurantUuid)) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid restaurantId");
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid restaurantId");
     }
 
     if (body.getItems() == null || body.getItems().isEmpty()) {
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST, "Order must contain at least one item");
+    }
+
+    ValidationUtils.rejectNullBytes(body.getCustomerName(), "customerName");
+    ValidationUtils.rejectNullBytes(body.getCustomerEmail(), "customerEmail");
+    ValidationUtils.rejectNullBytes(body.getSpecialInstructions(), "specialInstructions");
+    for (CreateOrderItemRequest item : body.getItems()) {
+      ValidationUtils.rejectNullBytes(item.getItemId(), "itemId");
     }
 
     OrderEntity e = new OrderEntity();
@@ -146,7 +155,9 @@ public class OrderController {
 
     // Map items
     List<OrderItemEmbeddable> items =
-        body.getItems().stream().map(OrderController::toEmbeddable).toList();
+        body.getItems().stream()
+            .map(OrderController::toEmbeddable)
+            .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
 
     // Compute totals
     items.forEach(OrderController::computeSubtotalIfMissing);
@@ -241,19 +252,29 @@ public class OrderController {
     if (body.getSpecialInstructions() != null)
       found.setSpecialInstructions(body.getSpecialInstructions());
 
+    ValidationUtils.rejectNullBytes(body.getCustomerName(), "customerName");
+    ValidationUtils.rejectNullBytes(body.getCustomerEmail(), "customerEmail");
+    ValidationUtils.rejectNullBytes(body.getSpecialInstructions(), "specialInstructions");
+
     if (body.getItems() != null) {
       if (body.getItems().isEmpty()) {
         throw new ResponseStatusException(
             HttpStatus.BAD_REQUEST, "Order must contain at least one item");
       }
+      for (CreateOrderItemRequest item : body.getItems()) {
+        ValidationUtils.rejectNullBytes(item.getItemId(), "itemId");
+      }
       List<OrderItemEmbeddable> items =
-          body.getItems().stream().map(OrderController::toEmbeddable).toList();
+          body.getItems().stream()
+              .map(OrderController::toEmbeddable)
+              .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
       items.forEach(OrderController::computeSubtotalIfMissing);
       BigDecimal total =
           items.stream()
               .map(OrderItemEmbeddable::getSubtotal)
               .reduce(BigDecimal.ZERO, BigDecimal::add);
-      found.setItems(items);
+      found.getItems().clear();
+      found.getItems().addAll(items);
       found.setTotalAmount(total);
     }
 

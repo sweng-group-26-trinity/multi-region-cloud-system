@@ -1,32 +1,40 @@
 package com.sweng.backend.restaurant.dto;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 /** Request body for creating a new restaurant. */
 public class CreateRestaurantRequest {
 
-  @NotBlank
+  @NotNull
   @Size(min = 1, max = 100)
   private String name;
 
   @Size(max = 500)
   private String description;
 
-  @NotBlank
-  @Size(max = 200)
+  @NotNull
+  @Size(min = 1, max = 200)
   private String address;
 
+  @NotBlank
   @Size(max = 20)
+  @Pattern(regexp = "^[\\x20-\\x7E]{1,20}$")
   private String phone;
 
-  @Email private String email;
+  @Pattern(regexp = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
+  private String email;
 
+  @NotBlank
   @Size(max = 50)
+  @Pattern(regexp = "^[\\x20-\\x7E]{1,50}$")
   private String cuisineType;
 
+  @NotBlank
   @Size(max = 100)
+  @Pattern(regexp = "^[\\x20-\\x7E]{1,100}$")
   private String openingHours;
 
   /** Default constructor for deserialization. */

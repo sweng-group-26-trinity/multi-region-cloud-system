@@ -1,10 +1,8 @@
 package com.sweng.backend.auth;
 
-import com.sweng.backend.config.StrictStringDeserializer;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import tools.jackson.databind.annotation.JsonDeserialize;
 
 /** Request object for user registration. */
 public class RegisterRequest {
@@ -14,7 +12,6 @@ public class RegisterRequest {
   @Pattern(
       regexp = "^[a-zA-Z0-9_-]+$",
       message = "Username must contain only letters, numbers, underscores, or hyphens")
-  @JsonDeserialize(using = StrictStringDeserializer.class)
   private String username;
 
   @NotBlank
@@ -23,7 +20,6 @@ public class RegisterRequest {
           "^[a-zA-Z0-9_%+-]+(?:\\.[a-zA-Z0-9_%+-]+)*@[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)*\\.[a-zA-Z]{2,63}$",
       message = "Invalid email format")
   @Size(max = 120)
-  @JsonDeserialize(using = StrictStringDeserializer.class)
   private String email;
 
   @NotBlank
@@ -31,21 +27,18 @@ public class RegisterRequest {
   @Pattern(
       regexp = "^[\\x20-\\x7E]+$",
       message = "Password must contain only ASCII printable characters")
-  @JsonDeserialize(using = StrictStringDeserializer.class)
   private String password;
 
   @Size(max = 50)
   @Pattern(
       regexp = "^[\\x20-\\x7E]*$",
       message = "First name must contain only ASCII printable characters")
-  @JsonDeserialize(using = StrictStringDeserializer.class)
   private String firstName;
 
   @Size(max = 50)
   @Pattern(
       regexp = "^[\\x20-\\x7E]*$",
       message = "Last name must contain only ASCII printable characters")
-  @JsonDeserialize(using = StrictStringDeserializer.class)
   private String lastName;
 
   /** Constructs a RegisterRequest with default values. */

@@ -30,3 +30,6 @@ backend/headscale
 backend/monitoring
 
 .gcs-server
+
+*.log
+.hypothesis

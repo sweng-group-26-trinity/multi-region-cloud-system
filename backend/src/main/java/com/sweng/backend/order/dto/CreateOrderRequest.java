@@ -1,8 +1,9 @@
 package com.sweng.backend.order.dto;
 
-import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.util.List;
 
@@ -16,12 +17,18 @@ public class CreateOrderRequest {
   /** Restaurant ID to place the order with (UUID as string). */
   @NotNull private String restaurantId;
 
-  /** Optional customer name (for guest or display). */
+  /** Customer name (for guest or display). */
+  @NotNull
   @Size(min = 1, max = 100)
   private String customerName;
 
-  /** Optional customer email. */
-  @Email private String customerEmail;
+  /** Customer email. */
+  @NotBlank
+  @Size(max = 255)
+  @Pattern(
+      regexp =
+          "^[a-zA-Z0-9_%+-]+(?:\\.[a-zA-Z0-9_%+-]+)*@[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)*\\.[a-zA-Z]{2,63}$")
+  private String customerEmail;
 
   /** List of items to order (must contain at least one item). */
   @NotEmpty private List<CreateOrderItemRequest> items;

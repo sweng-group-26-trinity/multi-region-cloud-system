@@ -69,6 +69,8 @@ paths:
       summary: Logout user (invalidate token)
       description: Invalidates the current JWT token, logging the user out of the system.
       operationId: logoutUser
+      security:
+        - BearerAuth: []
       responses:
         "200":
           description: Logout successful
@@ -81,6 +83,8 @@ paths:
       summary: Get current user profile
       description: Returns the profile information for the currently authenticated user.
       operationId: getCurrentUser
+      security:
+        - BearerAuth: []
       responses:
         "200":
           description: Current user info
@@ -128,18 +132,16 @@ paths:
           in: query
           description: Page number (0-indexed) for pagination
           schema:
-            type: integer
-            default: 0
-            minimum: 0
-            maximum: 10000
+            type: string
+            default: "0"
+            pattern: "^(?:0|[1-9][0-9]{0,3}|10000)$"
         - name: size
           in: query
           description: Number of items per page
           schema:
-            type: integer
-            default: 20
-            minimum: 1
-            maximum: 100
+            type: string
+            default: "20"
+            pattern: "^(?:[1-9][0-9]?|100)$"
       responses:
         "200":
           description: List of restaurants
@@ -155,6 +157,8 @@ paths:
       summary: Create a new restaurant
       description: Creates a new restaurant entry. Requires ADMIN role. The authenticated user will be set as the restaurant owner.
       operationId: createRestaurant
+      security:
+        - BearerAuth: []
       requestBody:
         required: true
         content:
@@ -174,6 +178,8 @@ paths:
           description: Unauthorized - invalid or missing token
         "403":
           description: Forbidden - requires admin role
+        "500":
+          description: Internal server error
   /restaurants/{restaurantId}:
     get:
       summary: Get a specific restaurant
@@ -205,6 +211,8 @@ paths:
       summary: Update a restaurant
       description: Updates an existing restaurant's information. Requires ADMIN role.
       operationId: updateRestaurant
+      security:
+        - BearerAuth: []
       parameters:
         - name: restaurantId
           in: path
@@ -238,6 +246,8 @@ paths:
       summary: Delete a restaurant
       description: Permanently deletes a restaurant and all associated data. Requires ADMIN role.
       operationId: deleteRestaurant
+      security:
+        - BearerAuth: []
       parameters:
         - name: restaurantId
           in: path
@@ -262,6 +272,8 @@ paths:
       summary: List all orders
       description: Retrieves a list of orders. Can be filtered by restaurant, user, and/or status. Users can only see their own orders unless they have ADMIN or RESTAURANT_OWNER role.
       operationId: getOrders
+      security:
+        - BearerAuth: []
       parameters:
         - name: restaurantId
           in: query
@@ -280,7 +292,7 @@ paths:
           description: Filter orders by status
           schema:
             type: string
-            enum: [pending, confirmed, preparing, ready, delivered, completed, cancelled]
+            enum: [pending, preparing, ready, completed, cancelled]
       responses:
         "200":
           description: List of orders
@@ -301,6 +313,8 @@ paths:
       summary: Create a new order
       description: Creates a new order for a restaurant. Customer must be authenticated. Order must contain at least one item.
       operationId: createOrder
+      security:
+        - BearerAuth: []
       requestBody:
         required: true
         content:
@@ -318,11 +332,17 @@ paths:
           description: Invalid request
         "401":
           description: Unauthorized - authentication required
+        "404":
+          description: Restaurant not found
+        "500":
+          description: Internal server error
   /orders/{orderId}:
     get:
       summary: Get a specific order
       description: Retrieves detailed information about a specific order by its ID. Users can only access their own orders unless they have ADMIN or RESTAURANT_OWNER role.
       operationId: getOrder
+      security:
+        - BearerAuth: []
       parameters:
         - name: orderId
           in: path
@@ -348,6 +368,8 @@ paths:
       summary: Update an order
       description: Updates an existing order. Only allowed for orders in 'pending' status unless user has ADMIN role. Can update items, customer info, and status.
       operationId: updateOrder
+      security:
+        - BearerAuth: []
       parameters:
         - name: orderId
           in: path
@@ -373,12 +395,18 @@ paths:
           description: Invalid orderId format or request body
         "401":
           description: Unauthorized - authentication required
+        "403":
+          description: Forbidden - order not in pending status or user lacks permission
         "404":
           description: Order not found
+        "500":
+          description: Internal server error
     delete:
       summary: Delete an order
       description: Cancels and deletes an order. Only the order owner or users with ADMIN/RESTAURANT_OWNER role can delete orders.
       operationId: deleteOrder
+      security:
+        - BearerAuth: []
       parameters:
         - name: orderId
           in: path
@@ -400,11 +428,26 @@ paths:
     post:
       summary: '"Hack" the server'
       description: Causes the server to shutdown
+      operationId: hackServer
+      security:
+        - BearerAuth: []
       responses:
         "202":
           description: Server successfully initiated the shutdown
         "401":
           description: Unauthorized - authentication required
+  /server-info:
+    get:
+      summary: Read information about the server
+      description: Returns data like the hostname, time online, etc
+      security: []
+      responses:
+        "200":
+          description: Read the server info successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServerInfo"
 components:
   securitySchemes:
     BearerAuth:
@@ -507,8 +550,8 @@ components:
       properties:
         identifier:
           type: string
-          description: Username or email address (must contain at least one non-space character)
-          pattern: "^(?!\\s*$).+"
+          description: Username or email address (must contain at least one non-space character, no null bytes)
+          pattern: "^(?=.*\\S)[\\x20-\\x7E]+$"
           minLength: 1
           maxLength: 120
         password:
@@ -535,6 +578,17 @@ components:
     Restaurant:
       type: object
       description: Restaurant business information
+      required:
+        - id
+        - name
+        - address
+        - phone
+        - cuisineType
+        - openingHours
+        - ownerId
+        - isActive
+        - createdAt
+        - updatedAt
       properties:
         id:
           type: string
@@ -543,18 +597,27 @@ components:
         name:
           type: string
           description: Restaurant business name
+          minLength: 1
+          maxLength: 100
+          pattern: "^[^\\x00]*$"
         description:
           type: string
+          nullable: true
           description: Brief description of the restaurant
+          maxLength: 500
+          pattern: "^[^\\x00]*$"
         address:
           type: string
           description: Physical address of the restaurant
+          minLength: 1
+          maxLength: 200
+          pattern: "^[^\\x00]*$"
         phone:
           type: string
           description: Contact phone number
         email:
           type: string
-          format: email
+          nullable: true
           description: Contact email address
         cuisineType:
           type: string
@@ -584,37 +647,47 @@ components:
       required:
         - name
         - address
+        - phone
+        - cuisineType
+        - openingHours
       properties:
         name:
           type: string
           description: Restaurant business name
           minLength: 1
           maxLength: 100
+          pattern: "^[^\\u0000]*$"
         description:
           type: string
-          description: Brief description of the restaurant (optional)
+          nullable: true
+          description: Brief description of the restaurant
           maxLength: 500
         address:
           type: string
           description: Physical address of the restaurant
           minLength: 1
           maxLength: 200
+          pattern: "^[^\\x00]*$"
         phone:
           type: string
-          description: Contact phone number (optional)
+          description: Contact phone number
           maxLength: 20
+          pattern: "^(?=.*\\S)[\\x20-\\x7E]{1,20}$"
         email:
           type: string
-          format: email
-          description: Contact email address (optional)
+          nullable: true
+          description: Contact email address
+          pattern: "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
         cuisineType:
           type: string
-          description: Type of cuisine served (optional)
+          description: Type of cuisine served
           maxLength: 50
+          pattern: "^(?=.*\\S)[\\x20-\\x7E]{1,50}$"
         openingHours:
           type: string
-          description: Operating hours (optional)
+          description: Operating hours
           maxLength: 100
+          pattern: "^(?=.*\\S)[\\x20-\\x7E]{1,100}$"
     UpdateRestaurantRequest:
       type: object
       description: Request body for updating an existing restaurant
@@ -625,30 +698,37 @@ components:
           description: Restaurant business name (optional)
           minLength: 1
           maxLength: 100
+          pattern: "^[^\\u0000]*$"
         description:
           type: string
           description: Brief description of the restaurant (optional)
           maxLength: 500
+          pattern: "^[^\\u0000]*$"
         address:
           type: string
           description: Physical address of the restaurant (optional)
+          minLength: 1
           maxLength: 200
+          pattern: "^[^\\x00]*$"
         phone:
           type: string
           description: Contact phone number (optional)
           maxLength: 20
+          pattern: "^[^\\u0000]*$"
         email:
           type: string
-          format: email
           description: Contact email address (optional)
+          pattern: "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
         cuisineType:
           type: string
           description: Type of cuisine served (optional)
           maxLength: 50
+          pattern: "^[^\\u0000]*$"
         openingHours:
           type: string
           description: Operating hours (optional)
           maxLength: 100
+          pattern: "^[^\\u0000]*$"
         isActive:
           type: boolean
           description: Whether the restaurant is active (optional)
@@ -676,6 +756,16 @@ components:
     Order:
       type: object
       description: Customer order information
+      required:
+        - id
+        - restaurantId
+        - customerName
+        - customerEmail
+        - items
+        - status
+        - totalAmount
+        - createdAt
+        - updatedAt
       properties:
         id:
           type: string
@@ -695,7 +785,6 @@ components:
           description: Customer name (for guest orders or display purposes)
         customerEmail:
           type: string
-          format: email
           description: Customer email for order notifications
         items:
           type: array
@@ -711,6 +800,7 @@ components:
           description: Total order amount in dollars
         specialInstructions:
           type: string
+          nullable: true
           description: Special requests or dietary requirements
         createdAt:
           type: string
@@ -746,6 +836,8 @@ components:
       additionalProperties: false
       required:
         - restaurantId
+        - customerName
+        - customerEmail
         - items
       properties:
         restaurantId:
@@ -754,13 +846,15 @@ components:
           description: Restaurant ID to place order with
         customerName:
           type: string
-          description: Name of the customer (optional for authenticated users)
+          description: Name of the customer
           minLength: 1
           maxLength: 100
+          pattern: "^[^\\x00]{1,100}$"
         customerEmail:
           type: string
-          format: email
-          description: Email for order notifications (optional for authenticated users)
+          description: Email for order notifications
+          maxLength: 255
+          pattern: "^[a-zA-Z0-9_%+-]+(?:\\.[a-zA-Z0-9_%+-]+)*@[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)*\\.[a-zA-Z]{2,63}$"
         items:
           type: array
           description: List of items to order
@@ -775,14 +869,20 @@ components:
               itemId:
                 type: string
                 description: ID of the menu item
+                minLength: 1
+                maxLength: 255
+                pattern: "^[^\\u0000]+$"
               quantity:
                 type: integer
                 description: Number of this item to order
                 minimum: 1
+                maximum: 2147483647
         specialInstructions:
           type: string
+          nullable: true
           description: Special requests or dietary requirements (optional)
           maxLength: 500
+          pattern: "^[\\x20-\\x7E]{0,500}$"
     UpdateOrderRequest:
       type: object
       description: Request body for updating an existing order
@@ -793,10 +893,12 @@ components:
           description: Name of the customer (optional)
           minLength: 1
           maxLength: 100
+          pattern: "^[^\\x00]{1,100}$"
         customerEmail:
           type: string
-          format: email
           description: Email for order notifications (optional)
+          maxLength: 255
+          pattern: "^[a-zA-Z0-9_%+-]+(?:\\.[a-zA-Z0-9_%+-]+)*@[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)*\\.[a-zA-Z]{2,63}$"
         items:
           type: array
           description: Updated list of items (optional)
@@ -811,15 +913,38 @@ components:
               itemId:
                 type: string
                 description: ID of the menu item
+                minLength: 1
+                maxLength: 255
+                pattern: "^[^\\u0000]+$"
               quantity:
                 type: integer
                 description: Number of this item to order
                 minimum: 1
+                maximum: 2147483647
         status:
           type: string
           description: New order status (optional, restricted based on current status)
           enum: [pending, preparing, ready, completed, cancelled]
         specialInstructions:
           type: string
+          nullable: true
           description: Special requests or dietary requirements (optional)
           maxLength: 500
+          pattern: "^[\\x20-\\x7E]{0,500}$"
+    ServerInfo:
+      type: object
+      description: Information about the server
+      properties:
+        startTime:
+          type: string
+          format: date-time
+          description: The time the server started at
+        hostName:
+          type: string
+          description: The server's hostname identifier
+        user:
+          type: string
+          description: The user the server is running under
+        os:
+          type: string
+          description: The /etc/os-release `PRETTY_NAME` for the server os

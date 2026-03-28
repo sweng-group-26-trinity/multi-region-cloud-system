@@ -1,6 +1,6 @@
 package com.sweng.backend.restaurant.dto;
 
-import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 /** Request body for updating an existing restaurant. */
@@ -12,13 +12,14 @@ public class UpdateRestaurantRequest {
   @Size(max = 500)
   private String description;
 
-  @Size(max = 200)
+  @Size(min = 1, max = 200)
   private String address;
 
   @Size(max = 20)
   private String phone;
 
-  @Email private String email;
+  @Pattern(regexp = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
+  private String email;
 
   @Size(max = 50)
   private String cuisineType;

@@ -2,6 +2,7 @@ package com.sweng.backend.order.dto;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 /**
  * Request body for an individual item within a create order request.
@@ -11,7 +12,9 @@ import jakarta.validation.constraints.NotBlank;
 public class CreateOrderItemRequest {
 
   /** ID of the menu item. */
-  @NotBlank private String itemId;
+  @NotBlank
+  @Size(max = 255)
+  private String itemId;
 
   /** Quantity ordered (minimum 1). */
   @Min(1)

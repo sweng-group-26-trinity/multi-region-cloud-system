@@ -19,16 +19,15 @@ public class StrictStringDeserializer extends ValueDeserializer<String> {
 
   @Override
   public String deserialize(JsonParser p, DeserializationContext ctxt) throws JacksonException {
-    JsonToken token = p.currentToken();
-
-    if (token == JsonToken.VALUE_STRING) {
-      return p.getString();
-    } else if (token == JsonToken.VALUE_NULL) {
-      return null;
-    } else {
-      ctxt.reportInputMismatch(String.class, "Expected a string value but got %s", token);
-      return null; // unreachable
-    }
+    return switch (p.currentToken()) {
+      case JsonToken.VALUE_STRING -> p.getString();
+      case JsonToken.VALUE_NULL -> null;
+      case null -> null;
+      case JsonToken token -> {
+        ctxt.reportInputMismatch(String.class, "Expected a string value but got %s", token);
+        yield null;
+      }
+    };
   }
 
   @Override

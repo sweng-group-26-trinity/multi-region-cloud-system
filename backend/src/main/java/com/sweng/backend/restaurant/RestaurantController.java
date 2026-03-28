@@ -5,6 +5,7 @@ import com.sweng.backend.restaurant.dto.RestaurantDto;
 import com.sweng.backend.restaurant.dto.RestaurantPageDto;
 import com.sweng.backend.restaurant.dto.UpdateRestaurantRequest;
 import com.sweng.backend.user.UserRepository;
+import com.sweng.backend.util.ValidationUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.time.OffsetDateTime;
@@ -125,9 +126,16 @@ public class RestaurantController {
             .orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
 
+    ValidationUtils.rejectNullBytes(body.getName(), "name");
+    ValidationUtils.rejectNullBytes(body.getAddress(), "address");
+    ValidationUtils.rejectNullBytes(body.getPhone(), "phone");
+    ValidationUtils.rejectNullBytes(body.getCuisineType(), "cuisineType");
+    ValidationUtils.rejectNullBytes(body.getOpeningHours(), "openingHours");
+    ValidationUtils.rejectNullBytes(body.getEmail(), "email");
+
     RestaurantEntity e = new RestaurantEntity();
     e.setName(body.getName());
-    e.setDescription(body.getDescription());
+    e.setDescription(ValidationUtils.stripNullBytes(body.getDescription()));
     e.setAddress(body.getAddress());
     e.setPhone(body.getPhone());
     e.setEmail(body.getEmail());
@@ -197,13 +205,33 @@ public class RestaurantController {
             .orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Restaurant not found"));
 
-    if (body.getName() != null) found.setName(body.getName());
-    if (body.getDescription() != null) found.setDescription(body.getDescription());
-    if (body.getAddress() != null) found.setAddress(body.getAddress());
-    if (body.getPhone() != null) found.setPhone(body.getPhone());
-    if (body.getEmail() != null) found.setEmail(body.getEmail());
-    if (body.getCuisineType() != null) found.setCuisineType(body.getCuisineType());
-    if (body.getOpeningHours() != null) found.setOpeningHours(body.getOpeningHours());
+    if (body.getName() != null) {
+      ValidationUtils.rejectNullBytes(body.getName(), "name");
+      found.setName(body.getName());
+    }
+    if (body.getDescription() != null) {
+      found.setDescription(ValidationUtils.stripNullBytes(body.getDescription()));
+    }
+    if (body.getAddress() != null) {
+      ValidationUtils.rejectNullBytes(body.getAddress(), "address");
+      found.setAddress(body.getAddress());
+    }
+    if (body.getPhone() != null) {
+      ValidationUtils.rejectNullBytes(body.getPhone(), "phone");
+      found.setPhone(body.getPhone());
+    }
+    if (body.getEmail() != null) {
+      ValidationUtils.rejectNullBytes(body.getEmail(), "email");
+      found.setEmail(body.getEmail());
+    }
+    if (body.getCuisineType() != null) {
+      ValidationUtils.rejectNullBytes(body.getCuisineType(), "cuisineType");
+      found.setCuisineType(body.getCuisineType());
+    }
+    if (body.getOpeningHours() != null) {
+      ValidationUtils.rejectNullBytes(body.getOpeningHours(), "openingHours");
+      found.setOpeningHours(body.getOpeningHours());
+    }
     if (body.getIsActive() != null) found.setActive(body.getIsActive());
 
     RestaurantEntity saved = repository.save(found);

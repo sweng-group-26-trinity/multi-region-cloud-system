@@ -625,6 +625,76 @@
       "hash": "sha256-CjC3l622giFH75jLJJ7z+/SiQ1QqqGv59C+tnmgwWkQ="
     }
   },
+  "net.jqwik:jqwik:1.9.3": {
+    "jqwik-1.9.3.jar": {
+      "url": "https://repo.maven.apache.org/maven2/net/jqwik/jqwik/1.9.3/jqwik-1.9.3.jar",
+      "hash": "sha256-Vikx4WZzCBgAVqjOhXkfcauMN8qO/CAGoWO6XWUOX3M="
+    },
+    "jqwik-1.9.3.module": {
+      "url": "https://repo.maven.apache.org/maven2/net/jqwik/jqwik/1.9.3/jqwik-1.9.3.module",
+      "hash": "sha256-aBMW+FbbTqPKyPzO2BESf8HXAWh15bUKpKVQJFE6k9c="
+    },
+    "jqwik-1.9.3.pom": {
+      "url": "https://repo.maven.apache.org/maven2/net/jqwik/jqwik/1.9.3/jqwik-1.9.3.pom",
+      "hash": "sha256-GQm+BQi5ZZaus0c8BAuptGKSYreS5FRhXHz4cf/hmsA="
+    }
+  },
+  "net.jqwik:jqwik-api:1.9.3": {
+    "jqwik-api-1.9.3.jar": {
+      "url": "https://repo.maven.apache.org/maven2/net/jqwik/jqwik-api/1.9.3/jqwik-api-1.9.3.jar",
+      "hash": "sha256-S85+gL622dcJKnmfqKUJ12zDHbsgyTiplSllwV0d2bI="
+    },
+    "jqwik-api-1.9.3.module": {
+      "url": "https://repo.maven.apache.org/maven2/net/jqwik/jqwik-api/1.9.3/jqwik-api-1.9.3.module",
+      "hash": "sha256-aZhEFuoun3/eQM+smD0vVA06N+l2b9OwoG+tqPm0z/I="
+    },
+    "jqwik-api-1.9.3.pom": {
+      "url": "https://repo.maven.apache.org/maven2/net/jqwik/jqwik-api/1.9.3/jqwik-api-1.9.3.pom",
+      "hash": "sha256-X8HYuNdzIklBnz1sHumwBpvAP2oQpoG4FUMIfDh+nFs="
+    }
+  },
+  "net.jqwik:jqwik-engine:1.9.3": {
+    "jqwik-engine-1.9.3.jar": {
+      "url": "https://repo.maven.apache.org/maven2/net/jqwik/jqwik-engine/1.9.3/jqwik-engine-1.9.3.jar",
+      "hash": "sha256-uFWS7njjAjnM/cp6E0+RjulOvsUa0poxP8mmdtl7Pt4="
+    },
+    "jqwik-engine-1.9.3.module": {
+      "url": "https://repo.maven.apache.org/maven2/net/jqwik/jqwik-engine/1.9.3/jqwik-engine-1.9.3.module",
+      "hash": "sha256-LGhHnr2p4zS8kDOr0u8ic1OAjyARTxl5R7XHuWRquOU="
+    },
+    "jqwik-engine-1.9.3.pom": {
+      "url": "https://repo.maven.apache.org/maven2/net/jqwik/jqwik-engine/1.9.3/jqwik-engine-1.9.3.pom",
+      "hash": "sha256-LsR4IRbldQZi945AbP96dhNmAVzsHhwBF8ZX1qF6Q1I="
+    }
+  },
+  "net.jqwik:jqwik-time:1.9.3": {
+    "jqwik-time-1.9.3.jar": {
+      "url": "https://repo.maven.apache.org/maven2/net/jqwik/jqwik-time/1.9.3/jqwik-time-1.9.3.jar",
+      "hash": "sha256-n9CQIdjwPUSZBFe/MJXPCq800nhdEQj/IlkChsIzs+U="
+    },
+    "jqwik-time-1.9.3.module": {
+      "url": "https://repo.maven.apache.org/maven2/net/jqwik/jqwik-time/1.9.3/jqwik-time-1.9.3.module",
+      "hash": "sha256-wrBWV2yHZ7/Nfv3ZgokPvHHmCPtcnID8FFz+5q3uqiQ="
+    },
+    "jqwik-time-1.9.3.pom": {
+      "url": "https://repo.maven.apache.org/maven2/net/jqwik/jqwik-time/1.9.3/jqwik-time-1.9.3.pom",
+      "hash": "sha256-9d95Pt3FV4X1Us/XFsXrZ62I37UWKIuXs/4ZkxUEtNE="
+    }
+  },
+  "net.jqwik:jqwik-web:1.9.3": {
+    "jqwik-web-1.9.3.jar": {
+      "url": "https://repo.maven.apache.org/maven2/net/jqwik/jqwik-web/1.9.3/jqwik-web-1.9.3.jar",
+      "hash": "sha256-au6dWDwf+e/jGbL6C8nXX8YW3m0fJA3b0q+eq9pIPb4="
+    },
+    "jqwik-web-1.9.3.module": {
+      "url": "https://repo.maven.apache.org/maven2/net/jqwik/jqwik-web/1.9.3/jqwik-web-1.9.3.module",
+      "hash": "sha256-OMhhMMi4bBZXtPglbgZe4IVR98XOco0aW+j2MTOxRVQ="
+    },
+    "jqwik-web-1.9.3.pom": {
+      "url": "https://repo.maven.apache.org/maven2/net/jqwik/jqwik-web/1.9.3/jqwik-web-1.9.3.pom",
+      "hash": "sha256-w7/witvsCnsi/QOuNDawNvCPOO1tyE+NI07futcKmEA="
+    }
+  },
   "net.minidev:accessors-smart:2.6.0": {
     "accessors-smart-2.6.0.jar": {
       "url": "https://repo.maven.apache.org/maven2/net/minidev/accessors-smart/2.6.0/accessors-smart-2.6.0.jar",

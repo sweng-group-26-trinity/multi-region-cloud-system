@@ -146,6 +146,8 @@ public class SecurityConfig {
                     .permitAll()
                     .requestMatchers("/actuator/**", "/error")
                     .permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/server-info")
+                    .permitAll()
                     .requestMatchers(HttpMethod.PUT, "/api/restaurants")
                     .permitAll()
                     .requestMatchers(HttpMethod.DELETE, "/api/restaurants")

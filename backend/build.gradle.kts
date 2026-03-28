@@ -29,7 +29,7 @@ dependencies {
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
 
     implementation("org.springframework.boot:spring-boot-starter-validation")
-    compileOnly("org.projectlombok:lombok")
+    implementation("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 
@@ -38,7 +38,8 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-test-autoconfigure")
     testImplementation("org.springframework:spring-test")
     testImplementation("org.springframework.security:spring-security-test")
-    testImplementation("com.h2database:h2") // <-- important
+    testImplementation("com.h2database:h2")
+    testImplementation("net.jqwik:jqwik:1.9.3")
 
     runtimeOnly("org.postgresql:postgresql")
     implementation("me.paulschwarz:spring-dotenv:4.0.0")
