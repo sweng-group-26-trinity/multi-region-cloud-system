@@ -65,6 +65,7 @@ in
 
         meta.mainProgram = pname;
       };
+      packages.default = packages.backend;
       checks.backend = packages.backend;
     };
 }
