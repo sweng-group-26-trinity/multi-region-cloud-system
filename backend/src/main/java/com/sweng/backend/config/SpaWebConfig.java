@@ -26,7 +26,6 @@ import org.springframework.web.servlet.resource.PathResourceResolver;
 /** Configuration class for serving the frontend SPA. */
 @Configuration
 @Controller
-@ConditionalOnProperty(name = "FRONTEND_PATH")
 public class SpaWebConfig implements WebMvcConfigurer {
 
   /** Default constructor. */
