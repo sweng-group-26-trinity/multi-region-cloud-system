@@ -3,6 +3,7 @@ package com.sweng.backend.config;
 import java.io.IOException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -22,6 +23,10 @@ import org.springframework.web.servlet.resource.PathResourceResolver;
 /** Configuration class for serving static frontend and documentation sites. */
 @Configuration
 @Controller
+/** Configuration class for serving the frontend SPA. */
+@Configuration
+@Controller
+@ConditionalOnProperty(name = "FRONTEND_PATH")
 public class SpaWebConfig implements WebMvcConfigurer {
 
   /** Default constructor. */
