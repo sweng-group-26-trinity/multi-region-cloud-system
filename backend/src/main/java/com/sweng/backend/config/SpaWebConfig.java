@@ -2,7 +2,7 @@ package com.sweng.backend.config;
 
 import java.io.IOException;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -22,13 +22,12 @@ import org.springframework.web.servlet.resource.PathResourceResolver;
 /** Configuration class for serving the frontend SPA. */
 @Configuration
 @Controller
-@ConditionalOnProperty(name = "FRONTEND_PATH")
 public class SpaWebConfig implements WebMvcConfigurer {
 
   /** Default constructor. */
   public SpaWebConfig() {}
 
-  @Value("${FRONTEND_PATH}")
+  @Value("${frontend.path:${FRONTEND_PATH:}}")
   private String frontendPath;
 
   /**
@@ -75,6 +74,7 @@ public class SpaWebConfig implements WebMvcConfigurer {
    */
   @Bean
   @Order(0)
+  @ConditionalOnBean(HttpSecurity.class)
   public SecurityFilterChain spaSecurityFilterChain(HttpSecurity http) throws Exception {
     if (frontendPath == null || frontendPath.isBlank()) {
       http.securityMatcher(request -> false);

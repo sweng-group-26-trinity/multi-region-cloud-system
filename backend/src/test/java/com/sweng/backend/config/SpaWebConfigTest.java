@@ -36,7 +36,7 @@ class SpaWebConfigTest {
   @DynamicPropertySource
   static void setFrontendPath(DynamicPropertyRegistry registry) {
     String path = Path.of("src/test/resources/test-frontend").toAbsolutePath().toString();
-    registry.add("FRONTEND_PATH", () -> path);
+    registry.add("frontend.path", () -> path);
   }
 
   @BeforeEach
