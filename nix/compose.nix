@@ -15,8 +15,6 @@
         cli.preHook = ''
           FLAKE_ROOT="$(git rev-parse --show-toplevel)"
           export FLAKE_ROOT
-
-          export FRONTEND_PATH="$FLAKE_ROOT/frontend/dist"
         '';
 
         settings.processes = {
