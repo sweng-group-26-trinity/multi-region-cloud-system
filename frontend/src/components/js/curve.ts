@@ -93,7 +93,6 @@ export class Curve {
    */
   lookAt(object: THREE.Object3D, elapsedTime: number, speed = 0.2): void {
     if (!Number.isFinite(elapsedTime)) return;
-    if (!this.path) return;
     const t = (elapsedTime * speed) % 1;
     const position = this.path.getPointAt(t);
     object.position.copy(position);

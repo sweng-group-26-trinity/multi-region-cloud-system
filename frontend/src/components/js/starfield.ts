@@ -189,8 +189,7 @@ export class StarField {
 
     // Tick active shots — transfer fading ones immediately to free the slot
     for (let i = this.activeShots.length - 1; i >= 0; i--) {
-      const shot = this.activeShots[i];
-      if (!shot) continue;
+      const shot = this.activeShots[i]!;
       this.tickShot(shot, delta);
 
       if (shot.isFading) {
@@ -201,12 +200,11 @@ export class StarField {
 
     // Tick fading shots — dispose once fully invisible
     for (let i = this.fadingShots.length - 1; i >= 0; i--) {
-      const shot = this.fadingShots[i];
-      if (!shot) continue;
+      const shot = this.fadingShots[i]!;
       this.tickShot(shot, delta);
 
       if (shot.fadeAlpha <= 0) {
-        this.disposeShotVisual(shot.visual);
+        this.disposeShot(shot);
         this.fadingShots.splice(i, 1);
       }
     }
@@ -440,7 +438,6 @@ export class StarField {
   // Shooting star lifecycle
 
   private startShootingStar(): void {
-    if (!this.darkMode) return;
 
     // Build a fresh trajectory tangent to the sphere shell for this shot
     const normal = this.randomUnitVector();
@@ -497,8 +494,6 @@ export class StarField {
 
   /** Advances a single shot and sets isFading when the threshold is crossed. */
   private tickShot(shot: ShootingStarState, delta: number): void {
-    if (!this.darkMode) return;
-
     shot.age += delta;
     shot.shootProgress += shot.speed * delta;
 
