@@ -4,12 +4,12 @@ import * as THREE from "three";
  * A trajectory between two world-space points, with an optional lateral bend
  * that curves the path via a quadratic Bézier arc.
  *
- * The {@link path} property exposes the same {@code getPointAt} /
- * {@code getTangentAt} interface used by {@link Curve}, so it can be used as a
- * drop-in replacement anywhere a Catmull-Rom path was used.
+ * The `path` property exposes the same `getPointAt` / `getTangentAt` interface
+ * used by `Curve`, so it can be used as a drop-in replacement anywhere a
+ * Catmull-Rom path was used.
  */
 export class Trajectory {
-  /** Unit vector along the direction of travel (from {@link start} to {@link end}). */
+  /** Unit vector along the direction of travel (from `start` to `end`). */
   normal: THREE.Vector3;
 
   /** World-space start point of the trajectory. */
@@ -19,16 +19,15 @@ export class Trajectory {
   end: THREE.Vector3;
 
   /**
-   * Path from {@link start} to {@link end}.
+   * Path from `start` to `end`.
    *
-   * A straight {@code THREE.LineCurve3} when {@code bend} is zero, or a
-   * {@code THREE.QuadraticBezierCurve3} when a bend offset is supplied.
-   * {@code getPointAt(0)} returns {@link start} and {@code getPointAt(1)}
-   * returns {@link end}.
+   * A straight `THREE.LineCurve3` when `bend` is zero, or a
+   * `THREE.QuadraticBezierCurve3` when a bend offset is supplied.
+   * `getPointAt(0)` returns `start` and `getPointAt(1)` returns `end`.
    */
   path: THREE.Curve<THREE.Vector3>;
 
-  /** Optional debug mesh visualising the trajectory segment. Null until {@link draw} is called. */
+  /** Optional debug mesh visualising the trajectory segment. Null until `draw` is called. */
   pathObject: THREE.Mesh | null = null;
 
   /**
@@ -49,7 +48,11 @@ export class Trajectory {
       // Always bend towards the Earth (origin) so the arc bows inward
       const toEarth = mid.clone().negate().normalize();
       const control = mid.clone().addScaledVector(toEarth, bend);
-      this.path = new THREE.QuadraticBezierCurve3(this.start, control, this.end);
+      this.path = new THREE.QuadraticBezierCurve3(
+        this.start,
+        control,
+        this.end,
+      );
     } else {
       this.path = new THREE.LineCurve3(this.start, this.end);
     }
@@ -64,7 +67,7 @@ export class Trajectory {
    * @param radius      - Tube radius in world units (default: 0.2).
    * @param opacity     - Material opacity in the range [0, 1] (default: 1).
    * @param transparent - Whether the material should use transparency (default: false).
-   * @returns {@code true} on success.
+   * @returns `true` on success.
    */
   draw(
     scene: THREE.Scene,

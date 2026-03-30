@@ -182,13 +182,7 @@ export default function HomePage() {
 
       const curve = new Curve(points, true);
 
-      curve.draw(
-        scene,
-        isDark() ? 0x4488ff : 0xffffff,
-        0.1,
-        opacity,
-        true,
-      );
+      curve.draw(scene, isDark() ? 0x4488ff : 0xffffff, 0.1, opacity, true);
 
       if (curve.pathObject) orbitMeshes.push(curve.pathObject);
     });

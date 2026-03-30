@@ -208,13 +208,7 @@ export default function ThreeScene() {
     /**
      * Renders the orbital path in the scene.
      */
-    orbitCurve.draw(
-      scene,
-      isDark() ? 0x4488ff : 0xffffff,
-      0,
-      0.15,
-      true,
-    );
+    orbitCurve.draw(scene, isDark() ? 0x4488ff : 0xffffff, 0, 0.15, true);
 
     /**
      * Renderer for HTML-based labels positioned in 3D space.
