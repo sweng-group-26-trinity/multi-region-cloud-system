@@ -6,14 +6,13 @@
 # or `pkgs.callPackage` if you wish to handle
 # it manually.
 {
+  copyPathToStore,
+  fetchFromGitHub,
+  fetchgit,
   fetchurl,
   ...
 }:
 {
-  "@dimforge/rapier3d-compat@0.12.0" = fetchurl {
-    url = "https://registry.npmjs.org/@dimforge/rapier3d-compat/-/rapier3d-compat-0.12.0.tgz";
-    hash = "sha512-uekIGetywIgopfD97oDL5PfeezkFpNhwlzlaEYNOA0N6ghdsOvh/HYjSMek5Q2O1PYvRSDFcqFVJl4r4ZBwOow==";
-  };
   "@floating-ui/core@1.7.4" = fetchurl {
     url = "https://registry.npmjs.org/@floating-ui/core/-/core-1.7.4.tgz";
     hash = "sha512-C3HlIdsBxszvm5McXlB8PeOEWfBhcGBTZGkGlWc2U0KFY5IwG5OQEuQ8rq52DZmcHDlPLd+YFBK+cZcytwIFWg==";
@@ -210,9 +209,9 @@
     url = "https://registry.npmjs.org/@types/stats.js/-/stats.js-0.17.4.tgz";
     hash = "sha512-jIBvWWShCvlBqBNIZt0KAshWpvSjhkwkEu4ZUcASoAvhmrgAUI2t1dXrjSL4xXVLB4FznPrIsX3nKXFl/Dt4vA==";
   };
-  "@types/three@0.182.0" = fetchurl {
-    url = "https://registry.npmjs.org/@types/three/-/three-0.182.0.tgz";
-    hash = "sha512-WByN9V3Sbwbe2OkWuSGyoqQO8Du6yhYaXtXLoA5FkKTUJorZ+yOHBZ35zUUPQXlAKABZmbYp5oAqpA4RBjtJ/Q==";
+  "@types/three@0.171.0" = fetchurl {
+    url = "https://registry.npmjs.org/@types/three/-/three-0.171.0.tgz";
+    hash = "sha512-oLuT1SAsT+CUg/wxUTFHo0K3NtJLnx9sJhZWQJp/0uXqFpzSk1hRHmvWvpaAWSfvx2db0lVKZ5/wV0I0isD2mQ==";
   };
   "@types/unist@3.0.3" = fetchurl {
     url = "https://registry.npmjs.org/@types/unist/-/unist-3.0.3.tgz";
@@ -318,9 +317,9 @@
     url = "https://registry.npmjs.org/mdurl/-/mdurl-2.0.0.tgz";
     hash = "sha512-Lf+9+2r+Tdp5wXDXC4PcIBjTDtq4UKjCPMQhKIuzpJNW0b96kVqSwW0bT7FhRSfmAiFYgP+SCRvdrDozfh0U5w==";
   };
-  "meshoptimizer@0.22.0" = fetchurl {
-    url = "https://registry.npmjs.org/meshoptimizer/-/meshoptimizer-0.22.0.tgz";
-    hash = "sha512-IebiK79sqIy+E4EgOr+CAw+Ke8hAspXKzBd0JdgEmPHiAwmvEj2S4h1rfvo+o/BnfEYd/jAOg5IeeIjzlzSnDg==";
+  "meshoptimizer@0.18.1" = fetchurl {
+    url = "https://registry.npmjs.org/meshoptimizer/-/meshoptimizer-0.18.1.tgz";
+    hash = "sha512-ZhoIoL7TNV4s5B6+rx5mC//fw8/POGyNxS/DZyCJeiZ12ScLfVwRE/GfsxwiTkMYYD5DmK2/JXnEVXqL4rF+Sw==";
   };
   "minimatch@9.0.6" = fetchurl {
     url = "https://registry.npmjs.org/minimatch/-/minimatch-9.0.6.tgz";

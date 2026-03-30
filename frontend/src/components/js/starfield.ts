@@ -470,7 +470,11 @@ export class StarField {
     const tStart = Math.random() * (1 - span - 0.04) + 0.02;
     const tEnd = tStart + span;
 
-    const segmentLength = this.estimateCurveSegmentLength(trajectory, tStart, tEnd);
+    const segmentLength = this.estimateCurveSegmentLength(
+      trajectory,
+      tStart,
+      tEnd,
+    );
     const visual = this.createShotVisual();
     this.resetShotVisual(visual);
 
@@ -540,7 +544,10 @@ export class StarField {
 
   private renderTrail(shot: ShootingStarState, alpha: number): void {
     // Tail has no upper clamp so both ends keep moving past the curve end during fade
-    const trailProgress = Math.max(0, shot.shootProgress - shot.trailMaxFraction);
+    const trailProgress = Math.max(
+      0,
+      shot.shootProgress - shot.trailMaxFraction,
+    );
 
     // Pre-compute exit position and tangent once so all segments can extrapolate cheaply
     const pastEnd = shot.shootProgress > 1;
@@ -571,8 +578,16 @@ export class StarField {
         continue;
       }
 
-      const p1Progress = THREE.MathUtils.lerp(trailProgress, shot.shootProgress, t1);
-      const p2Progress = THREE.MathUtils.lerp(trailProgress, shot.shootProgress, t2);
+      const p1Progress = THREE.MathUtils.lerp(
+        trailProgress,
+        shot.shootProgress,
+        t1,
+      );
+      const p2Progress = THREE.MathUtils.lerp(
+        trailProgress,
+        shot.shootProgress,
+        t2,
+      );
 
       const p1 = this.sampleProgress(shot, p1Progress, exitPos, exitTangent);
       const p2 = this.sampleProgress(shot, p2Progress, exitPos, exitTangent);
@@ -636,7 +651,11 @@ export class StarField {
     this.nextShotTime = this.elapsed + minDelay + Math.random() * 0.5;
   }
 
-  private estimateCurveSegmentLength(curve: Trajectory, tStart: number, tEnd: number): number {
+  private estimateCurveSegmentLength(
+    curve: Trajectory,
+    tStart: number,
+    tEnd: number,
+  ): number {
     const samples = 24;
     let length = 0;
     let previous = curve.path.getPointAt(tStart);
@@ -651,7 +670,10 @@ export class StarField {
     return length;
   }
 
-  private randomSpherePoint(minRadius: number, maxRadius: number): THREE.Vector3 {
+  private randomSpherePoint(
+    minRadius: number,
+    maxRadius: number,
+  ): THREE.Vector3 {
     const dir = this.randomUnitVector();
     const radius = minRadius + Math.random() * (maxRadius - minRadius);
     return dir.multiplyScalar(radius);
