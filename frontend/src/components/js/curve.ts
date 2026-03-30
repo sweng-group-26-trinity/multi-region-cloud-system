@@ -48,7 +48,6 @@ export class Curve {
     radius = 0.2,
     opacity: number,
     transparent: boolean,
-    p0: boolean,
   ): boolean {
     if (this.points.length < 2) {
       console.warn("Curve.draw(): not enough points");
@@ -77,7 +76,6 @@ export class Curve {
 
     scene.add(this.pathObject);
 
-    console.log("Curve.draw(): Object created successfully!");
     return true;
   }
 

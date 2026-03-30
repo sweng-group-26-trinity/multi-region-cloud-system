@@ -7,6 +7,7 @@ import { CSS2DRenderer } from "three/addons/renderers/CSS2DRenderer.js";
 import { Node } from "../components/js/node";
 import { useNavigate } from "react-router-dom";
 import { Terminal } from "../components/js/Terminal";
+import { StarField } from "../components/js/starfield";
 
 /**
  * ThreeScene
@@ -109,38 +110,25 @@ export default function ThreeScene() {
     scene.add(ambientLight);
 
     /**
-     * Starfield background using randomly distributed points.
+     * Full starfield with blinking background stars and animated shooting-star
+     * trails, driven by {@link StarField}. Replaces the previous static
+     * {@code THREE.Points} implementation. Visibility follows dark mode.
      */
-    const starsGeometry = new THREE.BufferGeometry();
-    const starPositions = new Float32Array(2000 * 3);
-
-    for (let i = 0; i < 2000 * 3; i += 3) {
-      const r = 80 + Math.random() * 150;
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.random() * Math.PI;
-
-      starPositions[i] = r * Math.sin(phi) * Math.cos(theta);
-      starPositions[i + 1] = r * Math.sin(phi) * Math.sin(theta);
-      starPositions[i + 2] = r * Math.cos(phi);
-    }
-
-    starsGeometry.setAttribute(
-      "position",
-      new THREE.BufferAttribute(starPositions, 3),
-    );
-
-    const starsMaterial = new THREE.PointsMaterial({
-      color: 0xffffff,
-      size: 0.4,
-      sizeAttenuation: true,
-      transparent: true,
-      opacity: isDark() ? 1.0 : 0.15,
+    const starField = new StarField(scene, {
+      count: 2000,
+      minRadius: 80,
+      maxRadius: 230,
+      darkMode: isDark(),
+      maxActiveShots: 3,
+      shootingCurveMinRadius: 250,
+      shootingCurveMaxRadius: 300,
+      trailTubeRadius: 0.5,
+      usePoints: true,
     });
 
-    scene.add(new THREE.Points(starsGeometry, starsMaterial));
-
     /**
-     * Atmospheric glow layers around the Earth.
+     * Three concentric back-face spheres that produce a soft atmospheric glow
+     * around the Earth — larger radius = wider, more transparent halo.
      */
     const glowMeshes: THREE.Mesh[] = [];
 
@@ -151,7 +139,7 @@ export default function ThreeScene() {
     ];
 
     glowConfigs.forEach(({ radius, lightOpacity, darkOpacity }) => {
-      const glowGeo = new THREE.SphereGeometry(radius, 64, 64);
+      const glowGeo = new THREE.SphereGeometry(radius, 16, 16);
 
       const glowMat = new THREE.MeshBasicMaterial({
         color: isDark() ? 0x1a4aff : 0xffdd44,
@@ -192,13 +180,6 @@ export default function ThreeScene() {
     };
 
     /**
-     * Loads the Earth model into the scene.
-     */
-    loadObject(earthObject, scene, (obj) => {
-      earth = obj;
-    });
-
-    /**
      * Loads the plane model into the scene.
      */
     loadObject(planeObject, scene, (obj) => {
@@ -216,6 +197,7 @@ export default function ThreeScene() {
       const angle = (i / numPoints) * Math.PI * 2;
       const x = Math.cos(angle) * orbitRadius;
       const z = Math.sin(angle) * orbitRadius;
+      /** Triple-frequency sine gives the orbit a gentle vertical wave. */
       const y = Math.sin(angle * 3) * 3;
 
       orbitPoints.push(new THREE.Vector3(x, y, z));
@@ -232,7 +214,6 @@ export default function ThreeScene() {
       0,
       0.15,
       true,
-      false,
     );
 
     /**
@@ -308,7 +289,10 @@ export default function ThreeScene() {
       renderer.setClearColor(dark ? 0x0a0f1e : 0x20a7db);
       dLight.intensity = dark ? 0.5 : 1;
       ambientLight.intensity = dark ? 0.2 : 0.5;
-      starsMaterial.opacity = dark ? 1.0 : 0.15;
+      /**
+       * Re-evaluate starfield visibility whenever the theme changes.
+       */
+      starField.setDarkMode(dark);
     });
 
     observer.observe(document.documentElement, {
@@ -321,8 +305,26 @@ export default function ThreeScene() {
      */
     let animationId: number;
 
+    /**
+     * Timestamp (ms) of the previous animation frame, used to compute a
+     * frame-accurate delta for {@link StarField#update}.
+     */
+    let lastFrameTime = performance.now();
+
     function animate() {
       animationId = requestAnimationFrame(animate);
+
+      const now = performance.now();
+
+      /**
+       * Elapsed seconds since the last frame, clamped to 100 ms to prevent
+       * large jumps after the tab regains focus.
+       */
+      const delta = Math.min((now - lastFrameTime) / 1000, 0.1);
+      lastFrameTime = now;
+
+      /** Advance starfield blinking and shooting-star animations. */
+      starField.update(delta);
 
       const time = Date.now() * 0.0005;
 
@@ -330,6 +332,12 @@ export default function ThreeScene() {
 
       nodeLeft?.update(time);
       nodeRight?.update(time);
+
+      /**
+       * Required every frame when {@code enableDamping} is true so that
+       * inertia is applied correctly after the user releases the mouse.
+       */
+      orbit.update();
 
       labelRenderer.render(scene, camera);
       renderer.render(scene, camera);
@@ -362,6 +370,13 @@ export default function ThreeScene() {
       cancelAnimationFrame(animationId);
       window.removeEventListener("resize", handleResize);
       orbit.dispose();
+
+      /**
+       * Release all Three.js geometries, materials, and sprites owned by the
+       * starfield so they don't leak across hot-reloads or route changes.
+       */
+      starField.dispose();
+
       renderer.dispose();
 
       mount.removeChild(labelRenderer.domElement);
@@ -392,8 +407,10 @@ export default function ThreeScene() {
  * @returns Responsive terminal overlay.
  */
 function MobileTerminalSheet() {
+  /** Controls whether the terminal sheet is expanded or collapsed. */
   const [expanded, setExpanded] = useState(false);
 
+  /** Shared props passed to both the mobile and desktop Terminal instances. */
   const terminalProps = {
     title: "dinehub-terminal",
     initialLines: ['Type a command. Try "/kill"'],
