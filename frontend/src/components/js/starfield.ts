@@ -369,22 +369,27 @@ export class StarField {
       { scaleMult: 9.5, baseOpacity: 0.14 },
     ];
 
-    const glowLayers: GlowLayer[] = glowConfigs.map(({ scaleMult, baseOpacity }) => {
-      const material = new THREE.MeshBasicMaterial({
-        color: 0x1a4aff,
-        transparent: true,
-        opacity: 0,
-        side: THREE.BackSide,
-        depthWrite: false,
-        toneMapped: false,
-        blending: THREE.AdditiveBlending,
-      });
-      const mesh = new THREE.Mesh(new THREE.IcosahedronGeometry(1, 2), material);
-      mesh.scale.setScalar(this.trailTubeRadius * scaleMult);
-      mesh.visible = false;
-      this.group.add(mesh);
-      return { mesh, material, baseOpacity };
-    });
+    const glowLayers: GlowLayer[] = glowConfigs.map(
+      ({ scaleMult, baseOpacity }) => {
+        const material = new THREE.MeshBasicMaterial({
+          color: 0x1a4aff,
+          transparent: true,
+          opacity: 0,
+          side: THREE.BackSide,
+          depthWrite: false,
+          toneMapped: false,
+          blending: THREE.AdditiveBlending,
+        });
+        const mesh = new THREE.Mesh(
+          new THREE.IcosahedronGeometry(1, 2),
+          material,
+        );
+        mesh.scale.setScalar(this.trailTubeRadius * scaleMult);
+        mesh.visible = false;
+        this.group.add(mesh);
+        return { mesh, material, baseOpacity };
+      },
+    );
 
     return {
       headMaterial,
@@ -438,12 +443,12 @@ export class StarField {
   // Shooting star lifecycle
 
   private startShootingStar(): void {
-
     // Build a fresh trajectory tangent to the sphere shell for this shot
     const normal = this.randomUnitVector();
     const shellRadius =
       this.shootingStartMinRadius +
-      Math.random() * (this.shootingStartMaxRadius - this.shootingStartMinRadius);
+      Math.random() *
+        (this.shootingStartMaxRadius - this.shootingStartMinRadius);
     const center = normal.clone().multiplyScalar(shellRadius);
 
     // Two orthogonal basis vectors on the tangent plane — random angle so
@@ -455,7 +460,10 @@ export class StarField {
     const basisA = new THREE.Vector3().crossVectors(normal, helper).normalize();
     const basisB = new THREE.Vector3().crossVectors(normal, basisA).normalize();
     const angle = Math.random() * Math.PI * 2;
-    const tangent = basisA.clone().multiplyScalar(Math.cos(angle)).addScaledVector(basisB, Math.sin(angle));
+    const tangent = basisA
+      .clone()
+      .multiplyScalar(Math.cos(angle))
+      .addScaledVector(basisB, Math.sin(angle));
 
     const lineLength = 60 + Math.random() * 60;
     // Positive bend — Trajectory pushes the midpoint towards Earth
