@@ -4,6 +4,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { loadObject, type SceneObject } from "../components/js/loader";
 import { Curve } from "../components/js/curve";
+import { StarField } from "../components/js/starfield";
 import { CookingPot, Activity } from "lucide-react";
 
 /**
@@ -113,36 +114,20 @@ export default function HomePage() {
     scene.add(ambientLight);
 
     /**
-     * Creates a starfield using randomly distributed points.
+     * Full starfield with blinking background stars and animated shooting-star
+     * trails. Matches the DatabaseHealth page configuration.
      */
-    const starsGeometry = new THREE.BufferGeometry();
-    const starPositions = new Float32Array(2000 * 3);
-
-    for (let i = 0; i < 2000 * 3; i += 3) {
-      const r = 80 + Math.random() * 150;
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.random() * Math.PI;
-
-      starPositions[i] = r * Math.sin(phi) * Math.cos(theta);
-      starPositions[i + 1] = r * Math.sin(phi) * Math.sin(theta);
-      starPositions[i + 2] = r * Math.cos(phi);
-    }
-
-    starsGeometry.setAttribute(
-      "position",
-      new THREE.BufferAttribute(starPositions, 3),
-    );
-
-    const starsMaterial = new THREE.PointsMaterial({
-      color: 0xffffff,
-      size: 0.4,
-      sizeAttenuation: true,
-      transparent: true,
-      opacity: isDark() ? 1.0 : 0.15,
+    const starField = new StarField(scene, {
+      count: 2000,
+      minRadius: 80,
+      maxRadius: 230,
+      darkMode: isDark(),
+      maxActiveShots: 3,
+      shootingCurveMinRadius: 250,
+      shootingCurveMaxRadius: 300,
+      trailTubeRadius: 0.5,
+      usePoints: true,
     });
-
-    const stars = new THREE.Points(starsGeometry, starsMaterial);
-    scene.add(stars);
 
     /**
      * Atmospheric glow layers surrounding the Earth model.
@@ -203,7 +188,6 @@ export default function HomePage() {
         0.1,
         opacity,
         true,
-        false,
       );
 
       if (curve.pathObject) orbitMeshes.push(curve.pathObject);
@@ -286,7 +270,7 @@ export default function HomePage() {
       renderer.setClearColor(dark ? 0x0a0f1e : 0x20a7db);
       dLight.intensity = dark ? 0.5 : 1;
       ambientLight.intensity = dark ? 0.2 : 0.5;
-      starsMaterial.opacity = dark ? 1.0 : 0.15;
+      starField.setDarkMode(dark);
     });
 
     observer.observe(document.documentElement, {
@@ -299,8 +283,26 @@ export default function HomePage() {
      */
     let animationId: number;
 
+    /**
+     * Timestamp of the previous frame in ms, used to compute a frame-accurate
+     * delta for {@link StarField#update}.
+     */
+    let lastFrameTime = performance.now();
+
     function animate() {
       animationId = requestAnimationFrame(animate);
+
+      const now = performance.now();
+
+      /**
+       * Elapsed seconds since the last frame, clamped to 100 ms to avoid
+       * large jumps when the tab regains focus.
+       */
+      const delta = Math.min((now - lastFrameTime) / 1000, 0.1);
+      lastFrameTime = now;
+
+      /** Advance starfield blinking and shooting-star animations. */
+      starField.update(delta);
 
       const time = Date.now() * 0.0005;
 
@@ -348,6 +350,11 @@ export default function HomePage() {
       cancelAnimationFrame(animationId);
       window.removeEventListener("resize", handleResize);
       controls.dispose();
+      /**
+       * Release all Three.js geometries, materials, and sprites owned by the
+       * starfield so they don't leak across hot-reloads or route changes.
+       */
+      starField.dispose();
       renderer.dispose();
       mount.removeChild(renderer.domElement);
     };

@@ -7,39 +7,21 @@ type StarFieldOptions = {
   maxRadius?: number;
   darkMode?: boolean;
 
-  /**
-   * Max simultaneous moving stars. Once a star starts fading its slot is freed
-   * immediately so a new one can spawn. Defaults to 2.
-   */
+  /** Max simultaneous moving stars (active + fading combined). Defaults to 2. */
   maxActiveShots?: number;
 
-  /**
-   * Radius of the tube used to render each trail segment, in world units.
-   * Defaults to 0.3. Increase for a thicker trail.
-   */
+  /** Tube radius for trail segments in world units. Defaults to 1.2. */
   trailTubeRadius?: number;
 
-  /**
-   * Minimum shell radius at which shooting-star curves are placed, in world
-   * units. Defaults to {@code minRadius + 35} when omitted.
-   */
+  /** Inner shell radius for shooting-star trajectories. Defaults to minRadius + 35. */
   shootingCurveMinRadius?: number;
 
-
-  /**
-   * Maximum shell radius at which shooting-star curves are placed, in world
-   * units. Defaults to {@code maxRadius - 25} when omitted.
-   */
+  /** Outer shell radius for shooting-star trajectories. Defaults to maxRadius - 25. */
   shootingCurveMaxRadius?: number;
 
   /**
-   * When {@code true}, background stars are rendered as a single
-   * {@code THREE.Points} object (one draw call) instead of individual
-   * {@code THREE.Sprite} instances (one draw call per star).
-   *
-   * Trade-off: much better GPU performance, but per-star blinking is
-   * unavailable because all points share one material.
-   * Defaults to {@code false}.
+   * Render background stars as a single THREE.Points object (one draw call)
+   * instead of individual sprites. Defaults to false.
    */
   usePoints?: boolean;
 };
@@ -49,8 +31,6 @@ type StarData = {
   material: THREE.SpriteMaterial;
   position: THREE.Vector3;
   baseOpacity: number;
-  blinkTimer: number;
-  canBlink: boolean;
 };
 
 /** One pre-built cylinder mesh that makes up a slice of the shooting-star trail. */
@@ -59,21 +39,11 @@ type TrailSegment = {
   material: THREE.MeshBasicMaterial;
 };
 
-/** A world-space point emitted along the trail with a per-point lifetime. */
-type TrailPoint = {
-  position: THREE.Vector3;
-  /** Seconds this point has been alive — used to fade it out over time. */
-  age: number;
-};
-
-/**
- * A single atmospheric glow layer rendered behind the shooting-star head.
- * Mirrors the per-sphere glow approach used for the Earth atmosphere.
- */
+/** One atmospheric glow layer rendered behind the shooting-star head. */
 type GlowLayer = {
   mesh: THREE.Mesh;
   material: THREE.MeshBasicMaterial;
-  /** Maximum opacity at full {@code fadeAlpha}. */
+  /** Maximum opacity at full alpha. */
   baseOpacity: number;
 };
 
@@ -89,9 +59,9 @@ type ShootingStarVisual = {
 /** Runtime state for one active or fading shooting star. */
 type ShootingStarState = {
   curve: Trajectory;
-  /** Normalised start of the sub-segment travelled on {@link curve} (0–1). */
+  /** Normalised start of the sub-segment travelled on the curve (0–1). */
   tStart: number;
-  /** Normalised end of the sub-segment travelled on {@link curve} (0–1). */
+  /** Normalised end of the sub-segment travelled on the curve (0–1). */
   tEnd: number;
   /** How far along the span the head has moved; may exceed 1 after the end. */
   shootProgress: number;
@@ -103,13 +73,13 @@ type ShootingStarState = {
   speed: number;
   /** World-unit length of the tStart→tEnd segment, used for extrapolation. */
   segmentLength: number;
-  /** Accumulated fade-out time, normalised by {@link shootingFadeDuration}. */
+  /** Accumulated fade-out time, normalised by shootingFadeDuration. */
   fadeProgress: number;
-  /** True once the head has passed {@link fadeStartThreshold}. */
+  /** True once the head has passed fadeStartThreshold. */
   isFading: boolean;
   visual: ShootingStarVisual;
   /**
-   * Per-shot trail length as a fraction of the total shoot-progress span.
+   * Per-shot trail length as a fraction of the shoot-progress span.
    * Randomised at spawn so each star has a distinct trail length.
    */
   trailMaxFraction: number;
@@ -134,54 +104,30 @@ export class StarField {
   private activeShots: ShootingStarState[] = [];
 
   /**
-   * Fading stars — not counted against the limit.
+   * Fading stars — counted against the cap so they can't accumulate unbounded.
    * Disposed once fully invisible.
    */
   private fadingShots: ShootingStarState[] = [];
 
-  /** Maximum number of simultaneously moving (non-fading) shots. */
+  /** Maximum number of simultaneously visible shots (active + fading). */
   private maxActiveShots = 2;
 
-  /** Number of tube segments per trail. 5 is plenty with independent aging. */
+  /** Number of cylinder segments per trail. */
   private readonly trailSteps = 20;
-  /** How long each emitted trail point lives before fully fading (seconds). */
-  private readonly trailSegmentLifetime = 1.8;
-  /** Min world-unit gap before a new trail point is emitted at the head. */
-  private readonly minTrailPointSpacing = 0.8;
-
-  /**
-   * Fraction of the curve's progress span used as the maximum trail length.
-   * Mirrors the {@code maxTrailLength / totalDistance} ratio from the original
-   * Processing implementation. At 0.25 the trail covers the last 25 % of the
-   * star's journey, growing naturally from nothing at launch and then
-   * maintaining a fixed apparent length until fade-out.
-   */
-  private readonly trailMaxFraction = 0.25;
 
   /** Seconds over which a new shot ramps from invisible to full opacity. */
   private readonly fadeInDuration = 0.6;
-  /** Seconds for the fade-out to go from full opacity to zero. */
+  /** Seconds for the fade-out to reach zero. */
   private readonly shootingFadeDuration = 8.45;
   /** shootProgress fraction at which fade-out begins. */
   private readonly fadeStartThreshold = 0.68;
   private readonly trailTubeRadius: number;
 
-  /**
-   * Reusable midpoint vector for trail segment positioning.
-   * Allocated once to avoid per-frame heap pressure inside {@link renderTrail}.
-   */
+  /** Reusable midpoint vector — allocated once to avoid per-frame GC pressure. */
   private readonly _segMid = new THREE.Vector3();
-
-  /**
-   * Reusable direction vector for trail segment orientation.
-   * Allocated once to avoid per-frame heap pressure inside {@link renderTrail}.
-   */
+  /** Reusable direction vector — allocated once to avoid per-frame GC pressure. */
   private readonly _segDir = new THREE.Vector3();
-
-  /**
-   * Constant Y-axis reference used by {@code setFromUnitVectors} when
-   * orienting each pre-built cylinder mesh along its trail segment.
-   */
+  /** Constant Y-axis used when orienting trail cylinder meshes. */
   private readonly _yAxis = new THREE.Vector3(0, 1, 0);
 
   /** Inner and outer shell radii for background star placement. */
@@ -191,22 +137,11 @@ export class StarField {
   private shootingStartMinRadius = 230;
   private shootingStartMaxRadius = 350;
 
-  /**
-   * Whether background stars are rendered via a single {@code THREE.Points}
-   * object. Set from {@link StarFieldOptions.usePoints} in the constructor.
-   */
+  /** When true, stars are rendered as a single THREE.Points object. */
   private usePoints = false;
-
-  /**
-   * The {@code THREE.Points} mesh used when {@link usePoints} is {@code true}.
-   * {@code null} when sprite-based rendering is active.
-   */
+  /** The THREE.Points mesh used when usePoints is true. */
   private pointsObject: THREE.Points | null = null;
-
-  /**
-   * Shared material for the {@link pointsObject}.
-   * {@code null} when sprite-based rendering is active.
-   */
+  /** Shared material for the points object. */
   private pointsMaterial: THREE.PointsMaterial | null = null;
 
   constructor(scene: THREE.Scene, options: StarFieldOptions = {}) {
@@ -242,8 +177,6 @@ export class StarField {
     this.elapsed += delta;
     if (!this.darkMode) return;
 
-    this.updateBlinking(delta);
-
     if (this.elapsed >= this.nextShotTime) {
       const totalShots = this.activeShots.length + this.fadingShots.length;
       if (totalShots < this.maxActiveShots) {
@@ -266,7 +199,7 @@ export class StarField {
       }
     }
 
-    // Tick fading shots — dispose once the head has fully faded out
+    // Tick fading shots — dispose once fully invisible
     for (let i = this.fadingShots.length - 1; i >= 0; i--) {
       const shot = this.fadingShots[i];
       if (!shot) continue;
@@ -284,18 +217,12 @@ export class StarField {
 
     for (const star of this.stars) {
       star.baseOpacity = this.darkMode ? 0.95 : 0;
-      star.blinkTimer = 0;
       star.material.opacity = star.baseOpacity;
     }
 
-    /**
-     * In {@code usePoints} mode the sprite array is empty, so update the
-     * shared {@link pointsMaterial} opacity directly instead.
-     */
     if (this.pointsMaterial) {
       this.pointsMaterial.opacity = this.darkMode ? 1.0 : 0;
     }
-
 
     if (!this.darkMode) this.hideShootingStars();
   }
@@ -308,9 +235,7 @@ export class StarField {
       star.material.dispose();
     }
 
-    /**
-     * Dispose the points geometry and material when in {@code usePoints} mode.
-     */
+    // Dispose points geometry and material when in usePoints mode
     if (this.pointsObject) {
       this.group.remove(this.pointsObject);
       this.pointsObject.geometry.dispose();
@@ -328,18 +253,11 @@ export class StarField {
     this.fadingShots = [];
   }
 
-  // ---------------------------------------------------------------------------
   // Background stars
-  // ---------------------------------------------------------------------------
 
   private createStars(count: number, minRadius: number, maxRadius: number): void {
     if (this.usePoints) {
-      /**
-       * Points-based path: pack all star positions into a single
-       * {@code BufferGeometry} and render with one {@code THREE.Points} object.
-       * Blinking is unavailable in this mode because all points share a single
-       * material, but draw calls drop from {@code count} to 1.
-       */
+      // Pack all positions into a single BufferGeometry — one draw call instead of one per star
       const positions = new Float32Array(count * 3);
 
       for (let i = 0; i < count; i++) {
@@ -392,25 +310,14 @@ export class StarField {
         material,
         position: position.clone(),
         baseOpacity: 0,
-        blinkTimer: 0,
-        canBlink: Math.random() < 0.5,
       });
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // Trail — TubeGeometry mesh pool with independent per-point aging
-  // ---------------------------------------------------------------------------
-
-  private makeTubeGeometry(p1: THREE.Vector3, p2: THREE.Vector3): THREE.TubeGeometry {
-    const path = new THREE.LineCurve3(p1, p2);
-    return new THREE.TubeGeometry(path, 1, this.trailTubeRadius, 6, false);
-  }
+  // Trail
 
   private createTrailSegments(): TrailSegment[] {
     const segments: TrailSegment[] = [];
-    const origin = new THREE.Vector3();
-    const tiny = new THREE.Vector3(0.001, 0, 0);
 
     for (let i = 0; i < this.trailSteps; i++) {
       const material = new THREE.MeshBasicMaterial({
@@ -423,11 +330,7 @@ export class StarField {
         blending: THREE.AdditiveBlending,
       });
 
-      /**
-       * Pre-build a unit-height cylinder once per segment. {@link renderTrail}
-       * repositions and rescales this mesh every frame instead of reallocating
-       * geometry, eliminating per-frame GPU buffer uploads for trail segments.
-       */
+      // Pre-build a unit-height cylinder — repositioned each frame rather than reallocated
       const mesh = new THREE.Mesh(
         new THREE.CylinderGeometry(this.trailTubeRadius, this.trailTubeRadius, 1, 6, 1),
         material,
@@ -452,25 +355,16 @@ export class StarField {
       blending: THREE.AdditiveBlending,
     });
 
-    /**
-     * Low-poly icosahedron used as the shooting-star head. Replaces the
-     * previous {@code THREE.Sprite} so the head is a real mesh with no
-     * camera-facing billboard behaviour, consistent with the trail segments.
-     */
+    // Low-poly icosahedron for the head — sized to match the trail tube radius
     const head = new THREE.Mesh(
       new THREE.IcosahedronGeometry(1, 1),
       headMaterial,
     );
-    /** Match the head radius to the trail tube so they appear the same width. */
     head.scale.setScalar(this.trailTubeRadius);
     head.visible = false;
     this.group.add(head);
 
-    /**
-     * Concentric back-face spheres layered around the head to produce a soft
-     * blue atmospheric corona — the same technique used for the Earth glow.
-     * Scale multipliers and opacities mirror the three-layer Earth setup.
-     */
+    // Three concentric back-face spheres producing a soft blue corona around the head
     const glowConfigs: { scaleMult: number; baseOpacity: number }[] = [
       { scaleMult: 3.5, baseOpacity: 0.45 },
       { scaleMult: 6.0, baseOpacity: 0.28 },
@@ -543,36 +437,7 @@ export class StarField {
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // Blinking
-  // ---------------------------------------------------------------------------
-
-  private updateBlinking(delta: number): void {
-    const blinkChance = 0.00008 * 60 * delta;
-
-    for (const star of this.stars) {
-      if (!star.canBlink) continue;
-
-      if (star.blinkTimer > 0) {
-        star.blinkTimer -= delta;
-        star.material.opacity = 0;
-        if (star.blinkTimer <= 0) {
-          star.blinkTimer = 0;
-          star.material.opacity = star.baseOpacity;
-        }
-        continue;
-      }
-
-      if (Math.random() < blinkChance) {
-        star.blinkTimer = 0.02 + Math.random() * 0.05;
-        star.material.opacity = 0;
-      }
-    }
-  }
-
-  // ---------------------------------------------------------------------------
   // Shooting star lifecycle
-  // ---------------------------------------------------------------------------
 
   private startShootingStar(): void {
     if (!this.darkMode) return;
@@ -584,8 +449,8 @@ export class StarField {
       Math.random() * (this.shootingStartMaxRadius - this.shootingStartMinRadius);
     const center = normal.clone().multiplyScalar(shellRadius);
 
-    // Build two orthogonal basis vectors on the tangent plane at this point,
-    // then pick a random angle so the travel direction is not always horizontal
+    // Two orthogonal basis vectors on the tangent plane — random angle so
+    // the travel direction is not always horizontal
     const helper =
       Math.abs(normal.y) < 0.95
         ? new THREE.Vector3(0, 1, 0)
@@ -596,7 +461,7 @@ export class StarField {
     const tangent = basisA.clone().multiplyScalar(Math.cos(angle)).addScaledVector(basisB, Math.sin(angle));
 
     const lineLength = 60 + Math.random() * 60;
-    // Bend always positive — Trajectory will push the midpoint towards Earth
+    // Positive bend — Trajectory pushes the midpoint towards Earth
     const bend = (0.2 + Math.random() * 0.3) * lineLength;
     const trajectory = new Trajectory(
       center.clone().addScaledVector(tangent, -lineLength / 2),
@@ -630,19 +495,13 @@ export class StarField {
     });
   }
 
-  /**
-   * Advances a single shot. Sets isFading = true the first time the threshold
-   * is crossed — the caller then moves it from activeShots → fadingShots.
-   */
+  /** Advances a single shot and sets isFading when the threshold is crossed. */
   private tickShot(shot: ShootingStarState, delta: number): void {
     if (!this.darkMode) return;
 
     shot.age += delta;
-
-    // Movement — always at natural speed
     shot.shootProgress += shot.speed * delta;
 
-    // Fade-out — independent of movement
     if (!shot.isFading && shot.shootProgress >= this.fadeStartThreshold) {
       shot.isFading = true;
     }
@@ -651,11 +510,11 @@ export class StarField {
       shot.fadeAlpha = Math.max(0, 1 - shot.fadeProgress);
     }
 
-    // Combined alpha: fade in over fadeInDuration, then fade out when isFading
+    // Combined alpha: ramp in over fadeInDuration, then ramp out when isFading
     const fadeIn = Math.min(1, shot.age / this.fadeInDuration);
     const alpha = fadeIn * shot.fadeAlpha;
 
-    // Head position — extrapolate past curve end if needed
+    // Head position — extrapolate linearly past the curve end if needed
     const clampedProgress = Math.min(1, shot.shootProgress);
     const headT = THREE.MathUtils.lerp(shot.tStart, shot.tEnd, clampedProgress);
     let headPosition: THREE.Vector3;
@@ -669,12 +528,11 @@ export class StarField {
       headPosition = shot.curve.path.getPointAt(headT);
     }
 
-    // Head
     shot.visual.head.visible = alpha > 0;
     shot.visual.head.position.copy(headPosition);
     shot.visual.headMaterial.opacity = Math.min(1, alpha * 1.2);
 
-    // Glow layers — follow head position, pulsate at ~1.3 Hz
+    // Glow layers follow the head and pulsate at ~1.3 Hz
     const pulse = 0.7 + 0.3 * Math.sin(shot.age * 8);
     for (const glow of shot.visual.glowLayers) {
       glow.mesh.visible = alpha > 0;
@@ -686,19 +544,10 @@ export class StarField {
   }
 
   private renderTrail(shot: ShootingStarState, alpha: number): void {
-    /**
-     * Tail progress has no upper clamp so both tail and head keep moving
-     * beyond the curve end until fadeAlpha reaches zero.
-     * Uses the per-shot {@code trailMaxFraction} so each star has a distinct
-     * trail length.
-     */
+    // Tail has no upper clamp so both ends keep moving past the curve end during fade
     const trailProgress = Math.max(0, shot.shootProgress - shot.trailMaxFraction);
 
-    /**
-     * Pre-compute exit position and tangent once per frame so every segment
-     * that lies past the curve end can extrapolate without an out-of-range
-     * {@code getPointAt} call.
-     */
+    // Pre-compute exit position and tangent once so all segments can extrapolate cheaply
     const pastEnd = shot.shootProgress > 1;
     const clampedHeadT = THREE.MathUtils.lerp(
       shot.tStart,
@@ -714,13 +563,8 @@ export class StarField {
       const segment = shot.visual.trailSegments[i];
       if (!segment) continue;
 
-      /**
-       * Each segment spans 1/trailSteps of the trail.
-       * t1 and t2 are normalised positions (0 = tail, 1 = head).
-       * Opacity scales with t2 so the tail is transparent and the section
-       * nearest the head is brightest — identical to {@code fadeAlpha * t2}
-       * in the Processing {@code display()} method.
-       */
+      // t1/t2 are normalised positions along the trail (0 = tail, 1 = head)
+      // opacity scales with t2 so the tail is transparent and the head is brightest
       const t1 = i / this.trailSteps;
       const t2 = (i + 1) / this.trailSteps;
 
@@ -761,17 +605,9 @@ export class StarField {
   }
 
   /**
-   * Returns the world-space position for a given shoot-progress value.
-   *
-   * Progress within {@code [0, 1]} is sampled directly from the Catmull-Rom
-   * path. Progress beyond {@code 1} extrapolates linearly past the curve end
-   * using the pre-computed {@code exitPos} and {@code exitTangent}, keeping
-   * the trail attached to the head for the full duration of the fade.
-   *
-   * @param shot         - The shooting star state.
-   * @param progress     - Shoot-progress value to sample (may exceed 1).
-   * @param exitPos      - World position at the curve end (non-null when progress > 1).
-   * @param exitTangent  - Unit tangent at the curve end (non-null when progress > 1).
+   * Samples a world-space position for a given shoot-progress value.
+   * Values within 0–1 are sampled from the curve; values beyond 1 are
+   * extrapolated linearly using the pre-computed exit position and tangent.
    */
   private sampleProgress(
     shot: ShootingStarState,
@@ -787,14 +623,11 @@ export class StarField {
       );
       return shot.curve.path.getPointAt(t);
     }
-    /** Linear extrapolation past the curve end — mirrors {@link tickShot}. */
     const extraDist = (progress - 1) * shot.segmentLength;
     return exitPos!.clone().addScaledVector(exitTangent!, extraDist);
   }
 
-  // ---------------------------------------------------------------------------
   // Helpers
-  // ---------------------------------------------------------------------------
 
   private hideShootingStars(): void {
     for (const shot of [...this.activeShots, ...this.fadingShots]) {
