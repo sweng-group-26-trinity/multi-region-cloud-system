@@ -21,3 +21,5 @@ logging:
   level:
     root: WARN
     org.springframework: WARN
+frontend:
+  path: ""

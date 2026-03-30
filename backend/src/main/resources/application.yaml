@@ -22,6 +22,9 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+  web:
+    resources:
+      add-mappings: false
 management:
   endpoints:
     web:
@@ -30,3 +33,5 @@ management:
 jwt:
   secret: H3q5G0iAKz+gwJzlJTQIKIco7jZlP74GwtgRrMoBSQUa
   expiration: 86400000
+frontend:
+  path: ${FRONTEND_PATH:}
