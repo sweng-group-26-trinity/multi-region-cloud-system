@@ -33,3 +33,4 @@ backend/monitoring
 
 *.log
 .hypothesis
+.gradle
