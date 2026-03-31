@@ -2,7 +2,7 @@
 
 > Designing for resilience, security, and scale.
 
-This section documents how we deploy and operate the Toast restaurant ordering system across multiple cloud regions.
+This section documents how we deploy and operate the DineHub restaurant ordering system across multiple cloud regions.
 
 ---
 
@@ -20,4 +20,8 @@ This section documents how we deploy and operate the Toast restaurant ordering s
 
 ## Documentation
 
-- [**Architecture**](./architecture.md) — Complete system design with diagrams and explanations
+- [**System Architecture**](./architecture.md) — Complete system design with diagrams and component overview
+- [**Deployment Process**](./deployment.md) — How we deploy, rollback, and manage infrastructure changes
+- [**Networking**](./networking.md) — Zero-trust mesh networking with Tailscale
+- [**Database**](./database.md) — Distributed PostgreSQL with Citus for horizontal scaling
+- [**Security**](./security.md) — Defense in depth across all layers

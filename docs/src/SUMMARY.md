@@ -1,12 +1,17 @@
 # Summary
 
-- [Meeting Notes](./meetings.md)
-  - [Toast Introduction](./meetings/toast_introduction.md)
+[DineHub Introduction](./introduction.md)
+
+---
 
 # System Architecture
 
 - [Infrastructure](./infrastructure/index.md)
-  - [Deployment Architecture](./infrastructure/architecture.md)
+  - [System Architecture](./infrastructure/architecture.md)
+  - [Deployment Process](./infrastructure/deployment.md)
+  - [Networking](./infrastructure/networking.md)
+  - [Database](./infrastructure/database.md)
+  - [Security](./infrastructure/security.md)
 
 # Component Architecture
 
@@ -16,6 +21,11 @@
 
 # API Reference
 
-- [`openapi` Docs](./openapi/index.md)
-- [`frontend` Docs](./frontend/index.md)
-- [`backend` Docs](./backend/index.md)
+- [OpenAPI Specification](./openapi/index.md) — Interactive API documentation and reference
+
+# Testing Strategy
+
+- **Unit Tests** — JUnit 5 for backend, Bun test runner for frontend
+- **Integration Tests** — Spring Boot Test with Testcontainers
+- **Property-Based Tests** — jqwik for generative testing, Schemathesis for API contract testing
+- **VM Tests** — Full system integration in NixOS virtual machines
