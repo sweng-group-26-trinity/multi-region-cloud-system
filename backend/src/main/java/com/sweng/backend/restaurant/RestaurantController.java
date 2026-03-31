@@ -205,7 +205,6 @@ public class RestaurantController {
             .orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Restaurant not found"));
 
-    // Track which fields were explicitly provided as null (schema violation)
     if (body.getName() != null) {
       ValidationUtils.rejectNullBytes(body.getName(), "name");
       found.setName(body.getName());
