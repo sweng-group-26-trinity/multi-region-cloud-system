@@ -22,7 +22,49 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+management:spring:
+  application:
+    name: backend
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
+    mapper:
+      accept-case-insensitive-enums: true
+  devtools:
+    restart:
+      enabled: true
+      poll-interval: 1s
+      quiet-period: 400ms
+  datasource:
+    url: jdbc:postgresql://localhost:5432/sweng
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: create
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
 management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,mappings
+jwt:
+  secret: H3q5G0iAKz+gwJzlJTQIKIco7jZlP74GwtgRrMoBSQUa
+  expiration: 86400000
+gcs:
+  project-id: sweng
+  bucket-name: bucket
+  emulator-url: https://localhost:4443
+  public-url: http://localhost:3000/gcs
+
   endpoints:
     web:
       exposure:
