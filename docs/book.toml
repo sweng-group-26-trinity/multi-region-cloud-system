@@ -2,3 +2,6 @@
 title = "Multi Region Cloud System"
 authors = ["Luke Bailey"]
 language = "en"
+
+[output.html]
+theme = "theme"

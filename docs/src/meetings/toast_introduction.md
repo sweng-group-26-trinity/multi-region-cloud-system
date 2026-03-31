@@ -1,3 +1,0 @@
-# Toast Introduction
-
-The meeting introduced the Toast SwEng 2026 Trinity College Dublin project, focusing on developing a resilient, multi-cloud region online ordering system for restaurants. Joe O'Connor outlined Toast's role in FinTech, emphasizing the critical nature of their software for small businesses. Jack Gilbride and Diana Osauzou offered technical support, while Shay, the demonstrator, coordinated weekly meetings. The team discussed cloud access, with AWS and Azure options available for students. The first task is to secure cloud resources, followed by sketching the REST API for online ordering. A visit to Toast's offices was proposed for future collaboration.

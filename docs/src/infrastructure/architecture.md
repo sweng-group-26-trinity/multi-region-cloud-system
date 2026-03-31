@@ -1,6 +1,6 @@
 # System Architecture
 
-> **Toast** - A resilient multi-region cloud restaurant ordering system
+> **DineHub** - A resilient multi-region cloud restaurant ordering system
 
 This document explains how our system is designed to be highly available, secure, and scalable across multiple cloud regions.
 

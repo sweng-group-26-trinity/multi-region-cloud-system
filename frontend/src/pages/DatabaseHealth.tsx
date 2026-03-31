@@ -405,6 +405,14 @@ function MobileTerminalSheet() {
           console.log("hello");
         },
       },
+      {
+        command: "/docs",
+        description: "open docs page",
+        noHacker: true,
+        onExecute: () => {
+          window.location.assign("/docs");
+        },
+      },
     ],
   };
 

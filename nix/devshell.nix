@@ -26,7 +26,6 @@
 
         shellHook = ''
           export FLAKE_ROOT="$(git rev-parse --show-toplevel)"
-          export FRONTEND_PATH="$FLAKE_ROOT/frontend/dist"
         '';
       };
     };

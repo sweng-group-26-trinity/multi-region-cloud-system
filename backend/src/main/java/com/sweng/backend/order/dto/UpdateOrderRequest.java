@@ -1,6 +1,7 @@
 package com.sweng.backend.order.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.util.List;
@@ -29,7 +30,7 @@ public class UpdateOrderRequest {
    *
    * <p>If provided, must contain at least one item.
    */
-  private List<CreateOrderItemRequest> items;
+  @Valid private List<CreateOrderItemRequest> items;
 
   /**
    * Optional new order status.
