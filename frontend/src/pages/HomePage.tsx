@@ -5,6 +5,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { loadObject, type SceneObject } from "../components/js/loader";
 import { Curve } from "../components/js/curve";
 import { CookingPot, Activity } from "lucide-react";
+import { loadCached } from "@/components/js/modelCache";
 
 /**
  * HomePage
@@ -225,8 +226,10 @@ export default function HomePage() {
     /**
      * Loads the Earth model into the scene.
      */
-    loadObject(earthObject, scene, (obj) => {
+    loadCached("/public/earth.gltf").then((obj) => {
       if (!mounted) return;
+      obj.scale.set(10, 10, 10); // your coords/scale here
+      scene.add(obj);
       earth = obj;
     });
 
