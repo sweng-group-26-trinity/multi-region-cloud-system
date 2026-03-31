@@ -147,11 +147,11 @@ export default function ThreeScene() {
     };
 
     loadCached("/public/earth.gltf").then((obj) => {
-  if (!mount) return;
-  obj.scale.set(10, 10, 10); // your coords/scale here
-  scene.add(obj);
-  earth = obj;
-});
+      if (!mount) return;
+      obj.scale.set(10, 10, 10); // your coords/scale here
+      scene.add(obj);
+      earth = obj;
+    });
     loadObject(planeObject, scene, (obj) => {
       plane = obj;
     });
