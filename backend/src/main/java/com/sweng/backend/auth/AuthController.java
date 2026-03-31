@@ -55,16 +55,10 @@ public class AuthController {
               registerRequest.getEmail(),
               registerRequest.getPassword());
 
-      UserDto dto = new UserDto();
-      dto.setId(user.getUid().toString());
-      dto.setUsername(user.getUsername());
-      dto.setEmail(user.getEmail());
-      dto.setFirstName(registerRequest.getFirstName());
-      dto.setLastName(registerRequest.getLastName());
-      dto.setRoles(user.getRoles().stream().map(r -> r.name()).toList());
-      dto.setCreatedAt(user.getCreatedAt());
-
-      return ResponseEntity.status(201).body(dto);
+      String jwt = jwtUtil.generateToken(user.getUsername());
+      LoginResponse.UserDto userDto =
+          new LoginResponse.UserDto(user.getUid().toString(), user.getUsername(), user.getEmail());
+      return ResponseEntity.status(201).body(new LoginResponse(jwt, 86400, userDto));
     } catch (RuntimeException e) {
       String message = e.getMessage();
       if (message != null && message.contains("already exists")) {

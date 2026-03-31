@@ -28,56 +28,51 @@ type TerminalLine =
   | { type: "input"; text: string };
 
 /**
- * Defines a custom command that can be registered with the {@link Terminal} component.
+ * Defines a custom command that can be executed in the terminal.
+ *
+ * @remarks
+ * Commands are matched by exact string equality (case-insensitive).
+ * The `onExecute` handler may be synchronous or asynchronous and
+ * can optionally return output lines to display.
  */
 export interface TerminalCommand {
-  /**
-   * The command string to match, including the leading slash.
-   * @example "/kill"
-   */
+  /** Command string (e.g. "/help") */
   command: string;
 
-  /**
-   * Short description displayed in the `/help` output.
-   */
+  /** Short description shown in `/help` */
   description: string;
 
   /**
-   * Callback invoked after the command runs.
-   * If {@link noHacker} is false (default), this is called after the
-   * hacker scramble animation completes. If {@link noHacker} is true,
-   * it is called immediately.
+   * Function executed when the command is invoked.
+   *
+   * @returns Optional output lines to append to the terminal
    */
-  onExecute: () => void;
+  onExecute: () => void | string[] | Promise<void | string[]>;
 
   /**
-   * When `true`, skips the hacker scramble animation and executes
-   * {@link onExecute} immediately.
-   * @default false
+   * If true, skips the hacker animation and executes immediately.
    */
   noHacker?: boolean;
 }
 
 /**
- * Props for the {@link Terminal} component.
+ * Props for configuring the {@link Terminal} component.
  */
 export interface TerminalProps {
   /**
-   * Text shown in the terminal title bar.
+   * Title displayed in the terminal header bar.
    * @default "terminal"
    */
   title?: string;
 
   /**
-   * Custom commands to register in addition to the built-in
-   * `/help` and `/clear` commands.
+   * Custom commands available in addition to built-in ones.
    * @default []
    */
   commands?: TerminalCommand[];
 
   /**
-   * Lines of text displayed on mount, below the version header.
-   * @default ['Type a command. Try "/help"']
+   * Initial output lines displayed on mount.
    */
   initialLines?: string[];
 }
@@ -85,39 +80,36 @@ export interface TerminalProps {
 /**
  * Terminal
  * --------
- * An interactive in-browser terminal widget.
+ * Interactive in-browser terminal component with support for custom commands
+ * and a hacker-style animation effect.
  *
+ * @remarks
  * Features:
- * - Accepts typed commands and echoes them in yellow
+ * - Displays output, input, and animated "hacker" lines
  * - Built-in `/help` and `/clear` commands
- * - Supports custom commands via the {@link TerminalProps.commands} prop
- * - Runs a green hacker-movie scramble animation before executing commands
+ * - Supports asynchronous custom commands
+ * - Optional hacker scramble animation before command execution
  * - Auto-scrolls to the latest output
- * - Focuses the input on click anywhere in the terminal
+ * - Click-to-focus input behavior
+ * - Responsive container-based layout
  *
- * Built-in commands:
- * - `/help`  — lists all available commands
- * - `/clear` — clears all terminal output
+ * Command execution flow:
+ * 1. User enters a command
+ * 2. Command is echoed to the terminal
+ * 3. If matched:
+ *    - Optional hacker animation runs
+ *    - Command handler executes (sync or async)
+ *    - Output (if any) is appended
+ * 4. If unmatched:
+ *    - Displays an "Unknown command" message
  *
- * This version is container-based:
- * - it fills the width and height of its parent
- * - it works inside responsive wrappers like bottom sheets on mobile
- * - it no longer hard-codes absolute positioning or fixed dimensions
+ * State:
+ * - `lines` — all terminal output lines
+ * - `input` — current input value
+ * - `busy`  — disables input during execution/animation
  *
- * @example
- * ```tsx
- * <Terminal
- *   title="dinehub-terminal"
- *   initialLines={['Type /kill to terminate all nodes']}
- *   commands={[
- *     {
- *       command: "/kill",
- *       description: "terminate all active nodes",
- *       onExecute: () => fetch("/api/kill", { method: "POST" }),
- *     },
- *   ]}
- * />
- * ```
+ * @param props - {@link TerminalProps}
+ * @returns A fully interactive terminal UI component
  */
 export function Terminal({
   title = "terminal",
@@ -232,22 +224,31 @@ export function Terminal({
     const match = commands.find((c) => c.command.toLowerCase() === trimmed);
 
     if (match) {
+      const exec = async () => {
+        const result = await match.onExecute();
+        if (Array.isArray(result)) {
+          setLines((prev) => [
+            ...prev,
+            ...result.map((t): TerminalLine => ({ type: "output", text: t })),
+          ]);
+        }
+      };
+
       if (match.noHacker) {
         setLines((prev) => [
           ...prev,
           { type: "output", text: `Executing ${match.command}...` },
         ]);
-        match.onExecute();
+        setBusy(true);
+        exec().finally(() => setBusy(false));
       } else {
         setBusy(true);
         setLines((prev) => [
           ...prev,
           { type: "output", text: `Executing ${match.command}...` },
         ]);
-
         runHackerEffect(() => {
-          match.onExecute();
-          setBusy(false);
+          exec().finally(() => setBusy(false));
         });
       }
       return;

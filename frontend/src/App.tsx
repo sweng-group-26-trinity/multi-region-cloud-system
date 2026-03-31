@@ -23,6 +23,23 @@ import {
 } from "lucide-react";
 import { useAuth } from "./context/AuthContext";
 import "./index.css";
+import PlaneBird from "./pages/PlaneBird";
+
+function useIsMobile(breakpoint = 640) {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < breakpoint);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < breakpoint);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, [breakpoint]);
+
+  return isMobile;
+}
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -65,6 +82,15 @@ function AnimatedRoutes() {
             </Page>
           }
         />
+        <Route
+          path="/game"
+          element={
+            <Page>
+              <PlaneBird />
+            </Page>
+          }
+        />
+
         <Route
           path="/health"
           element={
@@ -135,6 +161,7 @@ function Header({
   darkMode: boolean;
   toggleDarkMode: () => void;
 }) {
+  const isMobile = useIsMobile();
   const navigate = useNavigate();
   const location = useLocation();
   const { logout } = useAuth();
@@ -221,7 +248,9 @@ function Header({
               type="button"
               onClick={toggleDarkMode}
               title={darkMode ? "Light Mode" : "Dark Mode"}
-              className={navIconClass}
+              className="flex h-[42px] w-[42px] items-center justify-center rounded-full text-white transition-all duration-200 hover:bg-white/10 active:scale-[0.97]"
+
+              // className={navIconClass}
             >
               {darkMode ? <Sun size={18} /> : <Moon size={18} />}
             </button>
@@ -231,9 +260,9 @@ function Header({
                 type="button"
                 onClick={() => navigate("/dashboard")}
                 title="Dashboard"
-                className={`${navTextClass} px-2 sm:px-3`}
+                className={`${navTextClass}  text-white px-2 sm:px-3 hover:bg-white/10 active:scale-[0.97] hover:text-white`}
               >
-                <LayoutDashboard size={18} />
+                {isMobile && <LayoutDashboard size={18} />}
                 <span className="hidden sm:inline">Dashboard</span>
               </button>
             )}
@@ -243,7 +272,7 @@ function Header({
                 type="button"
                 onClick={handleLogout}
                 title="Logout"
-                className={`${logoutClass} px-2 sm:px-3`}
+                className={`${logoutClass} rounded-sm px-1 sm:px-3 sm:py-`}
               >
                 <LogOut size={18} />
                 <span className="hidden sm:inline">Logout</span>
@@ -288,7 +317,7 @@ function Header({
               title="Dashboard"
               className={navTextClass}
             >
-              <LayoutDashboard size={18} />
+              {isMobile && <LayoutDashboard size={18} />}
               <span className="hidden sm:inline">Dashboard</span>
             </button>
           )}
@@ -300,7 +329,7 @@ function Header({
               title="Health"
               className={navTextClass}
             >
-              <HeartPulse size={18} />
+              {isMobile && <HeartPulse size={18} />}
               <span className="hidden sm:inline">Health</span>
             </button>
           )}
@@ -312,7 +341,7 @@ function Header({
               title="FAQ"
               className={navTextClass}
             >
-              <HelpCircle size={18} />
+              {isMobile && <HelpCircle size={18} />}
               <span className="hidden sm:inline">FAQ</span>
             </button>
           )}
@@ -322,7 +351,7 @@ function Header({
               type="button"
               onClick={handleLogout}
               title="Logout"
-              className={logoutClass}
+              className={`${logoutClass} rounded-sm px-1 sm:px-3 sm:py-`}
             >
               <LogOut size={18} />
               <span className="hidden sm:inline">Logout</span>
