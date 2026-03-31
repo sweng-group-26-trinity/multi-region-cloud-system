@@ -1,6 +1,6 @@
 # DineHub
 
-> See our documentation website [here](https://docs-server.main.multi-region-cloud-system.sweng-group-26-trinity.garnix.me/).
+> See our documentation website [here](https://docs-server.main.multi-region-cloud-system.sweng-group-26-trinity.garnix.me/docs).
 
 DineHub is a multi region cloud native restaurant ordering system with resilient fallback mechanisms and detailed sustainability goals.
 
