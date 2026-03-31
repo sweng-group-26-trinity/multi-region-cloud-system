@@ -472,6 +472,14 @@ function TerminalPanel() {
           }
         },
       },
+      {
+        command: "/docs",
+        description: "open docs page",
+        noHacker: true,
+        onExecute: () => {
+          window.location.assign("/docs");
+        },
+      },
     ],
   };
 
