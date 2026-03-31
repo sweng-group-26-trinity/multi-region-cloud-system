@@ -1,5 +1,4 @@
 servers:
-  - configuration: docs-server
+  - configuration: staging
     deployment:
       type: on-branch
-      branch: main

@@ -59,14 +59,14 @@ in
       specialArgs = { inherit self inputs; };
     };
 
-    docs-server = inputs.nixpkgs.lib.nixosSystem {
+    staging = inputs.nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       modules = [
         inputs.garnix-lib.nixosModules.garnix
         {
           garnix.server.enable = true;
         }
-        self.nixosModules.docsServer
+        self.nixosModules.stagingServer
       ];
     };
   };
