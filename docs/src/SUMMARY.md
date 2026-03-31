@@ -15,13 +15,15 @@
 
 # Component Architecture
 
-- [Frontend](./architecture/frontend.md) — UI layer design and patterns
-- [Backend](./architecture/backend.md) — Service layer architecture
-- [Nix Build System](./architecture/nix.md) — Reproducible builds and deployment
+- [Frontend Architecture](./architecture/frontend.md)
+- [Backend Architecture](./architecture/backend.md)
+- [Nix Build System](./architecture/nix.md)
 
 # API Reference
 
-- [OpenAPI Specification](./openapi/index.md) — Interactive API documentation and reference
+- [OpenAPI Specification](./openapi/index.md)
+- [Frontend API](./frontend/index.md)
+- [Backend API](./backend/index.md)
 
 # Testing Strategy
 

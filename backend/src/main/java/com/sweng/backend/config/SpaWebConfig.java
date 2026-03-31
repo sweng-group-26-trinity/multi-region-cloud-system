@@ -74,10 +74,27 @@ public class SpaWebConfig implements WebMvcConfigurer {
   @Override
   public void addResourceHandlers(ResourceHandlerRegistry registry) {
     // Docs handler — registered before /** so it takes priority over the SPA resolver.
-    // Plain PathResourceResolver: missing files return 404, no SPA fallback.
+    // Uses DocsResourceResolver: serves index.html for directories, 404 for missing files.
     if (documentationPath != null && !documentationPath.isBlank()) {
       registry
           .addResourceHandler("/docs/**")
+          .addResourceLocations("file:" + documentationPath + "/")
+          .resourceChain(true)
+          .addResolver(new DocsResourceResolver());
+
+      // Also serve docs assets from root paths - mdbook generates relative paths like ../css/
+      // which resolve to root when the user is at /docs/subdir/. Since the docs are served
+      // from /docs/, we need to also serve the assets at the paths mdbook expects.
+      registry
+          .addResourceHandler("/css/**", "/fonts/**")
+          .addResourceLocations(
+              "file:" + documentationPath + "/css/", "file:" + documentationPath + "/fonts/")
+          .resourceChain(true)
+          .addResolver(new PathResourceResolver());
+
+      // Handle hashed JS/CSS files at root (e.g., /toc-9bc70d00.js)
+      registry
+          .addResourceHandler("/*.js", "/*.css")
           .addResourceLocations("file:" + documentationPath + "/")
           .resourceChain(true)
           .addResolver(new PathResourceResolver());
@@ -147,6 +164,30 @@ public class SpaWebConfig implements WebMvcConfigurer {
       }
 
       return super.getResource("index.html", location);
+    }
+  }
+
+  /**
+   * Resolver for documentation static files. Handles directory paths by serving index.html, but
+   * does not provide SPA fallback for non-existent paths (returns 404 instead).
+   */
+  private static class DocsResourceResolver extends PathResourceResolver {
+
+    @Override
+    protected Resource getResource(String resourcePath, Resource location) throws IOException {
+      Resource resource = super.getResource(resourcePath, location);
+      if (resource != null) {
+        return resource;
+      }
+
+      // Try appending index.html for directory paths
+      if (!resourcePath.endsWith("/")) {
+        resource = super.getResource(resourcePath + "/index.html", location);
+      } else {
+        resource = super.getResource(resourcePath + "index.html", location);
+      }
+
+      return resource;
     }
   }
 }
