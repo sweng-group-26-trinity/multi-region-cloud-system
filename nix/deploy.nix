@@ -22,6 +22,7 @@ in
       db-worker-1 = mkNode "db-worker-1";
       db-worker-2 = mkNode "db-worker-2";
       monitoring = mkNode "monitoring";
+      ingress = mkNode "ingress";
     };
   };
 

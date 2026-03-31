@@ -44,6 +44,19 @@ in
       { networking.hostName = "db-worker-2"; }
     ];
 
+    # ingress node - nginx load balancer in front of backend fleet
+    ingress = inputs.nixpkgs.lib.nixosSystem {
+      system = "x86_64-linux";
+      modules = [
+        self.nixosModules.base
+        self.nixosModules.diskConfig
+        self.nixosModules.nginxIngress
+        self.nixosModules.ingressNode
+        { networking.hostName = "ingress"; }
+      ];
+      specialArgs = { inherit self inputs; };
+    };
+
     # monitoring node (no backend or postgres needed)
     monitoring = inputs.nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
