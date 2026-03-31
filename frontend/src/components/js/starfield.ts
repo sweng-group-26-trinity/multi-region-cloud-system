@@ -3,9 +3,13 @@ import { Trajectory } from "./trajectory";
 
 /** Configuration options for {@link StarField}. */
 export type StarFieldOptions = {
+  /** Number of background stars to generate. Defaults to 2000. */
   count?: number;
+  /** Inner shell radius for background star placement in world units. Defaults to 180. */
   minRadius?: number;
+  /** Outer shell radius for background star placement in world units. Defaults to 330. */
   maxRadius?: number;
+  /** Whether to start in dark mode with stars visible. Defaults to true. */
   darkMode?: boolean;
 
   /** Max simultaneous moving stars (active + fading combined). Defaults to 2. */
