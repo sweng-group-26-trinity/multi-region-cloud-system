@@ -28,15 +28,20 @@ class SpaWebConfigTest {
   private MockMvc mockMvc;
 
   /**
-   * Sets FRONTEND_PATH to the test fixture directory before the application context loads. Uses
-   * DynamicPropertySource (highest priority) to override any environment variable.
+   * Sets FRONTEND_PATH and DOCUMENTATION_PATH to the test fixture directories before the
+   * application context loads. Uses DynamicPropertySource (highest priority) to override any
+   * environment variable.
    *
    * @param registry the dynamic property registry
    */
   @DynamicPropertySource
-  static void setFrontendPath(DynamicPropertyRegistry registry) {
-    String path = Path.of("src/test/resources/test-frontend").toAbsolutePath().toString();
-    registry.add("frontend.path", () -> path);
+  static void setPaths(DynamicPropertyRegistry registry) {
+    registry.add(
+        "frontend.path",
+        () -> Path.of("src/test/resources/test-frontend").toAbsolutePath().toString());
+    registry.add(
+        "documentation.path",
+        () -> Path.of("src/test/resources/test-docs").toAbsolutePath().toString());
   }
 
   @BeforeEach
@@ -94,5 +99,41 @@ class SpaWebConfigTest {
   @Test
   void apiPathsStillRequireAuth() throws Exception {
     mockMvc.perform(get("/api/orders")).andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  void docsRootServesIndexHtml() throws Exception {
+    mockMvc
+        .perform(get("/docs"))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString("test-docs-index")));
+  }
+
+  @Test
+  void docsSubpathServesFile() throws Exception {
+    mockMvc
+        .perform(get("/docs/guide.html"))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString("test-docs-guide")));
+  }
+
+  @Test
+  void docsStaticAssetServed() throws Exception {
+    mockMvc.perform(get("/docs/assets/style.css")).andExpect(status().isOk());
+  }
+
+  @Test
+  void docsMissingFileReturns404() throws Exception {
+    mockMvc.perform(get("/docs/nonexistent.html")).andExpect(status().isNotFound());
+  }
+
+  @Test
+  void docsMissingPathWithoutExtensionReturns404() throws Exception {
+    mockMvc.perform(get("/docs/no-such-page")).andExpect(status().isNotFound());
+  }
+
+  @Test
+  void docsPathDoesNotRequireAuth() throws Exception {
+    mockMvc.perform(get("/docs")).andExpect(status().isOk());
   }
 }
