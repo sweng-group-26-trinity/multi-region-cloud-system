@@ -7,24 +7,16 @@
 # System Architecture
 
 - [Infrastructure](./infrastructure/index.md)
-  - [System Architecture](./infrastructure/architecture.md)
-  - [Deployment Process](./infrastructure/deployment.md)
-  - [Networking](./infrastructure/networking.md)
-  - [Database](./infrastructure/database.md)
-  - [Security](./infrastructure/security.md)
+  - [Deployment Architecture](./infrastructure/architecture.md)
 
 # Component Architecture
 
-- [Frontend Architecture](./architecture/frontend.md)
-- [Backend Architecture](./architecture/backend.md)
-- [Nix Build System](./architecture/nix.md)
+- [Frontend](./architecture/frontend.md) — UI layer design and patterns
+- [Backend](./architecture/backend.md) — Service layer architecture
+- [Nix Build System](./architecture/nix.md) — Reproducible builds and deployment
 
 # API Reference
 
-- [OpenAPI Specification](./openapi/index.md)
-- [Frontend API](./frontend/index.md)
-- [Backend API](./backend/index.md)
-
-# Testing Strategy
-
-- [Testing Overview](./testing/index.md)
+- [`openapi` Docs](./openapi/index.md)
+- [`frontend` Docs](./frontend/index.md)
+- [`backend` Docs](./backend/index.md)
