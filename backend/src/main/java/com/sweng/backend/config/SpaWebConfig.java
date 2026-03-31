@@ -23,9 +23,6 @@ import org.springframework.web.servlet.resource.PathResourceResolver;
 /** Configuration class for serving static frontend and documentation sites. */
 @Configuration
 @Controller
-/** Configuration class for serving the frontend SPA. */
-@Configuration
-@Controller
 public class SpaWebConfig implements WebMvcConfigurer {
 
   /** Default constructor. */
