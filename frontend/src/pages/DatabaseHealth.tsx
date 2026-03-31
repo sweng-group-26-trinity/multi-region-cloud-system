@@ -450,6 +450,7 @@ function TerminalPanel() {
         description: "play a game",
         onExecute: () => navigate("/game"),
       },
+      
       {
         command: "/leaderboard",
         description: "show all player highscores",

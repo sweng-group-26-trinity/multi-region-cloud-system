@@ -1,5 +1,7 @@
 package com.sweng.backend.restaurant.dto;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 

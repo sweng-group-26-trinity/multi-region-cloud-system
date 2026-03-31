@@ -297,17 +297,19 @@ export default function ThreeScene() {
         { fileName: "/public/tree.gltf", coords: new THREE.Vector3(2, 2, 2) },
         scene,
         (obj) => {
-          scene.remove(obj);
-          obj.rotation.y = (Math.random() - 0.5) * 0.8;
-          obj.rotation.z = (Math.random() - 0.5) * 0.3;
-          const box = new THREE.Box3().setFromObject(obj);
-          const h = box.max.y - box.min.y;
-          const hw = Math.max(box.max.x - box.min.x, box.max.z - box.min.z) / 2;
-          pipeData.botHeight = h;
-          pipeData.botHalfWidth = hw;
-          obj.position.y = -box.max.y;
-          botGroup.add(obj);
-        },
+  scene.remove(obj);
+  // 1. Measure FIRST, before any rotations
+  const box = new THREE.Box3().setFromObject(obj);
+  const h = box.max.y - box.min.y;
+  const hw = Math.max(box.max.x - box.min.x, box.max.z - box.min.z) / 2;
+  pipeData.botHeight = h;       // (or topHeight / topHalfWidth)
+  pipeData.botHalfWidth = hw;
+  obj.position.y = -box.max.y;
+  // 2. THEN apply cosmetic rotations
+  // obj.rotation.y = (Math.random() - 0.5) * 0.8;
+  // obj.rotation.z = (Math.random() - 0.5) * 0.3;
+  botGroup.add(obj);            // (or topGroup)
+},
       );
 
       // top tree — group flipped so tip points DOWN
@@ -320,18 +322,29 @@ export default function ThreeScene() {
       loadObject(
         { fileName: "/public/tree.gltf", coords: new THREE.Vector3(2, 2, 2) },
         scene,
+        // (obj) => {
+        //   scene.remove(obj);
+        //   obj.rotation.y = (Math.random() - 0.5) * 0.8;
+        //   obj.rotation.z = (Math.random() - 0.5) * 0.3;
+        //   const box = new THREE.Box3().setFromObject(obj);
+        //   const h = box.max.y - box.min.y;
+        //   const hw = Math.max(box.max.x - box.min.x, box.max.z - box.min.z) / 2;
+        //   pipeData.topHeight = h;
+        //   pipeData.topHalfWidth = hw;
+        //   obj.position.y = -box.max.y;
+        //   topGroup.add(obj);
+        // },
+
         (obj) => {
-          scene.remove(obj);
-          obj.rotation.y = (Math.random() - 0.5) * 0.8;
-          obj.rotation.z = (Math.random() - 0.5) * 0.3;
-          const box = new THREE.Box3().setFromObject(obj);
-          const h = box.max.y - box.min.y;
-          const hw = Math.max(box.max.x - box.min.x, box.max.z - box.min.z) / 2;
-          pipeData.topHeight = h;
-          pipeData.topHalfWidth = hw;
-          obj.position.y = -box.max.y;
-          topGroup.add(obj);
-        },
+  scene.remove(obj);
+  const box = new THREE.Box3().setFromObject(obj);
+  const h = box.max.y - box.min.y;
+  const hw = Math.max(box.max.x - box.min.x, box.max.z - box.min.z) / 2;
+  pipeData.topHeight = h;      // ← was botHeight
+  pipeData.topHalfWidth = hw;  // ← was botHalfWidth
+  obj.position.y = -box.max.y;
+  topGroup.add(obj);
+},
       );
 
       pipes.push(pipeData);
@@ -382,46 +395,46 @@ export default function ThreeScene() {
     }
 
     function updateDebug() {
-      debugObjects.forEach((o) => scene.remove(o));
-      debugObjects.length = 0;
-      if (!DEBUG) return;
+  debugObjects.forEach((o) => scene.remove(o));
+  debugObjects.length = 0;
+  if (!DEBUG) return;
 
-      scene.updateMatrixWorld();
+  scene.updateMatrixWorld(); 
 
-      // plane hitbox
-      const planeHelper = new THREE.Box3Helper(
-        getPlaneBB(),
-        new THREE.Color(0x00ffff),
+  // plane hitbox
+  const planeHelper = new THREE.Box3Helper(getPlaneBB(), new THREE.Color(0x00ffff));
+  scene.add(planeHelper);
+  debugObjects.push(planeHelper);
+
+  // raycast sample points
+  const bb = getPlaneBB();
+  const nx = 4, ny = 3;
+
+  const allMeshes: THREE.Mesh[] = [];
+  for (const p of pipes) {
+    allMeshes.push(...getTreeMeshes(p.bot), ...getTreeMeshes(p.top));
+  }
+
+  for (let i = 0; i <= nx; i++) {
+    for (let j = 0; j <= ny; j++) {
+      const origin = new THREE.Vector3(
+        bb.min.x + (bb.max.x - bb.min.x) * (i / nx),
+        bb.min.y + (bb.max.y - bb.min.y) * (j / ny),
+        50
       );
-      scene.add(planeHelper);
-      debugObjects.push(planeHelper);
+      raycaster.set(origin, zDir);
+      const hit = raycaster.intersectObjects(allMeshes, false).length > 0;
 
-      for (const p of pipes) {
-        // bottom tree: tip at top, base hangs below
-        const botTri = makeTriangleLine(
-          p.x,
-          p.bot.position.y, // tip: x=tree centre, y=gap edge
-          p.x,
-          p.bot.position.y - p.botHeight, // base Y
-          p.botHalfWidth,
-          0x00ff00,
-        );
-        scene.add(botTri);
-        debugObjects.push(botTri);
-
-        // top tree: tip at bottom, base rises above
-        const topTri = makeTriangleLine(
-          p.x,
-          p.top.position.y, // tip: x=tree centre, y=gap edge
-          p.x,
-          p.top.position.y + p.topHeight, // base Y
-          p.topHalfWidth,
-          0xff8800,
-        );
-        scene.add(topTri);
-        debugObjects.push(topTri);
-      }
+      const dot = new THREE.Mesh(
+        new THREE.SphereGeometry(0.12),
+        new THREE.MeshBasicMaterial({ color: hit ? 0xff0000 : 0x00ff00 })
+      );
+      dot.position.set(origin.x, origin.y, 0);
+      scene.add(dot);
+      debugObjects.push(dot);
     }
+  }
+}
 
     // --- Game state ---
     let vy = 0;
@@ -482,56 +495,53 @@ export default function ThreeScene() {
       }
     }
 
-    // Proper rect-to-triangle collision: check full plane hitbox against triangular tree cones
-    function checkCollision(): boolean {
-      const bb = getPlaneBB();
-      const planeTop = bb.max.y;
-      const planeBot = bb.min.y;
-      const planeCX = (bb.min.x + bb.max.x) / 2;
-      const planeHW = HIT_W;
+    const raycaster = new THREE.Raycaster();
+const zDir = new THREE.Vector3(0, 0, -1);
 
-      if (planeBot < -frustumSize / 2 + 1) return true;
-      if (planeTop > frustumSize / 2) return true;
+function getTreeMeshes(group: THREE.Group): THREE.Mesh[] {
+  const meshes: THREE.Mesh[] = [];
+  group.traverse((child) => {
+    if (child instanceof THREE.Mesh) meshes.push(child);
+  });
+  return meshes;
+}
 
-      for (const p of pipes) {
-        // bottom tree: tip at p.bot.position.y, expands downward
-        const botTip = p.bot.position.y;
-        const botBase = botTip - p.botHeight;
+function checkCollision(): boolean {
+  scene.updateMatrixWorld();  // ← add this
+  
+  const bb = getPlaneBB();
 
-        // check if plane vertically overlaps tree extent
-        if (planeBot < botTip && planeTop > botBase) {
-          // sample multiple heights through the plane to catch collisions
-          const samples = [planeBot, planeTop, (planeBot + planeTop) / 2];
-          for (const checkY of samples) {
-            if (checkY >= botBase && checkY < botTip) {
-              const depth = botTip - checkY;
-              const allowedHW = (depth / p.botHeight) * p.botHalfWidth;
-              const dxToTree = Math.abs(p.x - planeCX);
-              if (dxToTree < allowedHW + planeHW) return true;
-            }
-          }
-        }
+  if (bb.min.y < -frustumSize / 2 + 1) return true;
+  if (bb.max.y > frustumSize / 2) return true;
 
-        // top tree: tip at p.top.position.y, expands upward
-        const topTip = p.top.position.y;
-        const topBase = topTip + p.topHeight;
-
-        // check if plane vertically overlaps tree extent
-        if (planeTop > topTip && planeBot < topBase) {
-          // sample multiple heights through the plane to catch collisions
-          const samples = [planeBot, planeTop, (planeBot + planeTop) / 2];
-          for (const checkY of samples) {
-            if (checkY <= topBase && checkY > topTip) {
-              const depth = checkY - topTip;
-              const allowedHW = (depth / p.topHeight) * p.topHalfWidth;
-              const dxToTree = Math.abs(p.x - planeCX);
-              if (dxToTree < allowedHW + planeHW) return true;
-            }
-          }
-        }
-      }
-      return false;
+  // Sample grid across the plane hitbox
+  const nx = 4, ny = 3;
+  const samples: THREE.Vector3[] = [];
+  for (let i = 0; i <= nx; i++) {
+    for (let j = 0; j <= ny; j++) {
+      samples.push(new THREE.Vector3(
+        bb.min.x + (bb.max.x - bb.min.x) * (i / nx),
+        bb.min.y + (bb.max.y - bb.min.y) * (j / ny),
+        50  // start in front of everything
+      ));
     }
+  }
+
+  for (const p of pipes) {
+    const meshes = [
+      ...getTreeMeshes(p.bot),
+      ...getTreeMeshes(p.top),
+    ];
+    if (meshes.length === 0) continue;
+
+    for (const origin of samples) {
+      raycaster.set(origin, zDir);
+      const hits = raycaster.intersectObjects(meshes, false);
+      if (hits.length > 0) return true;
+    }
+  }
+  return false;
+}
 
     spawnPipe();
 
