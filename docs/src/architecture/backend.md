@@ -253,6 +253,51 @@ The API documentation is generated from:
 
 This ensures API docs stay synchronized with implementation.
 
+## Contract Testing with Schemathesis
+
+Beyond traditional unit and integration tests, we use **Schemathesis** for property-based API testing. While unit tests verify specific inputs produce expected outputs, contract testing verifies the API adheres to its OpenAPI specification under all circumstances.
+
+### What is Schemathesis?
+
+Schemathesis reads the OpenAPI specification and automatically generates thousands of test cases:
+
+- **Valid inputs**: Ensures documented behavior matches implementation
+- **Edge cases**: Boundary values, maximum lengths, special characters
+- **Invalid inputs**: Malformed JSON, wrong types, missing fields
+- **Security cases**: SQL injection attempts, XSS payloads
+
+This catches bugs that manual test writing might miss—developers tend to test "happy paths" while Schemathesis explores the entire input space.
+
+### Testing Philosophy
+
+Schemathesis operates on a simple principle: if the API claims to accept certain inputs in its OpenAPI spec, it must handle them gracefully. This creates a **contract** between API provider and consumers:
+
+- **For providers**: Any change that breaks Schemathesis tests is a breaking change
+- **For consumers**: Can rely on documented behavior being accurate
+- **For both**: Reduces integration surprises
+
+### Integration in CI
+
+Schemathesis runs automatically during `nix flake check`:
+
+1. Build the backend and generate OpenAPI spec
+2. Start the backend in a test VM
+3. Run Schemathesis against the running API
+4. Fail the build if any tests fail
+
+This ensures the OpenAPI specification remains accurate and the implementation handles edge cases correctly.
+
+### Configuration
+
+Schemathesis is configured to:
+
+- Generate ASCII-only test data (avoiding HTTP header encoding issues)
+- Exclude certain endpoints that require external services (Google OAuth)
+- Skip stateful operations that would invalidate subsequent tests (logout)
+- Use automatic parallelism based on CPU cores
+
+The configuration lives in `schemathesis.toml` at the project root.
+
 ## Deployment Architecture
 
 ### Native Binary

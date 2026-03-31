@@ -1,8 +1,8 @@
-# README for "Name undecided"
+# DineHub
 
 > See our documentation website [here](https://docs-server.main.multi-region-cloud-system.sweng-group-26-trinity.garnix.me/).
 
-TODO: description
+DineHub is a multi region cloud native restaurant ordering system with resilient fallback mechanisms and detailed sustainability goals.
 
 ## 1. Build and Run
 
