@@ -1,7 +1,8 @@
 import * as THREE from "three";
 import { Trajectory } from "./trajectory";
 
-type StarFieldOptions = {
+/** Configuration options for {@link StarField}. */
+export type StarFieldOptions = {
   count?: number;
   minRadius?: number;
   maxRadius?: number;
@@ -85,6 +86,7 @@ type ShootingStarState = {
   trailMaxFraction: number;
 };
 
+/** Manages a 3D starfield scene with background stars and animated shooting stars. */
 export class StarField {
   private scene: THREE.Scene;
   /** Group that owns all star sprites, trail meshes, and glow layers. */
@@ -171,6 +173,7 @@ export class StarField {
     this.scheduleNextShot(0.5);
   }
 
+  /** Advances the starfield simulation by one frame. @param delta - Elapsed seconds since the last frame. */
   update(delta: number): void {
     if (!Number.isFinite(delta) || delta <= 0) return;
 
@@ -182,9 +185,7 @@ export class StarField {
       if (totalShots < this.maxActiveShots) {
         this.startShootingStar();
       }
-      this.scheduleNextShot(
-        totalShots >= this.maxActiveShots ? 0.5 : 1.5,
-      );
+      this.scheduleNextShot(totalShots >= this.maxActiveShots ? 0.5 : 1.5);
     }
 
     // Tick active shots — transfer fading ones immediately to free the slot
@@ -210,6 +211,7 @@ export class StarField {
     }
   }
 
+  /** Toggles dark mode, showing or hiding stars and shooting-star effects. @param darkMode - True to enable the starfield, false to hide it. */
   setDarkMode(darkMode: boolean): void {
     this.darkMode = darkMode;
 
@@ -225,6 +227,7 @@ export class StarField {
     if (!this.darkMode) this.hideShootingStars();
   }
 
+  /** Removes all starfield objects from the scene and releases their GPU resources. */
   dispose(): void {
     this.scene.remove(this.group);
 
@@ -253,7 +256,11 @@ export class StarField {
 
   // Background stars
 
-  private createStars(count: number, minRadius: number, maxRadius: number): void {
+  private createStars(
+    count: number,
+    minRadius: number,
+    maxRadius: number,
+  ): void {
     if (this.usePoints) {
       // Pack all positions into a single BufferGeometry — one draw call instead of one per star
       const positions = new Float32Array(count * 3);
@@ -266,7 +273,10 @@ export class StarField {
       }
 
       const geometry = new THREE.BufferGeometry();
-      geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+      geometry.setAttribute(
+        "position",
+        new THREE.BufferAttribute(positions, 3),
+      );
 
       this.pointsMaterial = new THREE.PointsMaterial({
         color: 0xffffff,
@@ -330,7 +340,13 @@ export class StarField {
 
       // Pre-build a unit-height cylinder — repositioned each frame rather than reallocated
       const mesh = new THREE.Mesh(
-        new THREE.CylinderGeometry(this.trailTubeRadius, this.trailTubeRadius, 1, 6, 1),
+        new THREE.CylinderGeometry(
+          this.trailTubeRadius,
+          this.trailTubeRadius,
+          1,
+          6,
+          1,
+        ),
         material,
       );
       mesh.visible = false;
