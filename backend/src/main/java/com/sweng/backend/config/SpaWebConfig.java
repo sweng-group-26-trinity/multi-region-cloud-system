@@ -82,6 +82,23 @@ public class SpaWebConfig implements WebMvcConfigurer {
           .addResourceLocations("file:" + documentationPath + "/")
           .resourceChain(true)
           .addResolver(new DocsResourceResolver());
+
+      // Also serve docs assets from root paths - mdbook generates relative paths like ../css/
+      // which resolve to root when the user is at /docs/subdir/. Since the docs are served
+      // from /docs/, we need to also serve the assets at the paths mdbook expects.
+      registry
+          .addResourceHandler("/css/**", "/fonts/**")
+          .addResourceLocations(
+              "file:" + documentationPath + "/css/", "file:" + documentationPath + "/fonts/")
+          .resourceChain(true)
+          .addResolver(new PathResourceResolver());
+
+      // Handle hashed JS/CSS files at root (e.g., /toc-9bc70d00.js)
+      registry
+          .addResourceHandler("/*.js", "/*.css")
+          .addResourceLocations("file:" + documentationPath + "/")
+          .resourceChain(true)
+          .addResolver(new PathResourceResolver());
     }
 
     if (frontendPath == null || frontendPath.isBlank()) {
