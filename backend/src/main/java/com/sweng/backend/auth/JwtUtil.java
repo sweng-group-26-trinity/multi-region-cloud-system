@@ -57,6 +57,7 @@ public class JwtUtil {
 
   /**
    * Validates a JWT token.
+   *
    * @param token the JWT token
    * @return true if valid, false otherwise
    */
