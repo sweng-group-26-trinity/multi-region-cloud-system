@@ -146,10 +146,12 @@ export default function ThreeScene() {
       coords: new THREE.Vector3(0.5, 0.5, 0.5),
     };
 
-    loadObject(earthObject, scene, (obj) => {
-      earth = obj;
-    });
-
+    loadCached("/public/earth.gltf").then((obj) => {
+  if (!mount) return;
+  obj.scale.set(10, 10, 10); // your coords/scale here
+  scene.add(obj);
+  earth = obj;
+});
     loadObject(planeObject, scene, (obj) => {
       plane = obj;
     });
@@ -450,7 +452,7 @@ function TerminalPanel() {
         description: "play a game",
         onExecute: () => navigate("/game"),
       },
-      
+
       {
         command: "/leaderboard",
         description: "show all player highscores",
