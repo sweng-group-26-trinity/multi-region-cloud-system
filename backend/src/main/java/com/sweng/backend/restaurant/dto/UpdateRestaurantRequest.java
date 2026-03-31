@@ -48,6 +48,7 @@ public class UpdateRestaurantRequest {
    *
    * @param name the restaurant name to set
    */
+  @JsonSetter(nulls = Nulls.FAIL)
   public void setName(String name) {
     this.name = name;
   }
