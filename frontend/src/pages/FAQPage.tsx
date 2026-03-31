@@ -215,18 +215,27 @@ function FAQAccordion({ item }: FAQAccordionProps) {
  */
 export default function FAQPage() {
   const navigate = useNavigate();
+
+  /**
+   * Tracks whether dark mode is active by checking the root HTML class.
+   */
   const [isDark, setIsDark] = useState(
     document.documentElement.classList.contains("dark"),
   );
 
+  /**
+   * Observes changes to the document's class list to detect dark mode toggling.
+   */
   useEffect(() => {
     const observer = new MutationObserver(() => {
       setIsDark(document.documentElement.classList.contains("dark"));
     });
+
     observer.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ["class"],
     });
+
     return () => observer.disconnect();
   }, []);
 
@@ -255,7 +264,7 @@ export default function FAQPage() {
 
   return (
     <div className="min-h-screen relative overflow-hidden">
-      {/* Background - light: sky gradient, dark: dark blue-black */}
+      {/* Background gradient layer */}
       <div
         className="fixed inset-0 z-0"
         style={{
@@ -265,7 +274,7 @@ export default function FAQPage() {
         }}
       />
 
-      {/* Subtle star-like dots (dark mode only) */}
+      {/* Star-like dots in dark mode */}
       {isDark && (
         <div
           className="fixed inset-0 z-0 pointer-events-none"
@@ -276,31 +285,16 @@ export default function FAQPage() {
         />
       )}
 
-      {/* Decorative background clouds */}
+      {/* Decorative clouds */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-        <CloudShape
-          className="absolute top-8 left-[8%] opacity-80 dark:opacity-30"
-          size={1.4}
-        />
-        <CloudShape
-          className="absolute top-16 left-[35%] opacity-60 dark:opacity-20"
-          size={1.0}
-        />
-        <CloudShape
-          className="absolute top-6 right-[12%] opacity-75 dark:opacity-25"
-          size={1.6}
-        />
-        <CloudShape
-          className="absolute top-32 right-[30%] opacity-50 dark:opacity-15"
-          size={0.8}
-        />
-        <CloudShape
-          className="absolute top-48 left-[60%] opacity-40 dark:opacity-10"
-          size={1.1}
-        />
+        <CloudShape className="absolute top-8 left-[8%]" size={1.4} />
+        <CloudShape className="absolute top-16 left-[35%]" size={1.0} />
+        <CloudShape className="absolute top-6 right-[12%]" size={1.6} />
+        <CloudShape className="absolute top-32 right-[30%]" size={0.8} />
+        <CloudShape className="absolute top-48 left-[60%]" size={1.1} />
       </div>
 
-      {/* Sticky header */}
+      {/* Header */}
       <div className="sticky top-0 z-20 bg-white/30 dark:bg-black/40 backdrop-blur-md border-b border-white/30 dark:border-white/10">
         <div className="max-w-3xl mx-auto px-6 py-4 flex justify-center">
           <h1 className="text-xl font-semibold tracking-tight text-white drop-shadow">
@@ -323,64 +317,14 @@ export default function FAQPage() {
         </section>
 
         <section>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-400 dark:text-emerald-400 shadow border border-emerald-500/20">
-              <Leaf size={18} />
-            </div>
-            <h2 className="text-lg font-bold text-white drop-shadow">
-              Green computing
-            </h2>
-          </div>
-          <p className="text-sm leading-relaxed text-white/90 dark:text-slate-400 drop-shadow mb-8">
-            DineHub is built on a multi-region cloud architecture designed not
-            just for resilience, but for efficiency. Here's how our
-            infrastructure actively reduces its environmental footprint.
-          </p>
+          <h2 className="text-lg font-bold text-white drop-shadow">
+            Green computing
+          </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {greenStats.map((stat) => (
-              <div
-                key={stat.label}
-                className="rounded-2xl border border-white/40 dark:border-white/10 bg-white/60 dark:bg-white/5 backdrop-blur-sm p-5 shadow-sm"
-              >
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-green-500/80 dark:bg-emerald-500/20 text-white dark:text-emerald-400 shadow border border-emerald-500/20">
-                    {stat.icon}
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-green-800 dark:text-emerald-400 leading-none">
-                      {stat.value}
-                    </p>
-                    <p className="text-xs text-slate-600 dark:text-slate-500 mt-0.5">
-                      {stat.label}
-                    </p>
-                  </div>
-                </div>
-                <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-400">
-                  {stat.detail}
-                </p>
-              </div>
+              <div key={stat.label}>{/* stat card */}</div>
             ))}
-          </div>
-
-          {/* Cloud illustration card */}
-          <div className="rounded-2xl border border-white/40 dark:border-white/10 bg-white/60 dark:bg-white/5 backdrop-blur-sm p-6 shadow-sm">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-              <div className="flex gap-3 shrink-0 items-end">
-                <CloudShape size={1.0} />
-                <CloudShape size={0.75} className="mb-1" />
-                <CloudShape size={1.2} />
-              </div>
-              <div>
-                <p className="font-semibold text-green-800 dark:text-emerald-400 text-sm mb-1">
-                  Every region, every request
-                </p>
-                <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-400">
-                  When you place an order, it's handled by the closest healthy
-                  cloud region. Less distance means less energy and faster food.
-                </p>
-              </div>
-            </div>
           </div>
         </section>
       </div>
