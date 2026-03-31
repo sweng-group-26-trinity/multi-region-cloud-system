@@ -1,5 +1,6 @@
 package com.sweng.backend.order.dto;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -31,7 +32,7 @@ public class CreateOrderRequest {
   private String customerEmail;
 
   /** List of items to order (must contain at least one item). */
-  @NotEmpty private List<CreateOrderItemRequest> items;
+  @NotEmpty @Valid private List<CreateOrderItemRequest> items;
 
   /** Optional special instructions. */
   @Size(max = 500)
