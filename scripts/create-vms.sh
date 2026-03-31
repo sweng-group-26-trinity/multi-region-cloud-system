@@ -42,10 +42,10 @@ fi
 #   europe-west1   → backend-b, db-worker-2
 declare -A NODE_ZONES=(
   [backend-a]="us-central1-a"
-  [backend-b]="europe-west1-b"
+  [backend-b]="us-central1-b"
   [db-coordinator]="us-central1-a"
   [db-worker-1]="us-central1-a"
-  [db-worker-2]="europe-west1-b"
+  [db-worker-2]="us-central1-b"
   [monitoring]="us-central1-a"
 )
 
@@ -79,6 +79,16 @@ if gcloud compute firewall-rules create toast-allow-tailscale \
   gum log --level info "Created: toast-allow-tailscale"
 else
   gum log --level warn "toast-allow-tailscale already exists"
+fi
+
+if gcloud compute firewall-rules create toast-allow-backend \
+  --network default \
+  --allow tcp:8080 \
+  --target-tags "$NETWORK_TAG" \
+  --description "Toast: backend API port" 2>/dev/null; then
+  gum log --level info "Created: toast-allow-backend"
+else
+  gum log --level warn "toast-allow-backend already exists"
 fi
 
 if gcloud compute firewall-rules create toast-allow-internal \
