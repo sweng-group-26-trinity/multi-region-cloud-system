@@ -47,9 +47,10 @@ declare -A NODE_ZONES=(
   [db-worker-1]="us-central1-a"
   [db-worker-2]="us-central1-b"
   [monitoring]="us-central1-a"
+  [ingress]="us-central1-a"
 )
 
-NODES=(backend-a backend-b db-coordinator db-worker-1 db-worker-2 monitoring)
+NODES=(backend-a backend-b db-coordinator db-worker-1 db-worker-2 monitoring ingress)
 
 # Wrap gcloud to always pass --project
 gcloud() { command gcloud --project "$GCP_PROJECT" "$@"; }
