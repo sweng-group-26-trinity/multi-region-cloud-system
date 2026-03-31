@@ -135,7 +135,6 @@ export function RestaurantsPage() {
   const goToMenu = (r: Restaurant) => {
     navigate(`/menu/${r.id}`);
   };
-
   return (
     <div className="min-h-screen bg-white text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
       <div className="max-w-6xl mx-auto px-6 py-10">
@@ -172,8 +171,7 @@ export function RestaurantsPage() {
             <select
               value={cuisine}
               onChange={(e) => setCuisine(e.target.value)}
-              className="rounded-full px-4 py-2 shadow-sm border border-slate-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
-            >
+className="rounded-full px-4 py-2 shadow-sm border border-slate-300 bg-white text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 transition dark:bg-slate-900 dark:text-slate-100 dark:border-slate-700"            >
               {cuisines.map((c) => (
                 <option key={c} value={c}>
                   {c}
