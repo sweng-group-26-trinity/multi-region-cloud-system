@@ -22,13 +22,14 @@ declare -A NODE_IPS=(
   [db-worker-1]=""
   [db-worker-2]=""
   [monitoring]=""
+  [ingress]=""
 )
 # ──────────────────────────────────────────────────────────────────────────────
 
 SSH_USER="admin"
 SSH_KEY="${SSH_KEY:-$HOME/.ssh/id_ed25519}"
 
-NODES=(backend-a backend-b db-coordinator db-worker-1 db-worker-2 monitoring)
+NODES=(backend-a backend-b db-coordinator db-worker-1 db-worker-2 monitoring ingress)
 
 # Verify all IPs are filled in
 echo "=== Checking IPs ==="

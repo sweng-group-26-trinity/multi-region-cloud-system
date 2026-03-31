@@ -86,6 +86,7 @@
       };
 
       config = lib.mkIf cfg.enable {
+        networking.firewall.allowedTCPPorts = [ 8080 ];
         systemd.targets.backend = {
           description = "backend Service";
           wantedBy = [ "multi-user.target" ];

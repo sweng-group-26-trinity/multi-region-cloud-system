@@ -126,6 +126,7 @@ _: {
 
             # Citus recommended settings
             "citus.node_conninfo" = "sslmode=prefer";
+            "citus.shard_replication_factor" = 2;
 
             # Connection settings for distributed queries
             max_connections = 300;
