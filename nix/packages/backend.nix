@@ -12,6 +12,7 @@ in
     }:
     let
       frontend = "${self'.packages.frontend}/dist";
+      docs = "${self'.packages.docs}/share/docs";
 
       metadataVersion = "0.3.30";
 
@@ -60,7 +61,8 @@ in
           cp build/native/nativeCompile/${pname} "$out/bin/${pname}"
 
           wrapProgram "$out/bin/${pname}" \
-            --set FRONTEND_PATH "${frontend}"
+            --set FRONTEND_PATH "${frontend}" \
+            --set DOCUMENTATION_PATH "${docs}"
         '';
 
         meta.mainProgram = pname;

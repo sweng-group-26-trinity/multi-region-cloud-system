@@ -19,7 +19,7 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.resource.PathResourceResolver;
 
-/** Configuration class for serving the frontend SPA. */
+/** Configuration class for serving static frontend and documentation sites. */
 @Configuration
 @Controller
 public class SpaWebConfig implements WebMvcConfigurer {
@@ -29,6 +29,9 @@ public class SpaWebConfig implements WebMvcConfigurer {
 
   @Value("${frontend.path:${FRONTEND_PATH:}}")
   private String frontendPath;
+
+  @Value("${documentation.path:${DOCUMENTATION_PATH:}}")
+  private String documentationPath;
 
   /**
    * Serves index.html for the root path. Spring's ResourceHttpRequestHandler strips the leading
@@ -50,8 +53,36 @@ public class SpaWebConfig implements WebMvcConfigurer {
     return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(index);
   }
 
+  /**
+   * Serves index.html for the /docs root path. Same empty-path workaround as serveRoot().
+   *
+   * @return the docs index.html resource as an HTML response
+   */
+  @GetMapping("/docs")
+  @ResponseBody
+  public ResponseEntity<Resource> serveDocsRoot() {
+    if (documentationPath == null || documentationPath.isBlank()) {
+      return ResponseEntity.notFound().build();
+    }
+    Resource index = new FileSystemResource(documentationPath + "/index.html");
+    if (!index.exists()) {
+      return ResponseEntity.notFound().build();
+    }
+    return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(index);
+  }
+
   @Override
   public void addResourceHandlers(ResourceHandlerRegistry registry) {
+    // Docs handler — registered before /** so it takes priority over the SPA resolver.
+    // Plain PathResourceResolver: missing files return 404, no SPA fallback.
+    if (documentationPath != null && !documentationPath.isBlank()) {
+      registry
+          .addResourceHandler("/docs/**")
+          .addResourceLocations("file:" + documentationPath + "/")
+          .resourceChain(true)
+          .addResolver(new PathResourceResolver());
+    }
+
     if (frontendPath == null || frontendPath.isBlank()) {
       return;
     }
@@ -64,9 +95,9 @@ public class SpaWebConfig implements WebMvcConfigurer {
   }
 
   /**
-   * Security filter chain for frontend paths. Permits all requests to non-API, non-actuator paths
-   * so that static assets and SPA routes are publicly accessible. Only active when FRONTEND_PATH is
-   * set to a non-blank value; falls back to matching nothing otherwise.
+   * Security filter chain for frontend and documentation paths. Permits all requests to non-API,
+   * non-actuator paths so that static assets are publicly accessible. Only active when either
+   * FRONTEND_PATH or DOCUMENTATION_PATH is non-blank; falls back to matching nothing otherwise.
    *
    * @param http the HTTP security builder
    * @return the configured security filter chain
@@ -76,7 +107,9 @@ public class SpaWebConfig implements WebMvcConfigurer {
   @Order(0)
   @ConditionalOnBean(HttpSecurity.class)
   public SecurityFilterChain spaSecurityFilterChain(HttpSecurity http) throws Exception {
-    if (frontendPath == null || frontendPath.isBlank()) {
+    boolean hasFrontend = frontendPath != null && !frontendPath.isBlank();
+    boolean hasDocs = documentationPath != null && !documentationPath.isBlank();
+    if (!hasFrontend && !hasDocs) {
       http.securityMatcher(request -> false);
       http.authorizeHttpRequests(auth -> auth.anyRequest().denyAll());
       return http.build();
