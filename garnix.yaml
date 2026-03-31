@@ -2,4 +2,3 @@ servers:
   - configuration: staging
     deployment:
       type: on-branch
-      branch: main
