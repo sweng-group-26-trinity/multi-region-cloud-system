@@ -5,3 +5,4 @@ language = "en"
 
 [output.html]
 theme = "theme"
+site-url = "/docs/"
