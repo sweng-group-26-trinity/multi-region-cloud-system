@@ -1,17 +1,33 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, ChevronDown, Leaf, Cloud, Zap, Server } from "lucide-react";
-
+import {
+  ChevronDown,
+  Leaf,
+  Cloud,
+  Zap,
+  Server,
+  Package,
+  Monitor,
+} from "lucide-react";
+/**
+ * Represents a single FAQ entry.
+ */
 type FAQItem = {
+  /** The question displayed in the accordion header */
   question: string;
+
+  /** The answer shown when the accordion is expanded */
   answer: string;
 };
 
+/**
+ * Static list of FAQ items displayed on the page.
+ */
 const faqs: FAQItem[] = [
   {
-    question: "What is Toast?",
+    question: "What is DineHub?",
     answer:
-      "Toast is a multi-region cloud-based food ordering platform that connects you to a range of restaurants. Built with resilience in mind, Toast keeps your orders flowing even if one part of our infrastructure goes offline — so your food always gets through.",
+      "DineHub is a multi-region cloud-based food ordering platform that connects you to a range of restaurants. Built with resilience in mind, DineHub keeps your orders flowing even if one part of our infrastructure goes offline, so your food always gets through.",
   },
   {
     question: "How do I place an order?",
@@ -26,65 +42,103 @@ const faqs: FAQItem[] = [
   {
     question: "What restaurants are available?",
     answer:
-      "Toast currently features Luna Pasta Bar, Saffron House, Kyoto Kitchen, El Camino, Green Bowl, and Burger Forge. We're always looking to add more — check back regularly for new additions.",
+      "DineHub currently features Luna Pasta Bar, Saffron House, Kyoto Kitchen, El Camino, Green Bowl, and Burger Forge. We're always looking to add more, check back regularly for new additions.",
   },
 ];
 
+/**
+ * Represents a statistic highlighting green computing practices.
+ */
 type GreenStat = {
+  /** Icon displayed alongside the stat */
   icon: React.ReactNode;
+
+  /** Primary value (e.g., "Nix", "0") */
   value: string;
+
+  /** Short label describing the stat */
   label: string;
+
+  /** Detailed explanation of the stat */
   detail: string;
 };
 
+/**
+ * Collection of green computing statistics shown in the UI.
+ */
 const greenStats: GreenStat[] = [
   {
-    icon: <Cloud size={22} />,
-    value: "2",
-    label: "Cloud regions",
+    icon: <Package size={22} />,
+    value: "Nix",
+    label: "Nix + Garnix CI",
     detail:
-      "Traffic is routed to the nearest available region, cutting unnecessary data travel and reducing latency-driven energy waste.",
+      "Order of magnitude better caching than Docker means fewer rebuilds, less compute wasted, and faster pipelines with a fraction of the energy.",
   },
   {
     icon: <Zap size={22} />,
-    value: "~40%",
-    label: "Less idle compute",
+    value: "GraalVM",
+    label: "Native compilation",
     detail:
-      "Our auto-scaling infrastructure spins down unused instances during low-traffic periods instead of running servers 24/7 at full capacity.",
+      "GraalVM compiles our backend to a native binary, lower resource usage, a smaller bundle, and fast startup that enables rapid, efficient scaling.",
+  },
+  {
+    icon: <Cloud size={22} />,
+    value: "Around €25",
+    label: "Low CO₂ cloud regions",
+    detail:
+      "We host in low carbon cloud regions, cutting costs from ~€32 to €25 while reducing our carbon footprint at the infrastructure level.",
   },
   {
     icon: <Server size={22} />,
-    value: "99.9%",
-    label: "Uptime via failover",
+    value: "0",
+    label: "Idle VMs",
     detail:
-      "Multi-region failover means we avoid costly full-system restarts, which are energy-intensive. Graceful degradation keeps power draw predictable.",
+      "VM startup and shutdown scripts automatically stop instances during off-peak hours. No idle servers, no wasted energy.",
   },
   {
     icon: <Leaf size={22} />,
-    value: "100%",
-    label: "Serverless functions",
+    value: "React",
+    label: "Virtual DOM",
     detail:
-      "Key backend operations use serverless functions that only consume compute — and energy — when actively processing a request.",
+      "React's Virtual DOM ensures only changed components re-render, reducing unnecessary client side CPU cycles and lowering device power draw.",
+  },
+  {
+    icon: <Monitor size={22} />,
+    value: "Dark",
+    label: "Dark mode",
+    detail:
+      "Our dark mode reduces power draw on screens, putting energy savings directly in users' hands.",
   },
 ];
 
-function CloudShape({
-  className,
-  size = 1,
-}: {
+/**
+ * Props for the CloudShape component.
+ */
+type CloudShapeProps = {
+  /** Optional CSS class names */
   className?: string;
+
+  /** Scale factor for the cloud size */
   size?: number;
-}) {
+};
+
+/**
+ * Decorative cloud shape used in the background.
+ *
+ * Renders layered rounded divs to simulate a cloud.
+ */
+function CloudShape({ className, size = 1 }: CloudShapeProps) {
   const w = 80 * size;
   const h = 48 * size;
+
   return (
     <div className={`relative ${className}`} style={{ width: w, height: h }}>
       <div
-        className="absolute bottom-0 left-0 right-0 rounded-full bg-white/60"
+        className="absolute bottom-0 left-0 right-0 rounded-full bg-white/60 dark:bg-white/10"
         style={{ height: h * 0.6 }}
       />
       <div
-        className="absolute rounded-full bg-white/60"
+        className="absolute rounded-full bg-white/60 dark:bg-white/10"
         style={{
           width: w * 0.45,
           height: w * 0.45,
@@ -93,7 +147,7 @@ function CloudShape({
         }}
       />
       <div
-        className="absolute rounded-full bg-white/60"
+        className="absolute rounded-full bg-white/60 dark:bg-white/10"
         style={{
           width: w * 0.38,
           height: w * 0.38,
@@ -105,23 +159,42 @@ function CloudShape({
   );
 }
 
-function FAQAccordion({ item }: { item: FAQItem }) {
+/**
+ * Props for FAQAccordion component.
+ */
+type FAQAccordionProps = {
+  /** FAQ item to render */
+  item: FAQItem;
+};
+
+/**
+ * Accordion component for displaying a single FAQ entry.
+ *
+ * Handles its own open/close state.
+ */
+function FAQAccordion({ item }: FAQAccordionProps) {
   const [open, setOpen] = useState(false);
+
   return (
-    <div className="border border-white/40 rounded-2xl overflow-hidden shadow-sm">
+    <div className="border border-white/40 dark:border-white/10 rounded-2xl overflow-hidden shadow-sm">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center justify-between px-6 py-4 text-left bg-white/70 hover:bg-white/90 transition backdrop-blur-sm"
+        className="w-full flex items-center justify-between px-6 py-4 text-left bg-white/70 hover:bg-white/90 dark:bg-white/5 dark:hover:bg-white/10 transition backdrop-blur-sm"
       >
-        <span className="font-semibold text-slate-800">{item.question}</span>
+        <span className="font-semibold text-slate-800 dark:text-slate-100">
+          {item.question}
+        </span>
         <ChevronDown
           size={18}
-          className={`shrink-0 ml-4 text-slate-400 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+          className={`shrink-0 ml-4 text-slate-400 transition-transform duration-200 ${
+            open ? "rotate-180" : ""
+          }`}
         />
       </button>
+
       {open && (
-        <div className="px-6 py-4 bg-white/50 border-t border-white/40 backdrop-blur-sm">
-          <p className="text-sm leading-relaxed text-slate-700">
+        <div className="px-6 py-4 bg-white/50 dark:bg-white/5 border-t border-white/40 dark:border-white/10 backdrop-blur-sm">
+          <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300">
             {item.answer}
           </p>
         </div>
@@ -131,54 +204,75 @@ function FAQAccordion({ item }: { item: FAQItem }) {
 }
 
 /**
- * FAQ and Green Computing page for Toast.
+ * Main FAQ page component.
  *
- * Provides answers to common user questions and an overview of
- * the platform's green computing practices, with a sky, cloud,
- * and earth-inspired visual theme.
+ * Displays:
+ * - FAQ accordion list
+ * - Green computing statistics
+ * - Decorative cloud background
  *
- * @returns React page component.
+ * Also observes the document's `dark` class to dynamically update styling.
  */
 export default function FAQPage() {
   const navigate = useNavigate();
 
+  /**
+   * Tracks whether dark mode is active by checking the root HTML class.
+   */
+  const [isDark, setIsDark] = useState(
+    document.documentElement.classList.contains("dark"),
+  );
+
+  /**
+   * Observes changes to the document's class list to detect dark mode toggling.
+   */
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.classList.contains("dark"));
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className="min-h-screen relative overflow-hidden">
-      {/* Sky-to-earth gradient background */}
+      {/* Background gradient layer */}
       <div
         className="fixed inset-0 z-0"
         style={{
-          background:
-            "linear-gradient(to bottom, #7ec8e3 0%, #a8d8b0 55%, #5a9e5a 80%, #3a7a3a 100%)",
+          background: isDark
+            ? "linear-gradient(to bottom, #0a0f1e 0%, #0d1a2e 40%, #091420 70%, #050d14 100%)"
+            : "linear-gradient(to bottom, #7ec8e3 0%, #a8d8b0 55%, #5a9e5a 80%, #3a7a3a 100%)",
         }}
       />
 
-      {/* Decorative background clouds */}
+      {/* Star-like dots in dark mode */}
+      {isDark && (
+        <div
+          className="fixed inset-0 z-0 pointer-events-none"
+          style={{
+            backgroundImage:
+              "radial-gradient(1px 1px at 20% 15%, rgba(255,255,255,0.15) 0%, transparent 100%), radial-gradient(1px 1px at 75% 30%, rgba(255,255,255,0.1) 0%, transparent 100%), radial-gradient(1px 1px at 45% 60%, rgba(255,255,255,0.08) 0%, transparent 100%), radial-gradient(1px 1px at 85% 75%, rgba(255,255,255,0.12) 0%, transparent 100%)",
+          }}
+        />
+      )}
+
+      {/* Decorative clouds */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-        <CloudShape
-          className="absolute top-8 left-[8%] opacity-80"
-          size={1.4}
-        />
-        <CloudShape
-          className="absolute top-16 left-[35%] opacity-60"
-          size={1.0}
-        />
-        <CloudShape
-          className="absolute top-6 right-[12%] opacity-75"
-          size={1.6}
-        />
-        <CloudShape
-          className="absolute top-32 right-[30%] opacity-50"
-          size={0.8}
-        />
-        <CloudShape
-          className="absolute top-48 left-[60%] opacity-40"
-          size={1.1}
-        />
+        <CloudShape className="absolute top-8 left-[8%]" size={1.4} />
+        <CloudShape className="absolute top-16 left-[35%]" size={1.0} />
+        <CloudShape className="absolute top-6 right-[12%]" size={1.6} />
+        <CloudShape className="absolute top-32 right-[30%]" size={0.8} />
+        <CloudShape className="absolute top-48 left-[60%]" size={1.1} />
       </div>
 
-      {/* Sticky header */}
-      <div className="sticky top-0 z-20 bg-white/30 backdrop-blur-md border-b border-white/30">
+      {/* Header */}
+      <div className="sticky top-0 z-20 bg-white/30 dark:bg-black/40 backdrop-blur-md border-b border-white/30 dark:border-white/10">
         <div className="max-w-3xl mx-auto px-6 py-4 flex justify-center">
           <h1 className="text-xl font-semibold tracking-tight text-white drop-shadow">
             FAQ & About
@@ -186,9 +280,8 @@ export default function FAQPage() {
         </div>
       </div>
 
-      {/* Page content */}
+      {/* Content */}
       <div className="relative z-10 max-w-3xl mx-auto px-6 py-10 space-y-14">
-        {/* FAQ Section */}
         <section>
           <h2 className="text-lg font-bold text-white drop-shadow mb-6">
             Frequently asked questions
@@ -200,67 +293,15 @@ export default function FAQPage() {
           </div>
         </section>
 
-        {/* Green Computing Section */}
         <section>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-green-600/80 text-white shadow">
-              <Leaf size={18} />
-            </div>
-            <h2 className="text-lg font-bold text-white drop-shadow">
-              Green computing
-            </h2>
-          </div>
-          <p className="text-sm leading-relaxed text-white/90 drop-shadow mb-8">
-            Toast is built on a multi-region cloud architecture designed not
-            just for resilience, but for efficiency. Here's how our
-            infrastructure actively reduces its environmental footprint.
-          </p>
+          <h2 className="text-lg font-bold text-white drop-shadow">
+            Green computing
+          </h2>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {greenStats.map((stat) => (
-              <div
-                key={stat.label}
-                className="rounded-2xl border border-white/40 bg-white/60 backdrop-blur-sm p-5 shadow-sm"
-              >
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-green-500/80 text-white shadow">
-                    {stat.icon}
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-green-800 leading-none">
-                      {stat.value}
-                    </p>
-                    <p className="text-xs text-slate-600 mt-0.5">
-                      {stat.label}
-                    </p>
-                  </div>
-                </div>
-                <p className="text-sm leading-relaxed text-slate-700">
-                  {stat.detail}
-                </p>
-              </div>
+              <div key={stat.label}>{/* stat card */}</div>
             ))}
-          </div>
-
-          {/* Cloud illustration card */}
-          <div className="rounded-2xl border border-white/40 bg-white/60 backdrop-blur-sm p-6 shadow-sm">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-              <div className="flex gap-3 shrink-0 items-end">
-                <CloudShape size={1.0} />
-                <CloudShape size={0.75} className="mb-1" />
-                <CloudShape size={1.2} />
-              </div>
-              <div>
-                <p className="font-semibold text-green-800 text-sm mb-1">
-                  Every region, every request
-                </p>
-                <p className="text-sm leading-relaxed text-slate-700">
-                  When you place an order, it's handled by the closest healthy
-                  cloud region. Less distance means less energy — and faster
-                  food.
-                </p>
-              </div>
-            </div>
           </div>
         </section>
       </div>
