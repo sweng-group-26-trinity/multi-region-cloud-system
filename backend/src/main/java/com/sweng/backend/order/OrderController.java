@@ -142,6 +142,10 @@ public class OrderController {
     ValidationUtils.rejectNullBytes(body.getCustomerEmail(), "customerEmail");
     ValidationUtils.rejectNullBytes(body.getSpecialInstructions(), "specialInstructions");
     for (CreateOrderItemRequest item : body.getItems()) {
+      if (item == null) {
+        throw new ResponseStatusException(
+            HttpStatus.BAD_REQUEST, "Order items cannot contain null");
+      }
       ValidationUtils.rejectNullBytes(item.getItemId(), "itemId");
     }
 
@@ -262,6 +266,10 @@ public class OrderController {
             HttpStatus.BAD_REQUEST, "Order must contain at least one item");
       }
       for (CreateOrderItemRequest item : body.getItems()) {
+        if (item == null) {
+          throw new ResponseStatusException(
+              HttpStatus.BAD_REQUEST, "Order items cannot contain null");
+        }
         ValidationUtils.rejectNullBytes(item.getItemId(), "itemId");
       }
       List<OrderItemEmbeddable> items =

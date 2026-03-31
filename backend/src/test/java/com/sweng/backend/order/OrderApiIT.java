@@ -151,6 +151,48 @@ class OrderApiIT {
 
   @Test
   @WithMockUser(username = "customerA", roles = "CUSTOMER")
+  void createOrder_withNullItemsEntries_returns400InsteadOf500() throws Exception {
+    String payload =
+        """
+        {
+          "restaurantId": "%s",
+          "customerName": "Customer A",
+          "customerEmail": "customerA@test.com",
+          "items": [null, null],
+          "specialInstructions": "test"
+        }
+        """
+            .formatted(restaurantId);
+
+    mockMvc
+        .perform(post("/api/orders").contentType(MediaType.APPLICATION_JSON).content(payload))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @WithMockUser(username = "customerA", roles = "CUSTOMER")
+  void createOrder_withControlCharacterItemId_isAccepted() throws Exception {
+    CreateOrderRequest req = new CreateOrderRequest();
+    req.setRestaurantId(restaurantId.toString());
+    req.setCustomerName("Customer A");
+    req.setCustomerEmail("customerA@test.com");
+    req.setSpecialInstructions("");
+
+    CreateOrderItemRequest i1 = buildItem("normal-item", 1);
+    CreateOrderItemRequest i2 = buildItem("\u001c", 2);
+    req.setItems(List.of(i1, i2));
+
+    mockMvc
+        .perform(
+            post("/api/orders")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.items[1].itemId").value("\u001c"));
+  }
+
+  @Test
+  @WithMockUser(username = "customerA", roles = "CUSTOMER")
   void getOrders_returnsWrappedDataArray() throws Exception {
     CreateOrderRequest req = new CreateOrderRequest();
     req.setRestaurantId(restaurantId.toString());
