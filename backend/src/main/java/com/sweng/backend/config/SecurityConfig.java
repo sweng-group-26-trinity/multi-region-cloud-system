@@ -146,7 +146,16 @@ public class SecurityConfig {
                     .permitAll()
                     .requestMatchers("/actuator/**", "/error")
                     .permitAll()
-                    .requestMatchers(HttpMethod.GET, "/", "/index.html", "/assets/**", "/*.js", "/*.css", "/*.ico", "/*.png", "/*.svg")
+                    .requestMatchers(
+                        HttpMethod.GET,
+                        "/",
+                        "/index.html",
+                        "/assets/**",
+                        "/*.js",
+                        "/*.css",
+                        "/*.ico",
+                        "/*.png",
+                        "/*.svg")
                     .permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/server-info")
                     .permitAll()

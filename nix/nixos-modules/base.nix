@@ -1,7 +1,12 @@
 # Base configuration shared by all nodes
 _: {
   flake.nixosModules.base =
-    { modulesPath, inputs, lib, ... }:
+    {
+      modulesPath,
+      inputs,
+      lib,
+      ...
+    }:
     {
       imports = [
         "${modulesPath}/virtualisation/google-compute-image.nix"
@@ -30,13 +35,34 @@ _: {
 
       # static hosts for toast.internal — replaces Tailscale MagicDNS for now
       networking.hosts = {
-        "10.128.0.13" = [ "backend-a.toast.internal" "backend-a" ];
-        "10.128.0.6"  = [ "backend-b.toast.internal" "backend-b" ];
-        "10.128.0.3"  = [ "db-coordinator.toast.internal" "db-coordinator" ];
-        "10.128.0.4"  = [ "db-worker-1.toast.internal" "db-worker-1" ];
-        "10.128.0.7"  = [ "db-worker-2.toast.internal" "db-worker-2" ];
-        "10.128.0.5"  = [ "monitoring.toast.internal" "monitoring" ];
-        "10.128.0.8"  = [ "ingress.toast.internal" "ingress" ];
+        "10.128.0.13" = [
+          "backend-a.toast.internal"
+          "backend-a"
+        ];
+        "10.128.0.6" = [
+          "backend-b.toast.internal"
+          "backend-b"
+        ];
+        "10.128.0.3" = [
+          "db-coordinator.toast.internal"
+          "db-coordinator"
+        ];
+        "10.128.0.4" = [
+          "db-worker-1.toast.internal"
+          "db-worker-1"
+        ];
+        "10.128.0.7" = [
+          "db-worker-2.toast.internal"
+          "db-worker-2"
+        ];
+        "10.128.0.5" = [
+          "monitoring.toast.internal"
+          "monitoring"
+        ];
+        "10.128.0.8" = [
+          "ingress.toast.internal"
+          "ingress"
+        ];
       };
 
       # use nftables instead of iptables (faster and more secure)
@@ -54,7 +80,10 @@ _: {
           "nix-command"
           "flakes"
         ];
-        trusted-users = [ "root" "admin" ];
+        trusted-users = [
+          "root"
+          "admin"
+        ];
         # allow deploy-rs to copy locally-built paths without public cache signatures
         require-sigs = false;
         substituters = [
