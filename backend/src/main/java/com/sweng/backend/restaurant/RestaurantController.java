@@ -143,6 +143,8 @@ public class RestaurantController {
     e.setOpeningHours(body.getOpeningHours());
     e.setOwnerId(owner.getUid());
     e.setActive(true);
+    e.setImageUrl(body.getImageUrl());
+    e.setLogoUrl(body.getLogoUrl());
 
     RestaurantEntity saved = repository.save(e);
     return ResponseEntity.status(HttpStatus.CREATED).body(toDto(saved));
@@ -233,6 +235,8 @@ public class RestaurantController {
       found.setOpeningHours(body.getOpeningHours());
     }
     if (body.getIsActive() != null) found.setActive(body.getIsActive());
+    if (body.getImageUrl() != null) found.setImageUrl(body.getImageUrl());
+    if (body.getLogoUrl() != null) found.setLogoUrl(body.getLogoUrl());
 
     RestaurantEntity saved = repository.save(found);
     return ResponseEntity.ok(toDto(saved));
@@ -321,6 +325,8 @@ public class RestaurantController {
     dto.setOpeningHours(e.getOpeningHours());
     dto.setOwnerId(e.getOwnerId().toString());
     dto.setIsActive(e.isActive());
+    dto.setImageUrl(e.getImageUrl());
+    dto.setLogoUrl(e.getLogoUrl());
     dto.setCreatedAt(OffsetDateTime.ofInstant(e.getCreatedAt(), ZoneOffset.UTC));
     dto.setUpdatedAt(OffsetDateTime.ofInstant(e.getUpdatedAt(), ZoneOffset.UTC));
     return dto;

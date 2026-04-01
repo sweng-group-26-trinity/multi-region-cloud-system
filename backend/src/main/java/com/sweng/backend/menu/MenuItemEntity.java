@@ -10,8 +10,8 @@ import org.hibernate.type.SqlTypes;
 /**
  * JPA entity representing a menu item belonging to a restaurant.
  *
- * <p>Each menu item is linked to a restaurant by restaurantId and stores the information needed
- * for menu browsing and ordering.
+ * <p>Each menu item is linked to a restaurant by restaurantId and stores the information needed for
+ * menu browsing and ordering.
  */
 @Entity
 @Table(name = "menu_items")
@@ -63,10 +63,7 @@ public class MenuItemEntity {
   @Column(nullable = false)
   private Instant updatedAt;
 
-  /**
-   * Lifecycle callback triggered before first persist.
-   * Initializes ID and timestamps.
-   */
+  /** Lifecycle callback triggered before first persist. Initializes ID and timestamps. */
   @PrePersist
   void onCreate() {
     if (id == null) {
@@ -77,10 +74,7 @@ public class MenuItemEntity {
     updatedAt = now;
   }
 
-  /**
-   * Lifecycle callback triggered before update.
-   * Updates the updatedAt timestamp.
-   */
+  /** Lifecycle callback triggered before update. Updates the updatedAt timestamp. */
   @PreUpdate
   void onUpdate() {
     updatedAt = Instant.now();

@@ -3,26 +3,30 @@
  * @description Provides global authentication state and helper functions
  * for logging in and logging out across the application.
  */
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, useContext, useState, type ReactNode } from "react";
+
+/**
+ * Shape of the authenticated user.
+ */
+export type User = {
+  username: string;
+  email: string;
+};
+
 /**
  * Shape of the authentication context.
  */
 export type AuthContextType = {
   /** Indicates whether the user is currently authenticated. */
   isAuthenticated: boolean;
-
+  /** The currently authenticated user, or null if not logged in. */
+  user: User | null;
   /**
    * Logs the user in.
    * @param token Authentication token returned by the backend.
+   * @param user  User info returned by the backend.
    */
-  login: (token: string) => void;
-
+  login: (token: string, user: User) => void;
   /** Logs the user out and clears authentication state. */
   logout: () => void;
 };
@@ -37,24 +41,27 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
  * and actions to all child components.
  */
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  /**
-   * On initial load, check localStorage for an auth token
-   * and restore the authentication state if one exists.
-   */
-  useEffect(() => {
-    const token = localStorage.getItem("authToken");
-    setIsAuthenticated(!!token);
-  }, []);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    return !!localStorage.getItem("authToken");
+  });
+
+  const [user, setUser] = useState<User | null>(() => {
+    const stored = localStorage.getItem("user");
+    return stored ? JSON.parse(stored) : null;
+  });
 
   /**
-   * Logs the user in by saving their token and updating auth state.
+   * Logs the user in by saving their token and user info,
+   * then updating auth state.
    *
    * @param token The authentication token to store.
+   * @param user  The authenticated user's info to store.
    */
-  const login = (token: string) => {
+  const login = (token: string, user: User) => {
     localStorage.setItem("authToken", token);
+    localStorage.setItem("user", JSON.stringify(user));
     setIsAuthenticated(true);
+    setUser(user);
   };
 
   /**
@@ -62,11 +69,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
    */
   const logout = () => {
     localStorage.removeItem("authToken");
+    localStorage.removeItem("user");
     setIsAuthenticated(false);
+    setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
@@ -80,10 +89,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
  */
 export function useAuth() {
   const context = useContext(AuthContext);
-
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
-
   return context;
 }

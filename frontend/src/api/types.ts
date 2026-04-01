@@ -1,66 +1,72 @@
-/**
- * Represents a restaurant entity.
- */
 export interface Restaurant {
-  /** Unique restaurant ID */
+  id: string;
+  name: string;
+  cuisineType: string;
+  description?: string;
+  imageUrl?: string;
+  logoUrl?: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  openingHours?: string;
+  isActive: boolean;
+  ownerId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ApiError {
+  message: string;
+  status: number;
+  errors?: Record<string, string[]>;
+}
+
+export interface PaginatedResponse<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+}
+/**
+ * Represents a menu item.
+ */
+export interface MenuItem {
+  /** Unique menu item ID */
   id: string;
 
-  /** Display name of the restaurant */
+  /** ID of the restaurant */
+  restaurantId: string;
+
+  /** Menu item name */
   name: string;
 
-  /** Type of cuisine served */
-  cuisine: string;
-
-  /** City or physical location */
-  location: string;
-
-  /** Geographic region identifier */
-  region: string;
-
-  /** Average customer rating */
-  rating: number;
-
-  /** Optional restaurant description */
+  /** Optional description */
   description?: string;
+
+  /** Category (e.g. Starter, Main) */
+  category: string;
+
+  /** Price of the item */
+  price: number;
 
   /** Optional image URL */
   imageUrl?: string;
 
-  /** ISO timestamp when the restaurant was created */
+  /** Whether the item is available */
+  isAvailable: boolean;
+
+  /** ISO timestamp when created */
   createdAt: string;
 
-  /** ISO timestamp when the restaurant was last updated */
+  /** ISO timestamp when updated */
   updatedAt: string;
 }
 
 /**
- * Represents an API error response.
+ * Response for menu items.
  */
-export interface ApiError {
-  /** Human-readable error message */
-  message: string;
-
-  /** HTTP status code */
-  status: number;
-
-  /** Optional field-level validation errors */
-  errors?: Record<string, string[]>;
-}
-
-/**
- * Represents a paginated API response.
- * @template T - Type of the returned data
- */
-export interface PaginatedResponse<T> {
-  /** List of returned items */
-  data: T[];
-
-  /** Total number of available items */
-  total: number;
-
-  /** Current page number */
-  page: number;
-
-  /** Number of items per page */
-  pageSize: number;
+export interface MenuItemListResponse {
+  /** List of menu items */
+  data: MenuItem[];
 }

@@ -83,13 +83,14 @@ parse_response() {
 # ── register username email password firstname lastname ───────────────────────
 register() {
   local username="$1" email="$2" password="$3" first="$4" last="$5"
-  local raw id
+  local raw id token
   raw=$(post "/auth/register" "$(jq -n \
     --arg u "$username" --arg e "$email" --arg p "$password" \
     --arg f "$first" --arg l "$last" \
     '{username:$u,email:$e,password:$p,firstName:$f,lastName:$l}')")
   parse_response "$raw"
-  id=$(extract "$RESP_BODY" '.id // empty')
+  id=$(extract "$RESP_BODY" '.user.id // empty')
+  token=$(extract "$RESP_BODY" '.accessToken // empty')
   if [[ -z $id ]]; then
     warn "❌ register '$username'"
     warn "   HTTP status : $RESP_STATUS"
@@ -98,6 +99,7 @@ register() {
   else
     success "Registered '$username' ($id)"
   fi
+  echo "$token"
 }
 
 # ── login identifier password ─────────────────────────────────────────────────
@@ -220,15 +222,17 @@ info "=== Seeding $BASE_URL ==="
 
 # ── 1. Users ──────────────────────────────────────────────────────────────────
 info "--- Users ---"
-register "admin_user" "admin@example.com" "Admin1234!" "Admin" "User"
+ADMIN_TOKEN=$(register "admin_user" "admin@example.com" "Admin1234!" "Admin" "User")
 register "owner_alice" "alice@example.com" "Alice1234!" "Alice" "Smith"
 register "owner_bob" "bob@example.com" "Bob12345!" "Bob" "Jones"
 register "customer_one" "customer1@example.com" "Cust1234!" "Jane" "Doe"
 register "customer_two" "customer2@example.com" "Cust5678!" "John" "Doe"
 
 # ── 2. Admin login ────────────────────────────────────────────────────────────
-info "--- Admin login ---"
-ADMIN_TOKEN=$(login "admin_user" "Admin1234!")
+if [[ -z ${ADMIN_TOKEN:-} ]]; then
+  info "--- Admin login (fallback) ---"
+  ADMIN_TOKEN=$(login "admin_user" "Admin1234!")
+fi
 success "Admin token acquired"
 
 # ── 3. Upload images (local dev only — skipped when IMG_BASE is set) ──────────

@@ -150,6 +150,8 @@ public class SecurityConfig {
                     .permitAll()
                     .requestMatchers("/favicon.ico")
                     .permitAll()
+                    .requestMatchers(HttpMethod.POST, "/api/upload/**")
+                    .authenticated()
                     .requestMatchers(HttpMethod.GET, "/api/highscores", "/api/highscores/all")
                     .permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/highscores")

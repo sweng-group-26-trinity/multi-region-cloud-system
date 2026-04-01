@@ -64,8 +64,7 @@ public class MenuItemController {
   /** Create a menu item for a restaurant. */
   @PostMapping
   public ResponseEntity<MenuItemDto> createMenuItem(
-      @PathVariable String restaurantId,
-      @Valid @RequestBody CreateMenuItemRequest body) {
+      @PathVariable String restaurantId, @Valid @RequestBody CreateMenuItemRequest body) {
 
     UUID rid = parseUuidOr400(restaurantId);
 

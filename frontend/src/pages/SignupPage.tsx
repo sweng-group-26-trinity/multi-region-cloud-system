@@ -112,7 +112,10 @@ export function SignupPage() {
       { username, firstName, lastName, email, password },
       {
         onSuccess: (data) => {
-          login(data.accessToken);
+          login(data.accessToken, {
+            username: data.username,
+            email: data.email,
+          });
           navigate("/dashboard");
         },
       },
@@ -141,7 +144,11 @@ export function SignupPage() {
           { idToken: response.credential },
           {
             onSuccess: (data) => {
-              login(data.accessToken);
+              console.log("login response:", data);
+              login(data.accessToken, {
+                username: data.username,
+                email: data.email,
+              });
               navigate("/dashboard");
             },
           },

@@ -14,6 +14,8 @@ public class RestaurantDto {
   private String openingHours;
   private String ownerId;
   private Boolean isActive;
+  private String imageUrl;
+  private String logoUrl;
   private OffsetDateTime createdAt;
   private OffsetDateTime updatedAt;
 
@@ -198,6 +200,42 @@ public class RestaurantDto {
    */
   public void setIsActive(Boolean active) {
     isActive = active;
+  }
+
+  /**
+   * Gets the restaurant's main image URL.
+   *
+   * @return the main image URL
+   */
+  public String getImageUrl() {
+    return imageUrl;
+  }
+
+  /**
+   * Sets the restaurant's main image URL.
+   *
+   * @param imageUrl the main image URL to set
+   */
+  public void setImageUrl(String imageUrl) {
+    this.imageUrl = imageUrl;
+  }
+
+  /**
+   * Gets the restaurant's logo URL.
+   *
+   * @return the logo URL
+   */
+  public String getLogoUrl() {
+    return logoUrl;
+  }
+
+  /**
+   * Sets the restaurant's logo URL.
+   *
+   * @param logoUrl the logo URL to set
+   */
+  public void setLogoUrl(String logoUrl) {
+    this.logoUrl = logoUrl;
   }
 
   /**

@@ -1,6 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronDown, Leaf, Cloud, Zap, Server, Package, Monitor } from "lucide-react";
+import {
+  ChevronDown,
+  Leaf,
+  Cloud,
+  Zap,
+  Server,
+  Package,
+  Monitor,
+} from "lucide-react";
 
 type FAQItem = {
   question: string;
@@ -127,7 +135,9 @@ function FAQAccordion({ item }: { item: FAQItem }) {
         onClick={() => setOpen((o) => !o)}
         className="w-full flex items-center justify-between px-6 py-4 text-left bg-white/70 hover:bg-white/90 dark:bg-white/5 dark:hover:bg-white/10 transition backdrop-blur-sm"
       >
-        <span className="font-semibold text-slate-800 dark:text-slate-100">{item.question}</span>
+        <span className="font-semibold text-slate-800 dark:text-slate-100">
+          {item.question}
+        </span>
         <ChevronDown
           size={18}
           className={`shrink-0 ml-4 text-slate-400 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
@@ -147,7 +157,7 @@ function FAQAccordion({ item }: { item: FAQItem }) {
 export default function FAQPage() {
   const navigate = useNavigate();
   const [isDark, setIsDark] = useState(
-    document.documentElement.classList.contains("dark")
+    document.documentElement.classList.contains("dark"),
   );
 
   useEffect(() => {
@@ -186,11 +196,26 @@ export default function FAQPage() {
 
       {/* Decorative background clouds */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-        <CloudShape className="absolute top-8 left-[8%] opacity-80 dark:opacity-30" size={1.4} />
-        <CloudShape className="absolute top-16 left-[35%] opacity-60 dark:opacity-20" size={1.0} />
-        <CloudShape className="absolute top-6 right-[12%] opacity-75 dark:opacity-25" size={1.6} />
-        <CloudShape className="absolute top-32 right-[30%] opacity-50 dark:opacity-15" size={0.8} />
-        <CloudShape className="absolute top-48 left-[60%] opacity-40 dark:opacity-10" size={1.1} />
+        <CloudShape
+          className="absolute top-8 left-[8%] opacity-80 dark:opacity-30"
+          size={1.4}
+        />
+        <CloudShape
+          className="absolute top-16 left-[35%] opacity-60 dark:opacity-20"
+          size={1.0}
+        />
+        <CloudShape
+          className="absolute top-6 right-[12%] opacity-75 dark:opacity-25"
+          size={1.6}
+        />
+        <CloudShape
+          className="absolute top-32 right-[30%] opacity-50 dark:opacity-15"
+          size={0.8}
+        />
+        <CloudShape
+          className="absolute top-48 left-[60%] opacity-40 dark:opacity-10"
+          size={1.1}
+        />
       </div>
 
       {/* Sticky header */}
@@ -272,8 +297,7 @@ export default function FAQPage() {
                 </p>
                 <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-400">
                   When you place an order, it's handled by the closest healthy
-                  cloud region. Less distance means less energy and faster
-                  food.
+                  cloud region. Less distance means less energy and faster food.
                 </p>
               </div>
             </div>
