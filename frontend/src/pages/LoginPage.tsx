@@ -88,7 +88,10 @@ export function LoginPage() {
       { identifier, password },
       {
         onSuccess: (data) => {
-          login(data.accessToken);
+          login(data.accessToken, {
+            username: data.username,
+            email: data.email,
+          });
           navigate("/dashboard");
         },
       },
@@ -121,7 +124,10 @@ export function LoginPage() {
           { idToken: response.credential },
           {
             onSuccess: (data) => {
-              login(data.accessToken);
+              login(data.accessToken, {
+                username: data.username,
+                email: data.email,
+              });
               navigate("/dashboard");
             },
           },

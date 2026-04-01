@@ -154,7 +154,7 @@ export const getOrders = (params?: GetOrdersParams) => {
 
   const qs = query.toString();
 
-  return apiFetch<OrdersResponse>(`/api/orders${qs ? `?${qs}` : ""}`);
+  return apiFetch<OrdersResponse>(`/orders${qs ? `?${qs}` : ""}`);
 };
 
 /**
@@ -164,7 +164,7 @@ export const getOrders = (params?: GetOrdersParams) => {
  * @returns The matching order.
  */
 export const getOrder = (orderId: string) =>
-  apiFetch<Order>(`/api/orders/${orderId}`);
+  apiFetch<Order>(`/orders/${orderId}`);
 
 /**
  * Creates a new order.
@@ -173,7 +173,7 @@ export const getOrder = (orderId: string) =>
  * @returns The newly created order.
  */
 export const createOrder = (data: CreateOrderRequest) =>
-  apiFetch<Order>("/api/orders", {
+  apiFetch<Order>("/orders", {
     method: "POST",
     body: JSON.stringify(data),
   });
@@ -186,7 +186,7 @@ export const createOrder = (data: CreateOrderRequest) =>
  * @returns The updated order.
  */
 export const updateOrder = (orderId: string, data: UpdateOrderRequest) =>
-  apiFetch<Order>(`/api/orders/${orderId}`, {
+  apiFetch<Order>(`/orders/${orderId}`, {
     method: "PUT",
     body: JSON.stringify(data),
   });
@@ -197,6 +197,6 @@ export const updateOrder = (orderId: string, data: UpdateOrderRequest) =>
  * @param orderId ID of the order to delete.
  */
 export const deleteOrder = (orderId: string) =>
-  apiFetch<void>(`/api/orders/${orderId}`, {
+  apiFetch<void>(`/orders/${orderId}`, {
     method: "DELETE",
   });

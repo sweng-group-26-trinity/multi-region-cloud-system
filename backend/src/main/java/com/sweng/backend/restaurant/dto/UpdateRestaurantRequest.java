@@ -25,6 +25,14 @@ public class UpdateRestaurantRequest {
   @Pattern(regexp = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
   private String email;
 
+  /** Optional URL for the restaurant's main image. */
+  @Size(max = 255)
+  private String imageUrl;
+
+  /** Optional URL for the restaurant's logo. */
+  @Size(max = 255)
+  private String logoUrl;
+
   @Size(max = 50)
   private String cuisineType;
 
@@ -129,6 +137,42 @@ public class UpdateRestaurantRequest {
   @JsonSetter(nulls = Nulls.FAIL)
   public void setEmail(String email) {
     this.email = email;
+  }
+
+  /**
+   * Gets the restaurant image URL.
+   *
+   * @return the image URL
+   */
+  public String getImageUrl() {
+    return imageUrl;
+  }
+
+  /**
+   * Sets the restaurant image URL.
+   *
+   * @param imageUrl the image URL to set
+   */
+  public void setImageUrl(String imageUrl) {
+    this.imageUrl = imageUrl;
+  }
+
+  /**
+   * Gets the restaurant logo URL.
+   *
+   * @return the logo URL
+   */
+  public String getLogoUrl() {
+    return logoUrl;
+  }
+
+  /**
+   * Sets the restaurant logo URL.
+   *
+   * @param logoUrl the logo URL to set
+   */
+  public void setLogoUrl(String logoUrl) {
+    this.logoUrl = logoUrl;
   }
 
   /**

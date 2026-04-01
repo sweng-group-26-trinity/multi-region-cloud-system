@@ -90,7 +90,6 @@ function AnimatedRoutes() {
             </Page>
           }
         />
-
         <Route
           path="/health"
           element={
@@ -125,16 +124,15 @@ function AnimatedRoutes() {
               </Page>
             }
           />
+          <Route
+            path="/order-summary"
+            element={
+              <Page>
+                <OrderSummaryPage />
+              </Page>
+            }
+          />
         </Route>
-
-        <Route
-          path="/order-summary"
-          element={
-            <Page>
-              <OrderSummaryPage />
-            </Page>
-          }
-        />
       </Routes>
     </AnimatePresence>
   );
@@ -249,8 +247,6 @@ function Header({
               onClick={toggleDarkMode}
               title={darkMode ? "Light Mode" : "Dark Mode"}
               className="flex h-[42px] w-[42px] items-center justify-center rounded-full text-white transition-all duration-200 hover:bg-white/10 active:scale-[0.97]"
-
-              // className={navIconClass}
             >
               {darkMode ? <Sun size={18} /> : <Moon size={18} />}
             </button>
@@ -260,7 +256,7 @@ function Header({
                 type="button"
                 onClick={() => navigate("/dashboard")}
                 title="Dashboard"
-                className={`${navTextClass}  text-white px-2 sm:px-3 hover:bg-white/10 active:scale-[0.97] hover:text-white`}
+                className={`${navTextClass} text-white px-2 sm:px-3 hover:bg-white/10 active:scale-[0.97] hover:text-white`}
               >
                 {isMobile && <LayoutDashboard size={18} />}
                 <span className="hidden sm:inline">Dashboard</span>

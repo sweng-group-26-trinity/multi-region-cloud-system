@@ -7,7 +7,6 @@ const FLAP = 0.32;
 const PIPE_SPEED = 0.12;
 const PIPE_GAP = 7;
 const PIPE_INTERVAL = 100;
-const BIRD_X = -4;
 
 // --- Plane hitbox tuning ---
 const HIT_OFFSET_X = 0.0;
@@ -83,6 +82,13 @@ export default function ThreeScene() {
     );
     camera.position.set(0, 0, 50);
     camera.lookAt(0, 0, 0);
+
+    // --- Dynamic bird X: always 25% from the left edge of the frustum ---
+    const getBirdX = () => {
+      const a = mount.clientWidth / mount.clientHeight;
+      const halfW = (frustumSize * a) / 2;
+      return -halfW + frustumSize * a * 0.25;
+    };
 
     // Lights
     const dLight = new THREE.DirectionalLight(0xffffff, isDark() ? 0.5 : 1);
@@ -222,7 +228,7 @@ export default function ThreeScene() {
 
     // --- Plane ---
     const planePivot = new THREE.Group();
-    planePivot.position.set(BIRD_X, 0, 0);
+    planePivot.position.set(getBirdX(), 0, 0);
     scene.add(planePivot);
 
     let planeLoaded = false;
@@ -261,18 +267,20 @@ export default function ThreeScene() {
       bot: THREE.Group;
       x: number;
       scored: boolean;
-      botTipY: number; // world Y of bottom tree tip
+      botTipY: number;
       botHeight: number;
       botHalfWidth: number;
-      topTipY: number; // world Y of top tree tip
+      topTipY: number;
       topHeight: number;
       topHalfWidth: number;
     };
     const pipes: Pipe[] = [];
 
     function spawnPipe() {
+      if (!mount) return;
       const gapY = (Math.random() - 0.5) * 5;
-      const spawnX = (frustumSize * aspect) / 2 + 4;
+      const a = mount.clientWidth / mount.clientHeight;
+      const spawnX = (frustumSize * a) / 2 + 4;
 
       const pipeData: Pipe = {
         top: new THREE.Group(),
@@ -298,17 +306,13 @@ export default function ThreeScene() {
         scene,
         (obj) => {
           scene.remove(obj);
-          // 1. Measure FIRST, before any rotations
           const box = new THREE.Box3().setFromObject(obj);
           const h = box.max.y - box.min.y;
           const hw = Math.max(box.max.x - box.min.x, box.max.z - box.min.z) / 2;
-          pipeData.botHeight = h; // (or topHeight / topHalfWidth)
+          pipeData.botHeight = h;
           pipeData.botHalfWidth = hw;
           obj.position.y = -box.max.y;
-          // 2. THEN apply cosmetic rotations
-          // obj.rotation.y = (Math.random() - 0.5) * 0.8;
-          // obj.rotation.z = (Math.random() - 0.5) * 0.3;
-          botGroup.add(obj); // (or topGroup)
+          botGroup.add(obj);
         },
       );
 
@@ -322,26 +326,13 @@ export default function ThreeScene() {
       loadObject(
         { fileName: "/public/tree.gltf", coords: new THREE.Vector3(2, 2, 2) },
         scene,
-        // (obj) => {
-        //   scene.remove(obj);
-        //   obj.rotation.y = (Math.random() - 0.5) * 0.8;
-        //   obj.rotation.z = (Math.random() - 0.5) * 0.3;
-        //   const box = new THREE.Box3().setFromObject(obj);
-        //   const h = box.max.y - box.min.y;
-        //   const hw = Math.max(box.max.x - box.min.x, box.max.z - box.min.z) / 2;
-        //   pipeData.topHeight = h;
-        //   pipeData.topHalfWidth = hw;
-        //   obj.position.y = -box.max.y;
-        //   topGroup.add(obj);
-        // },
-
         (obj) => {
           scene.remove(obj);
           const box = new THREE.Box3().setFromObject(obj);
           const h = box.max.y - box.min.y;
           const hw = Math.max(box.max.x - box.min.x, box.max.z - box.min.z) / 2;
-          pipeData.topHeight = h; // ← was botHeight
-          pipeData.topHalfWidth = hw; // ← was botHalfWidth
+          pipeData.topHeight = h;
+          pipeData.topHalfWidth = hw;
           obj.position.y = -box.max.y;
           topGroup.add(obj);
         },
@@ -388,7 +379,7 @@ export default function ThreeScene() {
         new THREE.Vector3(tipX, tipY, 0),
         new THREE.Vector3(baseX - baseHW, baseTopY, 0),
         new THREE.Vector3(baseX + baseHW, baseTopY, 0),
-        new THREE.Vector3(tipX, tipY, 0), // close the triangle
+        new THREE.Vector3(tipX, tipY, 0),
       ];
       const geo = new THREE.BufferGeometry().setFromPoints(pts);
       return new THREE.Line(geo, new THREE.LineBasicMaterial({ color }));
@@ -410,7 +401,6 @@ export default function ThreeScene() {
 
       scene.updateMatrixWorld();
 
-      // plane hitbox
       const planeHelper = new THREE.Box3Helper(
         getPlaneBB(),
         new THREE.Color(0x00ffff),
@@ -418,7 +408,6 @@ export default function ThreeScene() {
       scene.add(planeHelper);
       debugObjects.push(planeHelper);
 
-      // raycast sample points
       const bb = getPlaneBB();
 
       const allMeshes: THREE.Mesh[] = [];
@@ -465,7 +454,7 @@ export default function ThreeScene() {
     }
 
     function reset() {
-      planePivot.position.set(BIRD_X, 0, 0);
+      planePivot.position.set(getBirdX(), 0, 0);
       planePivot.rotation.z = 0;
       vy = 0;
       score = 0;
@@ -489,7 +478,7 @@ export default function ThreeScene() {
         console.log(key, "→", localStorage.getItem(key));
       }
 
-      const token = localStorage.getItem("authToken"); // or however your AuthContext stores it
+      const token = localStorage.getItem("authToken");
       if (token) {
         fetch("http://localhost:8080/api/highscores", {
           method: "POST",
@@ -535,7 +524,6 @@ export default function ThreeScene() {
       if (bb.min.y < -frustumSize / 2 + 1) return true;
       if (bb.max.y > frustumSize / 2) return true;
 
-      // Fill pre-allocated sample grid
       let si = 0;
       for (let i = 0; i <= nx; i++) {
         for (let j = 0; j <= ny; j++) {
@@ -564,6 +552,7 @@ export default function ThreeScene() {
 
     function animate() {
       animationId = requestAnimationFrame(animate);
+      if (!mount) return;
       frame++;
 
       if (alive) {
@@ -577,7 +566,8 @@ export default function ThreeScene() {
           p.x -= PIPE_SPEED;
           p.top.position.x = p.x;
           p.bot.position.x = p.x;
-          if (!p.scored && p.x < BIRD_X) {
+          // Use actual plane X for scoring so it works at any screen width
+          if (!p.scored && p.x < planePivot.position.x) {
             p.scored = true;
             score++;
             scoreEl.textContent = String(score);
@@ -586,7 +576,8 @@ export default function ThreeScene() {
 
         for (let i = pipes.length - 1; i >= 0; i--) {
           const p = pipes[i]!;
-          if (p.x < -(frustumSize * aspect) / 2 - 6) {
+          const a = mount.clientWidth / mount.clientHeight;
+          if (p.x < -(frustumSize * a) / 2 - 6) {
             scene.remove(p.top);
             scene.remove(p.bot);
             pipes.splice(i, 1);
@@ -596,7 +587,7 @@ export default function ThreeScene() {
         if (checkCollision()) die();
       }
 
-      // leapfrog terrain tiles — each tile is tW wide, pair covers 2*tW
+      // leapfrog terrain tiles
       for (const t of terrainMeshes) {
         t.mesh.position.x -= t.speed;
         if (t.mesh.position.x < -tW) {
@@ -632,6 +623,8 @@ export default function ThreeScene() {
       camera.left = (-frustumSize * a) / 2;
       camera.right = (frustumSize * a) / 2;
       camera.updateProjectionMatrix();
+      // Reposition plane to maintain 25% position after resize
+      if (!alive) planePivot.position.x = getBirdX();
     };
     window.addEventListener("resize", onResize);
 

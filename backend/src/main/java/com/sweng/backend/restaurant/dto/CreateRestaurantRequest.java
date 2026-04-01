@@ -27,6 +27,12 @@ public class CreateRestaurantRequest {
   @Pattern(regexp = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
   private String email;
 
+  @Size(max = 255)
+  private String imageUrl;
+
+  @Size(max = 255)
+  private String logoUrl;
+
   @NotBlank
   @Size(max = 50)
   @Pattern(regexp = "^[\\x20-\\x7E]{1,50}$")
@@ -128,6 +134,42 @@ public class CreateRestaurantRequest {
    */
   public void setEmail(String email) {
     this.email = email;
+  }
+
+  /**
+   * Gets the restaurant's main image URL.
+   *
+   * @return the image URL
+   */
+  public String getImageUrl() {
+    return imageUrl;
+  }
+
+  /**
+   * Sets the restaurant's main image URL.
+   *
+   * @param imageUrl the image URL to set
+   */
+  public void setImageUrl(String imageUrl) {
+    this.imageUrl = imageUrl;
+  }
+
+  /**
+   * Gets the restaurant logo URL.
+   *
+   * @return the logo URL
+   */
+  public String getLogoUrl() {
+    return logoUrl;
+  }
+
+  /**
+   * Sets the restaurant logo URL.
+   *
+   * @param logoUrl the logo URL to set
+   */
+  public void setLogoUrl(String logoUrl) {
+    this.logoUrl = logoUrl;
   }
 
   /**

@@ -18,10 +18,15 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create
-    show-sql: false
+    show-sql: true
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
 management:
   endpoints:
     web:
@@ -30,3 +35,8 @@ management:
 jwt:
   secret: H3q5G0iAKz+gwJzlJTQIKIco7jZlP74GwtgRrMoBSQUa
   expiration: 86400000
+gcs:
+  project-id: sweng
+  bucket-name: bucket
+  emulator-url: https://localhost:4443
+  public-url: http://localhost:3000/gcs
