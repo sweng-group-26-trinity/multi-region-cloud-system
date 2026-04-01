@@ -24,15 +24,17 @@
 
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-
+import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
 /**
  * Shared {@link GLTFLoader} instance reused for every load request.
  * Instantiating once avoids repeated internal setup costs.
  *
  * @internal
  */
+const dracoLoader = new DRACOLoader();
+dracoLoader.setDecoderPath("https://www.gstatic.com/draco/versioned/decoders/1.5.6/");
 const loader = new GLTFLoader();
-
+loader.setDRACOLoader(dracoLoader);
 /**
  * Stores the canonical (master) `Object3D` scene for each URL after it has
  * been successfully loaded.

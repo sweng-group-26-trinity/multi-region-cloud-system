@@ -30,92 +30,49 @@ import { loadCached } from "@/components/js/modelCache";
  * <HomePage />
  * ```
  */
-export default function HomePage() {
-  /**
-   * Reference to the DOM container used to mount the WebGL canvas.
-   */
-  const mountRef = useRef<HTMLDivElement>(null);
 
-  /**
-   * React Router navigation function for routing between pages.
-   */
+export default function HomePage() {
+  const mountRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
-  /**
-   * Initializes the Three.js rendering pipeline and animation loop.
-   *
-   * Runs once when the component mounts.
-   */
   useEffect(() => {
     const mount = mountRef.current;
     if (!mount) return;
 
-    /**
-     * Tracks whether the component is still mounted.
-     * Prevents updates after unmount.
-     */
     let mounted = true;
 
-    /**
-     * Returns whether the application is currently in dark mode.
-     */
     const isDark = () => document.documentElement.classList.contains("dark");
 
-    /**
-     * Main WebGL renderer responsible for drawing the scene.
-     */
     const renderer = new THREE.WebGLRenderer({ antialias: true });
-
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setClearColor(isDark() ? 0x0a0f1e : 0x20a7db);
     mount.appendChild(renderer.domElement);
 
-    /**
-     * Primary Three.js scene container.
-     */
     const scene = new THREE.Scene();
 
-    /**
-     * Perspective camera used for viewing the 3D scene.
-     */
     const camera = new THREE.PerspectiveCamera(
       45,
       window.innerWidth / window.innerHeight,
       0.1,
       1000,
     );
-
     camera.position.set(25, 15, 40);
 
-    /**
-     * Orbit controls allowing the user to rotate around the scene.
-     */
     const controls = new OrbitControls(camera, renderer.domElement);
-
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
     controls.minDistance = 20;
     controls.maxDistance = 80;
     controls.update();
 
-    /**
-     * Directional light acting as the primary scene illumination.
-     */
     const dLight = new THREE.DirectionalLight(0xffffff, isDark() ? 0.5 : 1);
-
     dLight.position.set(0, 10, 2);
     scene.add(dLight);
 
-    /**
-     * Ambient light providing global base illumination.
-     */
     const ambientLight = new THREE.AmbientLight(0xffffff, isDark() ? 0.2 : 0.5);
-
     scene.add(ambientLight);
 
-    /**
-     * Creates a starfield using randomly distributed points.
-     */
+    // Starfield
     const starsGeometry = new THREE.BufferGeometry();
     const starPositions = new Float32Array(2000 * 3);
 
@@ -145,9 +102,7 @@ export default function HomePage() {
     const stars = new THREE.Points(starsGeometry, starsMaterial);
     scene.add(stars);
 
-    /**
-     * Atmospheric glow layers surrounding the Earth model.
-     */
+    // Atmospheric glow
     const glowMeshes: THREE.Mesh[] = [];
 
     const glowConfigs = [
@@ -158,23 +113,18 @@ export default function HomePage() {
 
     glowConfigs.forEach(({ radius, lightOpacity, darkOpacity }) => {
       const glowGeo = new THREE.SphereGeometry(radius, 64, 64);
-
       const glowMat = new THREE.MeshBasicMaterial({
         color: isDark() ? 0x1a4aff : 0x00fbff,
         transparent: true,
         opacity: isDark() ? darkOpacity : lightOpacity,
         side: THREE.BackSide,
       });
-
       const mesh = new THREE.Mesh(glowGeo, glowMat);
-
       glowMeshes.push(mesh);
       scene.add(mesh);
     });
 
-    /**
-     * Orbit path meshes used to visualize flight routes.
-     */
+    // Orbit paths
     const orbitMeshes: THREE.Mesh[] = [];
 
     [
@@ -186,7 +136,6 @@ export default function HomePage() {
 
       for (let i = 0; i < 50; i++) {
         const angle = (i / 50) * Math.PI * 2;
-
         points.push(
           new THREE.Vector3(
             Math.cos(angle) * radius,
@@ -197,45 +146,34 @@ export default function HomePage() {
       }
 
       const curve = new Curve(points, true);
-
-      curve.draw(
-        scene,
-        isDark() ? 0x4488ff : 0xffffff,
-        0.1,
-        opacity,
-        true,
-        false,
-      );
-
+      curve.draw(scene, isDark() ? 0x4488ff : 0xffffff, 0.1, opacity, true, false);
       if (curve.pathObject) orbitMeshes.push(curve.pathObject);
     });
 
-    /**
-     * Reference to the Earth model.
-     */
-    let earth: THREE.Object3D | null = null;
+    // Earth slot — stable group that holds whichever earth is current
+    const earthSlot = new THREE.Group();
+    scene.add(earthSlot);
+    let earth: THREE.Object3D = earthSlot;
 
-    /**
-     * Configuration for the Earth model loader.
-     */
-    const earthObject: SceneObject = {
-      fileName: "/public/earth.gltf",
+    const earthQuickObject: SceneObject = {
+      fileName: "/public/earth_notree.gltf",
       coords: new THREE.Vector3(10, 10, 10),
     };
 
-    /**
-     * Loads the Earth model into the scene.
-     */
-    loadCached("/public/earth.gltf").then((obj) => {
+    loadObject(earthQuickObject, scene, (obj) => {
       if (!mounted) return;
-      obj.scale.set(10, 10, 10); // your coords/scale here
-      scene.add(obj);
-      earth = obj;
+      scene.remove(obj);     // loadObject already added it, move into slot
+      earthSlot.add(obj);
     });
 
-    /**
-     * Stores orbiting planes representing distributed traffic nodes.
-     */
+    loadCached("/public/earth.gltf").then((obj) => {
+      if (!mounted) return;
+      obj.scale.set(10, 10, 10);
+      earthSlot.clear();     // removes low-poly (or nothing if not yet loaded)
+      earthSlot.add(obj);
+    });
+
+    // Planes
     const planes: {
       object: THREE.Object3D;
       orbitRadius: number;
@@ -244,17 +182,9 @@ export default function HomePage() {
       yAmplitude: number;
     }[] = [];
 
-    /**
-     * Configuration for each orbiting plane.
-     */
     const orbitConfigs = [
       { orbitRadius: 15, speed: 1.8, offset: 0, yAmplitude: 3 },
-      {
-        orbitRadius: 18,
-        speed: 1.6,
-        offset: Math.PI + Math.PI / 3,
-        yAmplitude: 2,
-      },
+      { orbitRadius: 18, speed: 1.6, offset: Math.PI + Math.PI / 3, yAmplitude: 2 },
       { orbitRadius: 21, speed: 1.4, offset: Math.PI / 2, yAmplitude: 4 },
     ];
 
@@ -263,43 +193,22 @@ export default function HomePage() {
       coords: new THREE.Vector3(0.5, 0.5, 0.5),
     };
 
-    /**
-     * Loads multiple planes and assigns orbital parameters.
-     */
     orbitConfigs.forEach((config) => {
-      // Replace with this:
-      const earthQuickObject: SceneObject = {
-        fileName: "/public/earth_notree.gltf",
-        coords: new THREE.Vector3(10, 10, 10),
-      };
-
-      let lowPolyEarth: THREE.Object3D | null = null;
-
-      loadObject(earthQuickObject, scene, (obj) => {
+      loadObject(planeObject, scene, (obj) => {
         if (!mounted) return;
-        lowPolyEarth = obj;
-        earth = obj;
-      });
-
-      loadCached("/public/earth.gltf").then((obj) => {
-        if (!mounted) return;
-        obj.scale.set(10, 10, 10);
-        scene.add(obj);
-        earth = obj;
-
-        if (lowPolyEarth) {
-          scene.remove(lowPolyEarth);
-          lowPolyEarth = null;
-        }
+        planes.push({
+          object: obj,
+          orbitRadius: config.orbitRadius,
+          speed: config.speed,
+          offset: config.offset,
+          yAmplitude: config.yAmplitude,
+        });
       });
     });
 
-    /**
-     * Observes dark-mode changes and updates scene colors.
-     */
+    // Theme observer
     const observer = new MutationObserver(() => {
       const dark = isDark();
-
       renderer.setClearColor(dark ? 0x0a0f1e : 0x20a7db);
       dLight.intensity = dark ? 0.5 : 1;
       ambientLight.intensity = dark ? 0.2 : 0.5;
@@ -311,27 +220,22 @@ export default function HomePage() {
       attributeFilter: ["class"],
     });
 
-    /**
-     * Main animation loop.
-     */
+    // Animation loop
     let animationId: number;
 
     function animate() {
       animationId = requestAnimationFrame(animate);
-
       const time = Date.now() * 0.0005;
 
-      if (earth) earth.rotation.y += 0.001;
+      earthSlot.rotation.y += 0.001;
 
       planes.forEach((plane) => {
         const angle = time * plane.speed + plane.offset;
-
         plane.object.position.x = Math.cos(angle) * plane.orbitRadius;
         plane.object.position.z = Math.sin(angle) * plane.orbitRadius;
         plane.object.position.y = Math.sin(angle * 3) * plane.yAmplitude;
 
         const nextAngle = angle + 0.01;
-
         plane.object.lookAt(
           Math.cos(nextAngle) * plane.orbitRadius,
           Math.sin(nextAngle * 3) * plane.yAmplitude,
@@ -345,9 +249,7 @@ export default function HomePage() {
 
     animate();
 
-    /**
-     * Handles browser window resizing.
-     */
+    // Resize handler
     const handleResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
@@ -356,9 +258,7 @@ export default function HomePage() {
 
     window.addEventListener("resize", handleResize);
 
-    /**
-     * Cleanup executed when the component unmounts.
-     */
+    // Cleanup
     return () => {
       mounted = false;
       observer.disconnect();
@@ -369,6 +269,7 @@ export default function HomePage() {
       mount.removeChild(renderer.domElement);
     };
   }, []);
+
 
   return (
     <div className="relative h-screen w-screen overflow-hidden">
