@@ -47,6 +47,8 @@ _: {
 
           virtualHosts.${cfg.domain} = {
             default = true;
+            enableACME = true;
+            forceSSL = true;
 
             locations."/" = {
               proxyPass = "http://backend";
