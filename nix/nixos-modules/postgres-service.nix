@@ -141,7 +141,9 @@ _: {
           authentication = ''
             # Allow local connections
             local   all             all                                     trust
-            # Allow connections from any host with password
+            # Allow connections from GCP internal VPC without password (demo/internal only)
+            host    all             all             10.128.0.0/9            trust
+            # Allow connections from any other host with password
             host    all             all             0.0.0.0/0               scram-sha-256
             host    all             all             ::/0                    scram-sha-256
           '';

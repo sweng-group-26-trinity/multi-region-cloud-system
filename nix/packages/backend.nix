@@ -32,16 +32,13 @@ in
         lockFile = "${src}/gradle.lock";
 
         gradleBuildFlags = [
-          "test"
-          "nativeCompile"
+          "bootJar"
         ];
 
         nativeBuildInputs = with pkgs; [
           makeWrapper
           graalvmPackages.graalvm-ce
         ];
-
-        GRAALVM_HOME = pkgs.graalvmPackages.graalvm-ce;
 
         preBuild = ''
           sed -i '

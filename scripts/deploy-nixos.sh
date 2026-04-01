@@ -16,13 +16,13 @@ set -euo pipefail
 
 # ── Fill in the IPs printed by create-vms.sh ──────────────────────────────────
 declare -A NODE_IPS=(
-  [backend-a]=""
-  [backend-b]=""
-  [db-coordinator]=""
-  [db-worker-1]=""
-  [db-worker-2]=""
-  [monitoring]=""
-  [ingress]=""
+  [backend-a]="34.10.41.3"
+  [backend-b]="34.170.196.73"
+  [db-coordinator]="34.71.238.82"
+  [db-worker-1]="34.45.138.253"
+  [db-worker-2]="34.55.10.66"
+  [monitoring]="34.68.225.162"
+  [ingress]="34.123.48.185"
 )
 # ──────────────────────────────────────────────────────────────────────────────
 
@@ -61,8 +61,7 @@ for name in "${NODES[@]}"; do
     --flake ".#$name" \
     --target-host "${SSH_USER}@${ip}" \
     --ssh-option "StrictHostKeyChecking=no" \
-    --ssh-option "IdentityFile=$SSH_KEY" \
-    --install-via-sudo
+    -i "$SSH_KEY"
 
   echo "  $name: NixOS installed, rebooting..."
   echo ""
@@ -101,7 +100,7 @@ echo ""
 echo "=== Step 3: Deploying full config with deploy-rs ==="
 echo ""
 
-nix run .#deploy
+nix run github:serokell/deploy-rs -- . --accept-flake-config
 
 echo ""
 echo "=== Done ==="

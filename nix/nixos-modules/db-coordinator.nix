@@ -3,6 +3,7 @@
   flake.nixosModules.dbCoordinator = {
     services.postgres-distributed = {
       enable = true;
+      enableSecrets = false;
       isCoordinator = true;
       coordinatorAddress = "db-coordinator.toast.internal";
       workerNodes = [
