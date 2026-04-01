@@ -267,16 +267,30 @@ export default function HomePage() {
      * Loads multiple planes and assigns orbital parameters.
      */
     orbitConfigs.forEach((config) => {
-      loadObject(planeObject, scene, (obj) => {
-        if (!mounted) return;
+      // Replace with this:
+      const earthQuickObject: SceneObject = {
+        fileName: "/public/earth_notree.gltf",
+        coords: new THREE.Vector3(10, 10, 10),
+      };
 
-        planes.push({
-          object: obj,
-          orbitRadius: config.orbitRadius,
-          speed: config.speed,
-          offset: config.offset,
-          yAmplitude: config.yAmplitude,
-        });
+      let lowPolyEarth: THREE.Object3D | null = null;
+
+      loadObject(earthQuickObject, scene, (obj) => {
+        if (!mounted) return;
+        lowPolyEarth = obj;
+        earth = obj;
+      });
+
+      loadCached("/public/earth.gltf").then((obj) => {
+        if (!mounted) return;
+        obj.scale.set(10, 10, 10);
+        scene.add(obj);
+        earth = obj;
+
+        if (lowPolyEarth) {
+          scene.remove(lowPolyEarth);
+          lowPolyEarth = null;
+        }
       });
     });
 
