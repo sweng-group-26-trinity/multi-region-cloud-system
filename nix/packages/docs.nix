@@ -1,11 +1,10 @@
-{ self, ... }:
 {
   perSystem =
     { pkgs, self', ... }:
     let
       docs = pkgs.stdenvNoCC.mkDerivation (finalAttrs: {
         name = "options-doc-html";
-        src = self;
+        src = ../../docs;
 
         nativeBuildInputs = [
           pkgs.mdbook
@@ -15,7 +14,7 @@
         installPhase = ''
           mkdir -p "$out/share/docs"
 
-          mdbook build ./docs --dest-dir "$out/share/docs"
+          mdbook build --dest-dir "$out/share/docs"
 
           # Rewrite every relative URL in the mdbook HTML output to an absolute /docs/-prefixed
           # path. mdbook uses path_to_root ("" for root pages, "../" for depth-1 subpages, etc.)
