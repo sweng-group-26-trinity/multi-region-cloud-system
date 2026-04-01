@@ -27,6 +27,8 @@ _: {
       };
 
       config = lib.mkIf cfg.enable {
+        security.acme.acceptTerms = true;
+
         services.nginx = {
           enable = true;
 
