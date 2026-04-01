@@ -92,7 +92,7 @@ public class SecurityConfig {
   @Bean
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
-    configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+    configuration.setAllowedOrigins(List.of("http://204.168.164.105", "http://34.123.48.185"));
     configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
     configuration.setAllowedHeaders(
         Arrays.asList(
@@ -145,6 +145,8 @@ public class SecurityConfig {
                     .requestMatchers("/api/auth/**")
                     .permitAll()
                     .requestMatchers("/actuator/**", "/error")
+                    .permitAll()
+                    .requestMatchers(HttpMethod.GET, "/", "/index.html", "/assets/**", "/*.js", "/*.css", "/*.ico", "/*.png", "/*.svg")
                     .permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/server-info")
                     .permitAll()

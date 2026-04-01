@@ -22,7 +22,7 @@
         };
 
         buildPhase = ''
-          bun run build \
+          VITE_API_BASE_URL=http://34.123.48.185/api bun run build \
             --minify
         '';
 
