@@ -15,7 +15,7 @@ const HIT_OFFSET_Y = 0.8;
 const HIT_W = 1.0;
 const HIT_H = 0.3;
 
-const DEBUG = true;
+const DEBUG = false;
 /**
  * Three.js-powered game scene component.
  *
@@ -249,10 +249,10 @@ export default function ThreeScene() {
     function getPlaneBB(): THREE.Box3 {
       const cx = planePivot.position.x + HIT_OFFSET_X;
       const cy = planePivot.position.y + HIT_OFFSET_Y;
-      return new THREE.Box3(
-        new THREE.Vector3(cx - HIT_W, cy - HIT_H, -1),
-        new THREE.Vector3(cx + HIT_W, cy + HIT_H, 1),
-      );
+      _bbMin.set(cx - HIT_W, cy - HIT_H, -1);
+      _bbMax.set(cx + HIT_W, cy + HIT_H, 1);
+      _planeBB.set(_bbMin, _bbMax);
+      return _planeBB;
     }
 
     // --- Trees (pipes) ---
@@ -395,7 +395,16 @@ export default function ThreeScene() {
     }
 
     function updateDebug() {
-      debugObjects.forEach((o) => scene.remove(o));
+      debugObjects.forEach((o) => {
+        scene.remove(o);
+        if (o instanceof THREE.Mesh || o instanceof THREE.Line) {
+          o.geometry.dispose();
+          if (Array.isArray(o.material)) o.material.forEach((m) => m.dispose());
+          else o.material.dispose();
+        } else if (o instanceof THREE.Box3Helper) {
+          o.geometry.dispose();
+        }
+      });
       debugObjects.length = 0;
       if (!DEBUG) return;
 
@@ -411,8 +420,6 @@ export default function ThreeScene() {
 
       // raycast sample points
       const bb = getPlaneBB();
-      const nx = 4,
-        ny = 3;
 
       const allMeshes: THREE.Mesh[] = [];
       for (const p of pipes) {
@@ -502,6 +509,16 @@ export default function ThreeScene() {
     const raycaster = new THREE.Raycaster();
     const zDir = new THREE.Vector3(0, 0, -1);
 
+    // Pre-allocated vectors to avoid per-frame heap allocations
+    const _planeBB = new THREE.Box3();
+    const _bbMin = new THREE.Vector3();
+    const _bbMax = new THREE.Vector3();
+    const nx = 4,
+      ny = 3;
+    const _collisionSamples: THREE.Vector3[] = [];
+    for (let i = 0; i <= nx; i++)
+      for (let j = 0; j <= ny; j++) _collisionSamples.push(new THREE.Vector3());
+
     function getTreeMeshes(group: THREE.Group): THREE.Mesh[] {
       const meshes: THREE.Mesh[] = [];
       group.traverse((child) => {
@@ -511,25 +528,21 @@ export default function ThreeScene() {
     }
 
     function checkCollision(): boolean {
-      scene.updateMatrixWorld(); // ← add this
+      scene.updateMatrixWorld();
 
       const bb = getPlaneBB();
 
       if (bb.min.y < -frustumSize / 2 + 1) return true;
       if (bb.max.y > frustumSize / 2) return true;
 
-      // Sample grid across the plane hitbox
-      const nx = 4,
-        ny = 3;
-      const samples: THREE.Vector3[] = [];
+      // Fill pre-allocated sample grid
+      let si = 0;
       for (let i = 0; i <= nx; i++) {
         for (let j = 0; j <= ny; j++) {
-          samples.push(
-            new THREE.Vector3(
-              bb.min.x + (bb.max.x - bb.min.x) * (i / nx),
-              bb.min.y + (bb.max.y - bb.min.y) * (j / ny),
-              50, // start in front of everything
-            ),
+          _collisionSamples[si++]!.set(
+            bb.min.x + (bb.max.x - bb.min.x) * (i / nx),
+            bb.min.y + (bb.max.y - bb.min.y) * (j / ny),
+            50,
           );
         }
       }
@@ -538,7 +551,7 @@ export default function ThreeScene() {
         const meshes = [...getTreeMeshes(p.bot), ...getTreeMeshes(p.top)];
         if (meshes.length === 0) continue;
 
-        for (const origin of samples) {
+        for (const origin of _collisionSamples) {
           raycaster.set(origin, zDir);
           const hits = raycaster.intersectObjects(meshes, false);
           if (hits.length > 0) return true;
