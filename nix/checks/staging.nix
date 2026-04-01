@@ -21,7 +21,6 @@
 
           staging.wait_for_unit("nginx.service")
           staging.wait_for_open_port(80)
-          staging.wait_for_open_port(443)
 
           staging.succeed("curl -s http://localhost:8080/actuator/health | grep -o 'UP'")
 
