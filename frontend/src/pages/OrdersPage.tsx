@@ -7,7 +7,6 @@ import {
   ArrowLeft,
 } from "lucide-react";
 
-
 type Product = {
   id: number;
   name: string;
@@ -512,22 +511,22 @@ export default function OrdersPage() {
     );
   }
 
-async function confirmOrder() {
-  if (!meta) return;
-  setIsPending(true);
-  try {
-    setShowCheckout(false);
-    navigate("/order-summary", {
-      state: {
-        restaurantName: meta.name,
-        items: cart,
-        total,
-      },
-    });
-  } finally {
-    setIsPending(false);
+  async function confirmOrder() {
+    if (!meta) return;
+    setIsPending(true);
+    try {
+      setShowCheckout(false);
+      navigate("/order-summary", {
+        state: {
+          restaurantName: meta.name,
+          items: cart,
+          total,
+        },
+      });
+    } finally {
+      setIsPending(false);
+    }
   }
-}
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
