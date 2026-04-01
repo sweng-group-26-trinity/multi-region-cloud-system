@@ -1,7 +1,6 @@
 package com.sweng.backend.restaurant.dto;
 
-import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.annotation.Nulls;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
@@ -9,18 +8,22 @@ import jakarta.validation.constraints.Size;
 public class UpdateRestaurantRequest {
 
   @Size(min = 1, max = 100)
+  @NotNull
   private String name;
 
   @Size(max = 500)
   private String description;
 
   @Size(min = 1, max = 200)
+  @NotNull
   private String address;
 
   @Size(max = 20)
+  @NotNull
   private String phone;
 
   @Pattern(regexp = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
+  @NotNull
   private String email;
 
   @Size(max = 50)
