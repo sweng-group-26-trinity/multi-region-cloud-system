@@ -1,9 +1,13 @@
 package com.sweng.backend.restaurant.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 /** Request body for updating an existing restaurant. */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UpdateRestaurantRequest {
 
   @Size(min = 1, max = 100)
@@ -46,6 +50,7 @@ public class UpdateRestaurantRequest {
    *
    * @param name the restaurant name to set
    */
+  @JsonSetter(nulls = Nulls.FAIL)
   public void setName(String name) {
     this.name = name;
   }
@@ -64,6 +69,7 @@ public class UpdateRestaurantRequest {
    *
    * @param description the restaurant description to set
    */
+  @JsonSetter(nulls = Nulls.FAIL)
   public void setDescription(String description) {
     this.description = description;
   }
@@ -82,6 +88,7 @@ public class UpdateRestaurantRequest {
    *
    * @param address the restaurant address to set
    */
+  @JsonSetter(nulls = Nulls.FAIL)
   public void setAddress(String address) {
     this.address = address;
   }
@@ -100,6 +107,7 @@ public class UpdateRestaurantRequest {
    *
    * @param phone the phone number to set
    */
+  @JsonSetter(nulls = Nulls.FAIL)
   public void setPhone(String phone) {
     this.phone = phone;
   }
@@ -118,6 +126,7 @@ public class UpdateRestaurantRequest {
    *
    * @param email the email address to set
    */
+  @JsonSetter(nulls = Nulls.FAIL)
   public void setEmail(String email) {
     this.email = email;
   }
@@ -136,6 +145,7 @@ public class UpdateRestaurantRequest {
    *
    * @param cuisineType the cuisine type to set
    */
+  @JsonSetter(nulls = Nulls.FAIL)
   public void setCuisineType(String cuisineType) {
     this.cuisineType = cuisineType;
   }
@@ -154,6 +164,7 @@ public class UpdateRestaurantRequest {
    *
    * @param openingHours the opening hours to set
    */
+  @JsonSetter(nulls = Nulls.FAIL)
   public void setOpeningHours(String openingHours) {
     this.openingHours = openingHours;
   }

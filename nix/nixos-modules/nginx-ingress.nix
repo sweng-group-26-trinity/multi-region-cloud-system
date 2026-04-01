@@ -27,6 +27,8 @@ _: {
       };
 
       config = lib.mkIf cfg.enable {
+        security.acme.acceptTerms = true;
+
         services.nginx = {
           enable = true;
 
@@ -47,6 +49,8 @@ _: {
 
           virtualHosts.${cfg.domain} = {
             default = true;
+            enableACME = true;
+            forceSSL = true;
 
             locations."/" = {
               proxyPass = "http://backend";

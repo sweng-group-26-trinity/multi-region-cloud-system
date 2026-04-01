@@ -39,10 +39,10 @@
           headscale.wait_for_open_port(8080)
           headscale.succeed("curl -s http://localhost:8080/health || true")
 
-          # verify nginx starts and responds
+          # verify nginx starts and responds (use https with -k since forceSSL redirects http)
           ingress.wait_for_unit("nginx.service")
-          ingress.wait_for_open_port(80)
-          ingress.succeed("curl -s -o /dev/null -w '%{http_code}' http://localhost/ | grep -E '502|503'")
+          ingress.wait_for_open_port(443)
+          ingress.succeed("curl -s -k -o /dev/null -w '%{http_code}' https://localhost/ | grep -E '502|503'")
         '';
       };
     };

@@ -896,6 +896,7 @@ components:
           pattern: "^[^\\x00]{1,100}$"
         customerEmail:
           type: string
+          nullable: true
           description: Email for order notifications (optional)
           maxLength: 255
           pattern: "^[a-zA-Z0-9_%+-]+(?:\\.[a-zA-Z0-9_%+-]+)*@[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)*\\.[a-zA-Z]{2,63}$"
