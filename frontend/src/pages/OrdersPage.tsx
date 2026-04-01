@@ -6,7 +6,7 @@ import {
   GlassWater,
   ArrowLeft,
 } from "lucide-react";
-import { useCreateOrder } from "../api/ordershooks";
+
 
 type Product = {
   id: number;
@@ -463,12 +463,12 @@ const drinks: Product[] = [
 export default function OrdersPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { mutate: createOrder, isPending } = useCreateOrder();
 
   const [activeTab, setActiveTab] = useState<"food" | "drinks">("food");
   const [cart, setCart] = useState<CartItem[]>([]);
   const [showCheckout, setShowCheckout] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
+  const [isPending, setIsPending] = useState(false);
 
   const meta = id ? restaurantMeta[id] : undefined;
 
@@ -512,30 +512,22 @@ export default function OrdersPage() {
     );
   }
 
-  function confirmOrder() {
-    createOrder(
-      {
-        restaurantId: id!,
-        customerName: "Guest",
-        customerEmail: "guest@example.com",
-        items: cart.map((item) => ({
-          itemId: String(item.id),
-          quantity: item.quantity,
-        })),
+async function confirmOrder() {
+  if (!meta) return;
+  setIsPending(true);
+  try {
+    setShowCheckout(false);
+    navigate("/order-summary", {
+      state: {
+        restaurantName: meta.name,
+        items: cart,
+        total,
       },
-      {
-        onSuccess: () => {
-          setOrderPlaced(true);
-          setCart([]);
-          setShowCheckout(false);
-        },
-        onError: (err: Error) => {
-          console.error("Order failed:", err);
-          alert("Failed to place order. Please try again.");
-        },
-      },
-    );
+    });
+  } finally {
+    setIsPending(false);
   }
+}
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
