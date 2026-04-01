@@ -239,29 +239,6 @@ export default function FAQPage() {
     return () => observer.disconnect();
   }, []);
 
-  /**
-   * Tracks whether dark mode is active by checking the root HTML class.
-   */
-  const [isDark, setIsDark] = useState(
-    document.documentElement.classList.contains("dark"),
-  );
-
-  /**
-   * Observes changes to the document's class list to detect dark mode toggling.
-   */
-  useEffect(() => {
-    const observer = new MutationObserver(() => {
-      setIsDark(document.documentElement.classList.contains("dark"));
-    });
-
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-
-    return () => observer.disconnect();
-  }, []);
-
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Background gradient layer */}
