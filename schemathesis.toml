@@ -8,6 +8,7 @@ workers = "auto"
 # This prevents generation of Unicode/control characters in HTTP headers
 # which would be rejected by Tomcat per RFC 7230 (HTTP headers must be ASCII).
 codec = "ascii"
+max-examples = 20
 
 # Explicitly exclude control characters and high bytes from HTTP header generation.
 # HTTP headers must contain only printable ASCII per RFC 7230.
@@ -43,5 +44,3 @@ enabled = false
 [[operations]]
 include-operation-id = "logoutUser"
 enabled = false
-
-
