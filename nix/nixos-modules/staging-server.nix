@@ -1,4 +1,4 @@
-{ self, ... }:
+{ self, lib, ... }:
 {
   flake.nixosModules.stagingServer =
     { pkgs, ... }:
@@ -15,6 +15,43 @@
         '';
       };
 
+      systemd.services.gcs-server = {
+        enable = true;
+        description = "Fake GCS server";
+        after = [ "network.target" ];
+        wantedBy = [ "multi-user.target" ];
+
+        serviceConfig = {
+          ExecStart = lib.getExe (
+            pkgs.writeShellApplication {
+              name = "gcs-server";
+              runtimeInputs = [ pkgs.fake-gcs-server ];
+              text = ''
+                rm -rf /var/lib/gcs-server
+                mkdir -p /var/lib/gcs-server
+                fake-gcs-server -filesystem-root /var/lib/gcs-server
+              '';
+            }
+          );
+          DynamicUser = true;
+          StateDirectory = "gcs-server";
+          Restart = "always";
+          RestrictRealtime = true;
+          RestrictNamespaces = true;
+          LockPersonality = true;
+          ProtectKernelModules = true;
+          ProtectKernelTunables = true;
+          ProtectKernelLogs = true;
+          ProtectControlGroups = true;
+          ProtectClock = true;
+          RestrictSUIDSGID = true;
+          SystemCallArchitectures = "native";
+          CapabilityBoundingSet = [ "CAP_NET_BIND_SERVICE" ];
+          AmbientCapabilities = [ "CAP_NET_BIND_SERVICE" ];
+          ProtectProc = "invisible";
+        };
+      };
+
       services.backend = {
         enable = true;
         database = {
@@ -29,8 +66,12 @@
       systemd.services.backend.after = [
         "network.target"
         "postgresql.service"
+        "gcs-server.service"
       ];
-      systemd.services.backend.requires = [ "postgresql.service" ];
+      systemd.services.backend.requires = [
+        "postgresql.service"
+        "gcs-server.service"
+      ];
 
       services.nginx = {
         enable = true;
