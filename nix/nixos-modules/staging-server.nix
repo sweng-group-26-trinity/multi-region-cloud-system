@@ -27,9 +27,8 @@
               name = "gcs-server";
               runtimeInputs = [ pkgs.fake-gcs-server ];
               text = ''
-                rm -rf /var/lib/gcs-server
-                mkdir -p /var/lib/gcs-server
-                fake-gcs-server -filesystem-root /var/lib/gcs-server
+                mkdir -p /var/lib/gcs-server/bucket
+                fake-gcs-server -filesystem-root /var/lib/gcs-server/bucket
               '';
             }
           );
