@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { Terminal } from "../components/js/Terminal";
 import { asciiTable } from "@/components/js/ascii";
 import { loadCached } from "@/components/js/modelCache";
+import { API_BASE_URL } from "@/api/clients";
 // ─── Terminal panel (mobile + desktop) ──────────────────────────────
 /**
  * ThreeScene
@@ -222,7 +223,7 @@ export default function ThreeScene() {
           {
             label: "Details",
             onClick: async () => {
-              const url = "http://localhost:8080/api/server-info";
+              const url = `${API_BASE_URL}/server-info`;
               try {
                 const response = await fetch(url);
                 if (!response.ok)
@@ -257,7 +258,7 @@ export default function ThreeScene() {
           {
             label: "Details",
             onClick: async () => {
-              const url = "http://localhost:8080/api/server-info";
+              const url = `${API_BASE_URL}/server-info`;
               try {
                 const response = await fetch(url);
                 if (!response.ok)
@@ -470,7 +471,7 @@ function TerminalPanel() {
         noHacker: true,
         onExecute: async () => {
           try {
-            const res = await fetch("http://localhost:8080/api/highscores/all");
+            const res = await fetch(`${API_BASE_URL}/highscores/all`);
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const data: { username: string; score: number }[] =
               await res.json();
