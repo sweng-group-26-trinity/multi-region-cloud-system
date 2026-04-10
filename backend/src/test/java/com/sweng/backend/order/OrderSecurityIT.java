@@ -4,6 +4,8 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import com.sweng.backend.menu.MenuItemEntity;
+import com.sweng.backend.menu.MenuItemRepository;
 import com.sweng.backend.order.dto.CreateOrderItemRequest;
 import com.sweng.backend.order.dto.CreateOrderRequest;
 import com.sweng.backend.order.dto.UpdateOrderRequest;
@@ -12,6 +14,7 @@ import com.sweng.backend.restaurant.RestaurantRepository;
 import com.sweng.backend.user.Role;
 import com.sweng.backend.user.User;
 import com.sweng.backend.user.UserRepository;
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -36,11 +39,13 @@ class OrderSecurityIT {
   @Autowired UserRepository userRepository;
   @Autowired RestaurantRepository restaurantRepository;
   @Autowired OrderRepository orderRepository;
+  @Autowired MenuItemRepository menuItemRepository;
 
   private MockMvc mockMvc;
   private final ObjectMapper objectMapper = new ObjectMapper();
 
   private UUID restaurantId;
+  private UUID menuItemId;
   private String orderIdOfCustomerA;
   private String orderIdOfCustomerB;
 
@@ -49,6 +54,7 @@ class OrderSecurityIT {
     this.mockMvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
 
     orderRepository.deleteAll();
+    menuItemRepository.deleteAll();
     restaurantRepository.deleteAll();
 
     seedUserIfMissing("admin", Role.ADMIN);
@@ -69,12 +75,20 @@ class OrderSecurityIT {
     r.setOwnerId(ownerUid);
     restaurantId = restaurantRepository.save(r).getId();
 
+    MenuItemEntity menuItem = new MenuItemEntity();
+    menuItem.setRestaurantId(restaurantId);
+    menuItem.setName("Test Item");
+    menuItem.setCategory("Main");
+    menuItem.setPrice(BigDecimal.valueOf(9.99));
+    menuItem.setAvailable(true);
+    menuItemId = menuItemRepository.save(menuItem).getId();
+
     // Create order as customerA
     CreateOrderRequest a = new CreateOrderRequest();
     a.setRestaurantId(restaurantId.toString());
     a.setCustomerName("Customer A");
     a.setCustomerEmail("customerA@test.com");
-    a.setItems(List.of(buildItem("item-a", 1)));
+    a.setItems(List.of(buildItem(1)));
 
     String aResp =
         mockMvc
@@ -97,7 +111,7 @@ class OrderSecurityIT {
     b.setRestaurantId(restaurantId.toString());
     b.setCustomerName("Customer B");
     b.setCustomerEmail("customerB@test.com");
-    b.setItems(List.of(buildItem("item-b", 1)));
+    b.setItems(List.of(buildItem(1)));
 
     String bResp =
         mockMvc
@@ -116,9 +130,9 @@ class OrderSecurityIT {
     orderIdOfCustomerB = objectMapper.readTree(bResp).get("id").asText();
   }
 
-  private CreateOrderItemRequest buildItem(String itemId, int quantity) {
+  private CreateOrderItemRequest buildItem(int quantity) {
     CreateOrderItemRequest item = new CreateOrderItemRequest();
-    item.setItemId(itemId);
+    item.setItemId(menuItemId.toString());
     item.setQuantity(quantity);
     return item;
   }
