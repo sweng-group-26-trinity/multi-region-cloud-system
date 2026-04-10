@@ -21,6 +21,8 @@
           bunNix = "${src}/bun.nix";
         };
 
+        API_BASE_URL = "http://dinehubs.org/api";
+
         buildPhase = ''
           bun run build \
             --minify

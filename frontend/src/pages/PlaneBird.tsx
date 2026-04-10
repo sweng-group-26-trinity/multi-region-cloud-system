@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "@/api/clients";
 import { loadObject, type SceneObject } from "@/components/js/loader";
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
@@ -480,7 +481,7 @@ export default function ThreeScene() {
 
       const token = localStorage.getItem("authToken");
       if (token) {
-        fetch("http://localhost:8080/api/highscores", {
+        fetch(`${API_BASE_URL}/highscores`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

@@ -22,6 +22,8 @@
           inputs'.ragenix.packages.ragenix
         ];
 
+        API_BASE_URL = "http://localhost:8080/api";
+
         GRAALVM_HOME = pkgs.graalvmPackages.graalvm-ce;
 
         shellHook = ''
