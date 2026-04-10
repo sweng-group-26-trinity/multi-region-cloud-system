@@ -28,6 +28,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class GcsConfig {
 
+  /** Default constructor required by Spring. */
+  public GcsConfig() {}
+
   /**
    * Base URL of the local GCS emulator (e.g. {@code https://localhost:4443}). When {@code null},
    * the real GCS endpoint is used and Application Default Credentials are required.

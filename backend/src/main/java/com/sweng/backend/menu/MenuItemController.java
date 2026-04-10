@@ -29,11 +29,23 @@ public class MenuItemController {
 
   private final MenuItemRepository repository;
 
+  /**
+   * Constructs a MenuItemController with the given repository.
+   *
+   * @param repository the menu item repository
+   */
   public MenuItemController(MenuItemRepository repository) {
     this.repository = repository;
   }
 
-  /** Get all menu items for a restaurant. */
+  /**
+   * Get all menu items for a restaurant.
+   *
+   * @param restaurantId the restaurant UUID
+   * @param category optional category filter
+   * @param availableOnly optional flag to filter only available items
+   * @return paginated list of menu items
+   */
   @GetMapping
   public ResponseEntity<MenuItemListResponse> getMenu(
       @PathVariable String restaurantId,
@@ -61,7 +73,13 @@ public class MenuItemController {
     return ResponseEntity.ok(new MenuItemListResponse(dtoList));
   }
 
-  /** Create a menu item for a restaurant. */
+  /**
+   * Create a menu item for a restaurant.
+   *
+   * @param restaurantId the restaurant UUID
+   * @param body the menu item creation request
+   * @return the created menu item
+   */
   @PostMapping
   public ResponseEntity<MenuItemDto> createMenuItem(
       @PathVariable String restaurantId, @Valid @RequestBody CreateMenuItemRequest body) {
@@ -84,7 +102,13 @@ public class MenuItemController {
     return ResponseEntity.status(HttpStatus.CREATED).body(toDto(saved));
   }
 
-  /** Get a single menu item. */
+  /**
+   * Get a single menu item.
+   *
+   * @param restaurantId the restaurant UUID
+   * @param menuItemId the menu item UUID
+   * @return the requested menu item
+   */
   @GetMapping("/{menuItemId}")
   public ResponseEntity<MenuItemDto> getMenuItem(
       @PathVariable String restaurantId, @PathVariable String menuItemId) {
@@ -101,7 +125,14 @@ public class MenuItemController {
     return ResponseEntity.ok(toDto(item));
   }
 
-  /** Update a menu item. */
+  /**
+   * Update a menu item.
+   *
+   * @param restaurantId the restaurant UUID
+   * @param menuItemId the menu item UUID
+   * @param body the menu item update request
+   * @return the updated menu item
+   */
   @PutMapping("/{menuItemId}")
   public ResponseEntity<MenuItemDto> updateMenuItem(
       @PathVariable String restaurantId,
@@ -128,7 +159,13 @@ public class MenuItemController {
     return ResponseEntity.ok(toDto(saved));
   }
 
-  /** Delete a menu item. */
+  /**
+   * Delete a menu item.
+   *
+   * @param restaurantId the restaurant UUID
+   * @param menuItemId the menu item UUID
+   * @return no content response
+   */
   @DeleteMapping("/{menuItemId}")
   public ResponseEntity<Void> deleteMenuItem(
       @PathVariable String restaurantId, @PathVariable String menuItemId) {

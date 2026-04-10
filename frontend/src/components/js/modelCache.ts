@@ -32,7 +32,9 @@ import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
  * @internal
  */
 const dracoLoader = new DRACOLoader();
-dracoLoader.setDecoderPath("https://www.gstatic.com/draco/versioned/decoders/1.5.6/");
+dracoLoader.setDecoderPath(
+  "https://www.gstatic.com/draco/versioned/decoders/1.5.6/",
+);
 const loader = new GLTFLoader();
 loader.setDRACOLoader(dracoLoader);
 /**

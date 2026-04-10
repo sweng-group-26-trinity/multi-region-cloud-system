@@ -146,7 +146,14 @@ export default function HomePage() {
       }
 
       const curve = new Curve(points, true);
-      curve.draw(scene, isDark() ? 0x4488ff : 0xffffff, 0.1, opacity, true, false);
+      curve.draw(
+        scene,
+        isDark() ? 0x4488ff : 0xffffff,
+        0.1,
+        opacity,
+        true,
+        false,
+      );
       if (curve.pathObject) orbitMeshes.push(curve.pathObject);
     });
 
@@ -162,14 +169,14 @@ export default function HomePage() {
 
     loadObject(earthQuickObject, scene, (obj) => {
       if (!mounted) return;
-      scene.remove(obj);     // loadObject already added it, move into slot
+      scene.remove(obj); // loadObject already added it, move into slot
       earthSlot.add(obj);
     });
 
     loadCached("/public/earth.gltf").then((obj) => {
       if (!mounted) return;
       obj.scale.set(10, 10, 10);
-      earthSlot.clear();     // removes low-poly (or nothing if not yet loaded)
+      earthSlot.clear(); // removes low-poly (or nothing if not yet loaded)
       earthSlot.add(obj);
     });
 
@@ -184,7 +191,12 @@ export default function HomePage() {
 
     const orbitConfigs = [
       { orbitRadius: 15, speed: 1.8, offset: 0, yAmplitude: 3 },
-      { orbitRadius: 18, speed: 1.6, offset: Math.PI + Math.PI / 3, yAmplitude: 2 },
+      {
+        orbitRadius: 18,
+        speed: 1.6,
+        offset: Math.PI + Math.PI / 3,
+        yAmplitude: 2,
+      },
       { orbitRadius: 21, speed: 1.4, offset: Math.PI / 2, yAmplitude: 4 },
     ];
 
@@ -269,7 +281,6 @@ export default function HomePage() {
       mount.removeChild(renderer.domElement);
     };
   }, []);
-
 
   return (
     <div className="relative h-screen w-screen overflow-hidden">

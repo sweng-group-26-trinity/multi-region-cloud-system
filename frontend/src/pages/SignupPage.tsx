@@ -113,8 +113,8 @@ export function SignupPage() {
       {
         onSuccess: (data) => {
           login(data.accessToken, {
-            username: data.username,
-            email: data.email,
+            username: data.user.username,
+            email: data.user.email,
           });
           navigate("/dashboard");
         },
@@ -146,8 +146,8 @@ export function SignupPage() {
             onSuccess: (data) => {
               console.log("login response:", data);
               login(data.accessToken, {
-                username: data.username,
-                email: data.email,
+                username: data.user.username,
+                email: data.user.email,
               });
               navigate("/dashboard");
             },

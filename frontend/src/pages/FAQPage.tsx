@@ -154,6 +154,14 @@ function FAQAccordion({ item }: { item: FAQItem }) {
   );
 }
 
+/**
+ * FAQ and About page component.
+ *
+ * Displays frequently asked questions in an accordion layout
+ * and a Green Computing section highlighting sustainability features.
+ *
+ * @returns The rendered FAQ page.
+ */
 export default function FAQPage() {
   const navigate = useNavigate();
   const [isDark, setIsDark] = useState(
