@@ -26,19 +26,19 @@ export function RestaurantsPage() {
   const restaurants: Restaurant[] = data?.content ?? [];
 
   const cuisines = useMemo(() => {
-    const unique = Array.from(new Set(restaurants.map((r) => r.cuisineType)));
+    const unique = Array.from(new Set(restaurants.map((r) => r.cuisine)));
     return ["All", ...unique.sort()];
   }, [restaurants]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return restaurants
-      .filter((r) => cuisine === "All" || r.cuisineType === cuisine)
+      .filter((r) => cuisine === "All" || r.cuisine === cuisine)
       .filter((r) => {
         if (!q) return true;
         return (
           r.name.toLowerCase().includes(q) ||
-          r.cuisineType.toLowerCase().includes(q) ||
+          r.cuisine.toLowerCase().includes(q) ||
           (r.description ?? "").toLowerCase().includes(q)
         );
       });
@@ -142,7 +142,7 @@ export function RestaurantsPage() {
                         {r.name}
                       </h2>
                       <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                        {r.cuisineType}
+                        {r.cuisine}
                       </p>
                     </div>
                   </div>

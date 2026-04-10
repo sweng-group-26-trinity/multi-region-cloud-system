@@ -868,7 +868,8 @@ components:
             properties:
               itemId:
                 type: string
-                description: ID of the menu item
+                format: uuid
+                description: ID of the menu item (UUID format)
                 minLength: 1
                 maxLength: 255
                 pattern: "^[^\\u0000]+$"

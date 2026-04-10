@@ -9,7 +9,9 @@ import { createContext, useContext, useState, type ReactNode } from "react";
  * Shape of the authenticated user.
  */
 export type User = {
+  /** Authenticated user's username */
   username: string;
+  /** Authenticated user's email address */
   email: string;
 };
 

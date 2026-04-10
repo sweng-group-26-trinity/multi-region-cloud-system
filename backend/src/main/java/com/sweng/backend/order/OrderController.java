@@ -375,7 +375,7 @@ public class OrderController {
         menuItemRepository
             .findById(itemId)
             .orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid menu item"));
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid menu item"));
 
     OrderItemEmbeddable e = new OrderItemEmbeddable();
     e.setItemId(req.getItemId());

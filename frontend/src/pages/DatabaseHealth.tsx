@@ -49,7 +49,7 @@ export default function ThreeScene() {
   useEffect(() => {
     const mount = mountRef.current;
     if (!mount) return;
-
+    let lowPolyEarth: THREE.Object3D | null = null;
     const isDark = () => document.documentElement.classList.contains("dark");
     const isMobile = () => window.innerWidth < 640;
 
@@ -140,18 +140,29 @@ export default function ThreeScene() {
       fileName: "/public/earth.gltf",
       coords: new THREE.Vector3(10, 10, 10),
     };
-
+    const earthQuickObject: SceneObject = {
+      fileName: "/public/earth_notree.gltf",
+      coords: new THREE.Vector3(10, 10, 10),
+    };
     const planeObject: SceneObject = {
       fileName: "/public/plane.gltf",
       coords: new THREE.Vector3(0.5, 0.5, 0.5),
     };
-
+    loadObject(earthQuickObject, scene, (obj) => {
+      lowPolyEarth = obj;
+      earth = obj;
+    });
     loadCached("/public/earth.gltf").then((obj) => {
       if (!mount) return;
       obj.scale.set(10, 10, 10); // your coords/scale here
       scene.add(obj);
       earth = obj;
+      if (lowPolyEarth) {
+        scene.remove(lowPolyEarth);
+        lowPolyEarth = null;
+      }
     });
+
     loadObject(planeObject, scene, (obj) => {
       plane = obj;
     });

@@ -1,6 +1,14 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
 
+const dracoLoader = new DRACOLoader();
+dracoLoader.setDecoderPath(
+  "https://www.gstatic.com/draco/versioned/decoders/1.5.6/",
+);
+
+const loader = new GLTFLoader();
+loader.setDRACOLoader(dracoLoader);
 /**
  * Represents a loadable 3D object in the scene.
  */
@@ -34,7 +42,6 @@ export function loadObject(
   scene: THREE.Scene,
   onLoad?: (obj: THREE.Object3D) => void,
 ): void {
-  const loader = new GLTFLoader();
   loader.load(
     object.fileName,
 
